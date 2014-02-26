@@ -1,0 +1,13 @@
+{
+  "name": "modules/xtuple/xdruple_commerce",
+  "description": "xTuple's Drupal Commerce Override Module",
+  "type": "library",
+  "license": "GPL-2.0",
+  "authors": [
+    {
+      "name": "Ben Thompson",
+      "email": "ben@xtuple.com",
+      "role": "Software Engineer"
+    }
+  ]
+}
