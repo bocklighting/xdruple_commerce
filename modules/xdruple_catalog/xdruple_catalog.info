@@ -1,0 +1,4 @@
+name = xTuple's Drupal Commerce Product Catalog
+description = Provides xTuple integrated list of filtered Products by Item Group for Drupal Commerce.
+core = 7.x
+package = xDruple

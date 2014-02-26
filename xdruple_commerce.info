@@ -1,0 +1,15 @@
+name = xTuple's Drupal Commerce Overrides Module
+description = Uses hook to override some features in Drupal Commerce to integrate with xTuple ERP
+core = 7.x
+package = xDruple
+
+dependencies[] = entity_operations
+dependencies[] = rescued
+dependencies[] = commerce
+dependencies[] = commerce_line_item
+dependencies[] = commerce_price
+dependencies[] = commerce_product
+dependencies[] = commerce_product_reference
+dependencies[] = commerce_price_savings_formatter
+dependencies[] = email_registration
+dependencies[] = xdruple_fields

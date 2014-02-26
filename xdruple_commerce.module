@@ -1,0 +1,1216 @@
+<?php
+
+/**
+* Implements hook_entity_info_alter().
+*
+* Override Drupal Commerce's entities to use xTuples.
+*/
+function xdruple_commerce_entity_info_alter(&$info) {
+  // TODO: Get wsclient name. Assuming 'xtuple_' here.
+
+  if (isset($info['xtuple_xdruplecommerceproduct'], $info['commerce_product']) && true) {
+    $original = $info['commerce_product'];
+    // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdruplecommerceproduct']
+    $info['commerce_product'] = $info['xtuple_xdruplecommerceproduct'];
+    $info['commerce_product']['entity keys']['bundle'] = 'type';
+    $info['commerce_product']['entity keys']['name'] = 'product_id';
+
+    // Preserve some of the original entity_info settings.
+    $info['commerce_product']['label'] = $original['label'];
+    $info['commerce_product']['bundles']['product'] = $original['bundles']['product'];
+    $info['commerce_product']['view modes'] = $original['view modes'];
+    $info['commerce_product']['uri callback'] = $original['uri callback'];
+    $info['commerce_product']['access callback'] = $original['access callback'];
+  }
+
+//   if (isset($info['xtuple_xdruplecommercecustomerprofile'], $info['commerce_customer_profile']) && true) {
+//     $original = $info['commerce_customer_profile'];
+//     // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdruplecommercecustomerprofile']
+//     $info['commerce_customer_profile'] = $info['xtuple_xdruplecommercecustomerprofile'];
+//     $info['commerce_customer_profile']['entity keys']['bundle'] = 'type';
+//     $info['commerce_customer_profile']['entity keys']['name'] = 'profile_id';
+
+//     // Preserve some of the original entity_info settings.
+//     $info['commerce_customer_profile']['label'] = $original['label'];
+//     $info['commerce_customer_profile']['bundles']['billing'] = $original['bundles']['billing'];
+//     $info['commerce_customer_profile']['view modes'] = $original['view modes'];
+//     $info['commerce_customer_profile']['uri callback'] = $original['uri callback'];
+//     $info['commerce_customer_profile']['access callback'] = $original['access callback'];
+//   }
+}
+
+/**
+ * Implements hook_entity_operation_info_alter(().
+ *
+ * Override Drupal Commerce's entities to use the RESCUED entity operation handler.
+ *
+ * @param $operation_info
+ *  The array of data provided by hook_entity_operation_info().
+ */
+function xdruple_commerce_entity_operation_info_alter(&$operation_info) {
+  // TODO: Consider removing 'operations ui' from commerce_product in
+  // xdruple_commerce_entity_info_alter() instead of adding this here.
+
+  // Add a handler for commerce_product.
+  if (isset($operation_info['xtuple_xdruplecommerceproduct'])) {
+    // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdruplecommerceproduct']
+    $operation_info['commerce_product'] = $operation_info['xtuple_xdruplecommerceproduct'];
+  }
+
+  // Add a handler for commerce_customer_profile.
+//   if (isset($operation_info['xtuple_xdruplecommercecustomerprofile'])) {
+//     // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdruplecommercecustomerprofile']
+//     $operation_info['commerce_customer_profile'] = $operation_info['xtuple_xdruplecommercecustomerprofile'];
+//   }
+}
+
+/**
+ * Implements hook_rescued_operation_entityform_alter().
+ */
+function xdruple_commerce_rescued_operation_entityform_alter (&$form, &$form_state, $context) {
+  $form_id = $form_state['build_info']['form_id'];
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdrupleusercontact') {
+    // Modify this entity form to hide some properties/fields.
+    unset ($form['uuid']);
+    unset ($form['uid']);
+
+    $form['xdruple_site']['#type'] = 'hidden';
+    $form['xdruple_site']['#default_value'] = 'b2c';
+    $form['xdruple_site']['#attributes']['disabled'] = TRUE;
+
+    $form['create_new_customer']['#type'] = 'hidden';
+    $form['create_new_customer']['#default_value'] = TRUE;
+    $form['create_new_customer']['#attributes']['disabled'] = TRUE;
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommercecontact') {
+    // Modify this entity form to hide some properties/fields.
+    unset ($form['number']);
+    unset ($form['honorific']);
+    unset ($form['middleName']);
+    unset ($form['suffix']);
+    unset ($form['jobTitle']);
+    unset ($form['initials']);
+    unset ($form['alternate']);
+    unset ($form['fax']);
+    unset ($form['webAddress']);
+
+    $form['firstName']['#weight'] = -44;
+    $form['lastName']['#weight'] = -43;
+    $form['primaryEmail']['#weight'] = -42;
+    $form['phone']['#weight'] = -41;
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceaddress') {
+    // Modify this entity form to hide some properties/fields.
+    unset ($form['number']);
+
+    $form['country']['#weight'] = -47;
+    $form['line1']['#weight'] = -46;
+    $form['line2']['#weight'] = -45;
+    $form['line3']['#weight'] = -44;
+    $form['city']['#weight'] = -43;
+    $form['state']['#weight'] = -42;
+    $form['postalCode']['#weight'] = -41;
+
+    $countries = _addressfield_country_options_list();
+    $xtuple_countries_format = array('' => '--');
+
+    // xTuple xm.xdruple_commerce_address uses a full country name as the key.
+    foreach ($countries as $key => $value) {
+      $xtuple_countries_format[$value] = $value;
+    }
+
+    $format = array();
+
+    if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#name'] === 'country') {
+      // For non-IEF
+      $country = drupal_array_get_nested_value($form_state['values'], $form_state['triggering_element']['#parents']);
+      $selected_country = array_search($country, $countries);
+    } else {
+      // For initial load an IEF ajax refreshes.
+      $selected_country = isset($context['entity']->country) ? array_search($context['entity']->country, $countries) : '';
+    }
+    $address = array(
+      'country' => $selected_country,
+    );
+    $addr_context = array(
+      'mode' => 'form',
+    );
+
+    module_load_include('inc', 'addressfield', 'plugins/format/address');
+    addressfield_format_address_generate($format, $address, $addr_context);
+
+    if (isset($form['#parents'])) {
+      $wrapper_id = 'xtuple-address-wrapper-' . implode('-', $form['#parents']);
+    } else {
+      $wrapper_id = 'xtuple-address-wrapper';
+    }
+    $form['#wrapper_id'] = $wrapper_id;
+    $form['#prefix'] = '<div id="' . $wrapper_id . '">';
+    $form['#suffix'] = '</div>';
+
+    // If this is a child IEF and the operation is 'add', we can't make any of
+    // the address fields required becuase we allow contacts to be saved with
+    // no address set. There are also use cases like Customer that has a
+    // Correspondence Contact that can be blank. Skip for user reg/profile
+    // forms because it should be required on those.
+    $skip_required = false;
+    if (isset($form['#ief_id'], $form['#op']) && $form_id !== 'user_register_form' && $form_id !== 'user_profile_form') {
+      $path_parts = explode('--', $form['#ief_id']);
+
+      if ((count($path_parts) > 1 && $form['#op'] === 'add')) {
+        $skip_required = true;
+      } elseif (isset($form_state['values'])) {
+        $country_parents = $form['#parents'];
+        $country_parents[] = 'country';
+        $country = drupal_array_get_nested_value($form_state['values'], $country_parents);
+
+        if (empty($country) && drupal_array_get_nested_value($form_state['values'], $form['#parents'])) {
+          $skip_required = true;
+        }
+      }
+    }
+
+    $form['country']['#type'] = 'select';
+    $form['country']['#options'] = $xtuple_countries_format;
+    $form['country']['#weight'] = -47;
+    $form['country']['#default_value'] = isset($context['entity']->country) ? $context['entity']->country : '';
+    $form['country']['#title'] = $format['country']['#title'];
+    $form['country']['#required'] = $skip_required ? false : $format['country']['#required'];
+    $form['country']['#ajax']['callback'] = 'addressfield_standard_widget_refresh';
+    $form['country']['#ajax']['wrapper'] = $wrapper_id;
+    $form['country']['#ief_processing'] = false; // Do not want to save this through IEF on an ajax update.
+
+
+    $form['line1']['#title'] = $format['street_block']['thoroughfare']['#title'];
+    $form['line1']['#size'] = $format['street_block']['thoroughfare']['#size'];
+    $form['line1']['#required'] = $skip_required ? false : $format['street_block']['thoroughfare']['#required'];
+
+    $form['line2']['#title'] = $format['street_block']['premise']['#title'];
+    $form['line2']['#size'] = $format['street_block']['premise']['#size'];
+
+
+    $form['line3']['#title'] = 'Address 3';
+    $form['line3']['#size'] = $format['street_block']['premise']['#size'];
+
+
+    $form['city']['#title'] = $format['locality_block']['locality']['#title'];
+    $form['city']['#size'] = $format['locality_block']['locality']['#size'];
+    $form['city']['#required'] = $skip_required ? false : $format['locality_block']['locality']['#required'];
+
+
+    if (isset($format['locality_block']['administrative_area'])) {
+      if (isset($format['locality_block']['administrative_area']['#options'])) {
+        $form['state']['#type'] = 'select';
+        $form['state']['#options'] = $format['locality_block']['administrative_area']['#options'];
+      } else {
+        $form['state']['#type'] = 'textfield';
+        $form['state']['#size'] = $format['locality_block']['administrative_area']['#size'];
+      }
+      $form['state']['#title'] = $format['locality_block']['administrative_area']['#title'];
+      $form['state']['#default_value'] = isset($context['entity']->state) ? $context['entity']->state : '_none';
+      $form['state']['#required'] = $skip_required ? false : $format['locality_block']['administrative_area']['#required'];
+    } else {
+      unset($form['state']);
+    }
+
+    if (isset($format['locality_block']['postal_code'])) {
+      $form['postalCode']['#title'] = $format['locality_block']['postal_code']['#title'];
+      $form['postalCode']['#size'] = $format['locality_block']['postal_code']['#size'];
+      $form['postalCode']['#required'] = $skip_required ? false : $format['locality_block']['postal_code']['#required'];
+    } else {
+      unset($form['postalCode']);
+    }
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceshipto') {
+    // Modify this entity form to hide some properties/fields.
+    unset ($form['uuid']);
+
+    $form['number']['#weight'] = -44;
+    $form['name']['#weight'] = -43;
+    $form['isDefault']['#weight'] = -42;
+    $form['customer']['#weight'] = -41;
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommercecustomer') {
+    // Modify this entity form to hide some properties/fields.
+    unset ($form['isActive']);
+
+    $form['number']['#weight'] = -42;
+    $form['name']['#weight'] = -41;
+  }
+}
+
+/**
+ * Implements hook_rescued_entity_default_label_alter().
+ */
+function xdruple_commerce_rescued_entity_default_label_alter($entity, &$label, $context) {
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommercecontact') {
+    if (isset($entity->firstName) || isset($entity->lastName)) {
+      $label = '';
+      $label .= isset($entity->firstName) ? ' ' . $entity->firstName : '';
+      $label .= isset($entity->lastName) ? ' ' . $entity->lastName : '';
+    }
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceaddress') {
+    $label = $entity->line1;
+    $label .= isset($entity->line2) ? ' ' . $entity->line2 : '';
+    $label .= ' ' . $entity->city;
+    $label .= isset($entity->state) ? ', ' . $entity->state : '';
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceshipto') {
+    $label = $entity->number;
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommercecustomer') {
+    $label = $entity->number;
+  }
+}
+
+/**
+ * Implements hook_rescued_entity_build_content_view_alter().
+ */
+function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$resource_schema, $context) {
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommercecontact') {
+    // TODO: Convert this to a function call that has a hook to override.
+    // User that function in xdruple_commerce_rescued_operation_entityform_alter().
+    $properity_white_list = array(
+      'firstName' => true,
+      'lastName' => true,
+      'phone' => true,
+      'primaryEmail' => true,
+      'address' => true,
+    );
+
+    // Limit the schema to only the fields we want to display.
+    $resource_schema = array_intersect_key($resource_schema, $properity_white_list);
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceaddress') {
+    // TODO: Convert this to a function call that has a hook to override.
+    // User that function in xdruple_commerce_rescued_operation_entityform_alter().
+    $properity_white_list = array(
+      'line1' => true,
+      'line2' => true,
+      'line3' => true,
+      'city' => true,
+      'state' => true,
+      'postalCode' => true,
+      'country' => true,
+    );
+
+    // Limit the schema to only the fields we want to display.
+    $resource_schema = array_intersect_key($resource_schema, $properity_white_list);
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceshipto') {
+    // TODO: Convert this to a function call that has a hook to override.
+    // User that function in xdruple_commerce_rescued_operation_entityform_alter().
+    $properity_white_list = array(
+      'number' => true,
+      'name' => true,
+      'isDefault' => true,
+      'customer' => true,
+      'contact' => true,
+      'address' => true,
+    );
+
+    // Limit the schema to only the fields we want to display.
+    $resource_schema = array_intersect_key($resource_schema, $properity_white_list);
+  }
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommercecustomer') {
+    // TODO: Convert this to a function call that has a hook to override.
+    // User that function in xdruple_commerce_rescued_operation_entityform_alter().
+    $properity_white_list = array(
+      'number' => true,
+      'name' => true,
+      'billingContact' => true,
+      'correspondenceContact' => true,
+      'shipTo' => true,
+    );
+
+    // Limit the schema to only the fields we want to display.
+    $resource_schema = array_intersect_key($resource_schema, $properity_white_list);
+  }
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langcode) {
+  if ($entity_type === 'xtuple_xdruplecommercecontact') {
+    // Reset the weights to the correct order.
+    $entity->content['firstName']['#weight'] = -4;
+    $entity->content['lastName']['#weight'] = -3;
+    $entity->content['primaryEmail']['#weight'] = -2;
+    $entity->content['phone']['#weight'] = -1;
+
+    // Unset the address and use the 'xtuple_xdruplecommercecontactaddress' field instead.
+    unset($entity->content['address']);
+  }
+
+  if ($entity_type === 'xtuple_xdruplecommerceaddress') {
+    // Reset the weights to the correct order and change the labels.
+    // For some reason these weights are not respected.  See the
+    // xdruple_commerce_field_extra_fields_alter() function.
+    $entity->content['line1']['#weight'] = -7;
+    $entity->content['line1']['#title'] = 'Address 1';
+    $entity->content['line2']['#weight'] = -6;
+    $entity->content['line2']['#title'] = 'Address 2';
+    $entity->content['line3']['#weight'] = -5;
+    $entity->content['line3']['#title'] = 'Address 3';
+    $entity->content['city']['#weight'] = -4;
+    $entity->content['state']['#weight'] = -3;
+    $entity->content['postalCode']['#weight'] = -2;
+    $entity->content['country']['#weight'] = -1;
+  }
+
+  if ($entity_type === 'xtuple_xdruplecommerceshipto') {
+    // Reset the weights to the correct order.
+    $entity->content['number']['#weight'] = -4;
+    $entity->content['name']['#weight'] = -3;
+    $entity->content['isDefault']['#weight'] = -2;
+    $entity->content['customer']['#weight'] = -1;
+
+    // Unset the address and contact. Use the 'xtuple_xdruplecommerceshiptoxxx' fields instead.
+    unset($entity->content['address']);
+    unset($entity->content['contact']);
+  }
+
+  if ($entity_type === 'xtuple_xdruplecommercecustomer') {
+    // Reset the weights to the correct order.
+    $entity->content['number']['#weight'] = -2;
+    $entity->content['name']['#weight'] = -1;
+
+    // Unset some things. Use the 'xtuple_xdruplecommerceshiptoxxx' fields instead.
+    unset($entity->content['isActive']);
+    unset($entity->content['billingContact']);
+    unset($entity->content['correspondenceContact']);
+    unset($entity->content['shipTo']);
+  }
+}
+
+/**
+ * Implements hook_entity_property_info_alter()
+ *
+ * Add our custom xTuple properties.
+ *
+ * @param array $info The associative array of entity properties.
+ */
+function xdruple_commerce_entity_property_info_alter(&$info) {
+  if (isset($info['xtuple_xdruplecommerceproduct'], $info['xtuple_xdruplecommerceproduct']['properties'], $info['commerce_product'])) {
+    foreach ($info['xtuple_xdruplecommerceproduct']['properties'] as $prop_name => $prop_value) {
+      if (!isset($info['commerce_product']['properties'][$prop_name])) {
+        // Set product property to match xTuple's entity.
+        // TODO: Break the reference: (array)clone(object)$prop_value
+        $info['commerce_product']['properties'][$prop_name] = $prop_value;
+      }
+    }
+  }
+
+//   if (isset($info['xtuple_xdruplecommercecustomerprofile'], $info['xtuple_xdruplecommercecustomerprofile']['properties'], $info['commerce_customer_profile'])) {
+//     foreach ($info['xtuple_xdruplecommercecustomerprofile']['properties'] as $prop_name => $prop_value) {
+//       if (!isset($info['commerce_customer_profile']['properties'][$prop_name])) {
+//         // Set profile property to match xTuple's entity.
+//         // TODO: Break the reference: (array)clone(object)$prop_value
+//         $info['commerce_customer_profile']['properties'][$prop_name] = $prop_value;
+//       }
+//     }
+//   }
+}
+
+/**
+ * Implements hook_field_extra_fields_alter()
+ *
+ * Expose our custom xTuple properties as fields.
+ *
+ * @param array $info The associative array of 'pseudo-field' components.
+ */
+function xdruple_commerce_field_extra_fields_alter(&$info) {
+  if (isset($info['xtuple_xdruplecommerceproduct'],
+    $info['xtuple_xdruplecommerceproduct']['xtuple_xdruplecommerceproduct'],
+    $info['commerce_product'],
+    $info['commerce_product']['product'])) {
+
+    foreach ($info['xtuple_xdruplecommerceproduct']['xtuple_xdruplecommerceproduct'] as $view_name => $view_fields) {
+      if (isset($info['commerce_product']['product'][$view_name])) {
+        foreach ($view_fields as $field_name => $field_values) {
+          if (!isset($info['commerce_product']['product'][$view_name][$field_name])) {
+            // Set product fields to match xTuple's entity.
+            // TODO: Break the reference: (array)clone(object)$field_values
+            $info['commerce_product']['product'][$view_name][$field_name] = $field_values;
+          }
+        }
+      }
+    }
+  }
+
+  if (isset($info['xtuple_xdruplecommercecontact'])) {
+    $contact_fields = &$info['xtuple_xdruplecommercecontact']['xtuple_xdruplecommercecontact']['display'];
+
+    $contact_fields['firstName']['weight'] = -54;
+    $contact_fields['lastName']['weight'] = -53;
+    $contact_fields['primaryEmail']['weight'] = -52;
+    $contact_fields['phone']['weight'] = -51;
+  }
+
+  if (isset($info['xtuple_xdruplecommerceaddress'])) {
+    $address_fields = &$info['xtuple_xdruplecommerceaddress']['xtuple_xdruplecommerceaddress']['display'];
+
+    $address_fields['line1']['weight'] = -57;
+    $address_fields['line2']['weight'] = -56;
+    $address_fields['line3']['weight'] = -55;
+    $address_fields['city']['weight'] = -54;
+    $address_fields['state']['weight'] = -53;
+    $address_fields['postalCode']['weight'] = -52;
+    $address_fields['country']['weight'] = -51;
+  }
+
+  if (isset($info['xtuple_xdruplecommerceshipto'])) {
+    $shipto_fields = &$info['xtuple_xdruplecommerceshipto']['xtuple_xdruplecommerceshipto']['display'];
+
+    $shipto_fields['number']['weight'] = -54;
+    $shipto_fields['name']['weight'] = -53;
+    $shipto_fields['isDefault']['weight'] = -52;
+    $shipto_fields['customer']['weight'] = -51;
+  }
+
+  if (isset($info['xtuple_xdruplecommercecustomer'])) {
+    $shipto_fields = &$info['xtuple_xdruplecommercecustomer']['xtuple_xdruplecommercecustomer']['display'];
+
+    $shipto_fields['number']['weight'] = -52;
+    $shipto_fields['name']['weight'] = -51;
+  }
+
+//   if (isset($info['xtuple_xdruplecommercecustomerprofile'],
+//     $info['xtuple_xdruplecommercecustomerprofile']['xtuple_xdruplecommercecustomerprofile'],
+//     $info['commerce_customer_profile'],
+//     $info['commerce_customer_profile']['billing'])) {
+
+//     foreach ($info['xtuple_xdruplecommercecustomerprofile']['xtuple_xdruplecommercecustomerprofile'] as $view_name => $view_fields) {
+//       if (isset($info['commerce_customer_profile']['billing'][$view_name])) {
+//         foreach ($view_fields as $field_name => $field_values) {
+//           if (!isset($info['commerce_customer_profile']['billing'][$view_name][$field_name])) {
+//             // Set profile fields to match xTuple's entity.
+//             // TODO: Break the reference: (array)clone(object)$field_values
+//             $info['commerce_customer_profile']['billing'][$view_name][$field_name] = $field_values;
+//           }
+//         }
+//       }
+//     }
+//   }
+}
+
+/**
+ * Lets modules add extra fields to product entities without using
+ * hook_field_extra_field_alter because of how product_reference calls
+ * commerce_product_field_extra_fields() directly instead of using
+ * field_info_extra_fields().
+ *
+ * @See: commerce_product_reference_field_extra_fields()
+ *
+ * @param $extra
+ *   Extra fields from commerce_product_field_extra_fields()
+ *
+ * @return
+ *   Modified extra fields array with your additions/changes.
+ */
+function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
+  // Modify $extra here to add the extra xTuple specific entity properties.
+
+  foreach (commerce_product_types() as $type => $product_type) {
+    $form = array(
+      'subTitle' => array(
+        'label' => t('Product Sub-Title'),
+        'description' => t('Product module sub-title form element'),
+        'weight' => -4,
+      ),
+      'productWeight' => array(
+        'label' => t('Product Weight'),
+        'description' => t('Product module product weight form element'),
+        'weight' => -4,
+      ),
+      'packageWeight' => array(
+        'label' => t('Package Weight'),
+        'description' => t('Product module package weight form element'),
+        'weight' => -4,
+      ),
+      'classCode' => array(
+        'label' => t('Class Code'),
+        'description' => t('Product module class code form element'),
+        'weight' => -4,
+      ),
+      'productCategory' => array(
+        'label' => t('Product Category'),
+        'description' => t('Product module product category form element'),
+        'weight' => -4,
+      ),
+      'priceUnit' => array(
+        'label' => t('Price Unit'),
+        'description' => t('Product module price unit form element'),
+        'weight' => -4,
+      ),
+      'notes' => array(
+        'label' => t('Notes'),
+        'description' => t('Product module notes form element'),
+        'weight' => -3,
+      ),
+      'extDescrip' => array(
+        'label' => t('Extended Description'),
+        'description' => t('Product module extended description form element'),
+        'weight' => -3,
+      ),
+    );
+
+    $display = array(
+      'subTitle' => array(
+        'label' => t('Product Sub-Title'),
+        'description' => t('Product sub-title'),
+        'theme' => 'xdruple_commerce_sub_title',
+        'weight' => -4,
+      ),
+      'productWeight' => array(
+        'label' => t('Product Weight'),
+        'description' => t('Weight of the product'),
+        'theme' => 'xdruple_commerce_product_weight',
+        'weight' => -4,
+      ),
+      'packageWeight' => array(
+        'label' => t('Package Weight'),
+        'description' => t('Weight of the empty package this product comes in'),
+        'theme' => 'xdruple_commerce_package_weight',
+        'weight' => -4,
+      ),
+      'classCode' => array(
+        'label' => t('Class Code'),
+        'description' => t('Class Code the product belongs to'),
+        'theme' => 'xdruple_commerce_class_code',
+        'weight' => -4,
+      ),
+      'productCategory' => array(
+        'label' => t('Product Category'),
+        'description' => t('Product Category the product belongs to'),
+        'theme' => 'xdruple_commerce_product_category',
+        'weight' => -4,
+      ),
+      'priceUnit' => array(
+        'label' => t('Price Unit'),
+        'description' => t('Unit of measure used for the price calculation'),
+        'theme' => 'xdruple_commerce_price_unit',
+        'weight' => -4,
+      ),
+      'notes' => array(
+        'label' => t('Notes'),
+        'description' => t('Additional notes for the product'),
+        'theme' => 'xdruple_commerce_notes',
+        'weight' => -3,
+      ),
+      'extDescrip' => array(
+        'label' => t('Extended Description'),
+        'description' => t('Extended description of the product'),
+        'theme' => 'xdruple_commerce_ex_descrip',
+        'weight' => -3,
+      ),
+    );
+
+    $extra['commerce_product'][$type]['form'] = array_merge($extra['commerce_product'][$type]['form'], $form);
+    $extra['commerce_product'][$type]['display'] = array_merge($extra['commerce_product'][$type]['display'], $display);
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_inline_entity_form_default_entity_alter().
+ */
+function xdruple_commerce_inline_entity_form_default_entity_alter(&$items, &$settings, &$form_state) {
+  if ($settings['entity_type'] == 'xtuple_xdruplecommercecontact') {
+    if (count($items) === 0) {
+      // TODO: Figure out which target_id to use.
+      //$items[] = array($settings['column'] => 1);
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter()
+ *
+ * Resolve a problem with undefined commerce_checkout_form on AJAX calls
+ * when using page_manager_existing_pages.
+ *
+ * @See: https://drupal.org/node/1773674
+ * @See: https://drupal.org/node/1774770
+ * @See: https://drupal.org/node/2134023
+ */
+function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
+  if (strpos($form_id, 'commerce_checkout_form') !== false) {
+    // Drupal has an automatic dependencies load when a menu item at hook_menu
+    // declares an include file where the page callback is located. E.x.
+    // $items['checkout/%commerce_order'] = array(
+    //  'title' => 'Checkout',
+    //  'page callback' => 'commerce_checkout_router',
+    //  'page arguments' => array(1),
+    //  'access arguments' => array('access checkout'),
+    //  'type' => MENU_CALLBACK,
+    //  'file' => 'includes/commerce_checkout.pages.inc',
+    // );
+    // The FAPI store the path of the of an include in the cached $form_state
+    // form to satisfy the dependency when for an element in a viewed page
+    // has an AJAX behavior so when an AJAX call is received the function
+    // form_get_cache look into $form_state['build_info']['files'] and do a
+    // include of that specified file. Unfortunately at doing menu_alter of this
+    // menu item:
+    // $items['checkout/%commerce_order/%commerce_checkout_page']['file'] = $task['file'];
+    // The FAPI will include only the file referenced in the menu array and the
+    // AJAX call will be broken. We resolve this altering the form to explicit
+    // attach the commerce_checkout.pages.inc into the build_info files.
+
+    $form_state['build_info']['files']['commerce_checkout'] = array(
+      'module' => 'commerce_checkout',
+      'name' => 'includes/commerce_checkout.pages',
+      'type' => 'inc',
+    );
+  }
+
+  // Modify the user registration form to work with xTuple.
+  if ($form_id === 'user_register_form' || $form_id === 'user_profile_form') {
+    if (isset($form['xd_contact_association'][LANGUAGE_NONE]['form']['xd_xdrupleusercontactcontact'][LANGUAGE_NONE]['form']['primaryEmail'])) {
+      $contact_form = &$form['xd_contact_association'][LANGUAGE_NONE]['form']['xd_xdrupleusercontactcontact'][LANGUAGE_NONE]['form'];
+
+      // Make the Contact's first and last name required.
+      $contact_form['firstName']['#required'] = true;
+      $contact_form['lastName']['#required'] = true;
+
+      // Hide the IEF entity_id select list field on the Contact.
+      $contact_form['entity_id']['#type'] = 'hidden';
+      $contact_form['entity_id']['#attributes']['disabled'] = TRUE;
+
+      // Hide the primaryEmail field since we get this from the Drupal User's mail field.
+      $contact_form['primaryEmail']['#type'] = 'hidden';
+      $contact_form['primaryEmail']['#attributes']['disabled'] = TRUE;
+
+      // We want our validate function to be first so it adds the user's email to the contact before IEF does it's thing.
+      array_unshift($contact_form['#element_validate'], 'xdruple_commerce_user_reg_form_validate');
+
+      // Hide the IEF entity_id select list field on the Address.
+      $addr_form = &$contact_form['xd_xdruplecommercecontactaddress'][LANGUAGE_NONE]['form'];
+      $addr_form['entity_id']['#type'] = 'hidden';
+      $addr_form['entity_id']['#attributes']['disabled'] = TRUE;
+    }
+  }
+}
+
+/**
+ * Validation function to modify the user reg form submit and copy the Drupal
+ * user's email/username to xTuple contact's email field which is hidden from
+ * the user.
+ */
+function xdruple_commerce_user_reg_form_validate(&$element_form, &$form_state, $complete_form) {
+  if (isset($element_form['#entity_type'], $element_form['#parents']) && $element_form['#entity_type'] = 'xtuple_xdruplecommercecontact') {
+    if (isset($form_state['values']['mail'])) {
+      $cntct_email_parents = $element_form['#parents'];
+      $cntct_email_parents[] = 'primaryEmail';
+
+      // Set the contact's primaryEmail to the Drupal user's email/username before we save.
+      drupal_array_set_nested_value($form_state['values'], $cntct_email_parents, $form_state['values']['mail']);
+
+      // Unset the IEF entity so it gets reprocessed if there's a validation error.
+      $form_state['inline_entity_form'][$element_form['#ief_id']]['entities'] = array();
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function xdruple_commerce_theme() {
+  return array(
+    'xdruple_commerce_sub_title' => array(
+      'variables' => array('subTitle' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-sub-title',
+    ),
+    'xdruple_commerce_product_weight' => array(
+      'variables' => array('productWeight' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-product-weight',
+    ),
+    'xdruple_commerce_package_weight' => array(
+      'variables' => array('packageWeight' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-package-weight',
+    ),
+    'xdruple_commerce_class_code' => array(
+      'variables' => array('classCode' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-class-code',
+    ),
+    'xdruple_commerce_product_category' => array(
+      'variables' => array('productCategory' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-product-category',
+    ),
+    'xdruple_commerce_price_unit' => array(
+      'variables' => array('priceUnit' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-price-unit',
+    ),
+    'xdruple_commerce_notes' => array(
+      'variables' => array('notes' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-notes',
+    ),
+    'xdruple_commerce_ex_descrip' => array(
+      'variables' => array('extDescrip' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-ext-descrip',
+    ),
+  );
+}
+
+/**
+ * Implements hook_email_registration_name().
+ */
+// function xdruple_commerce_email_registration_name($edit, $account) {
+//   $name = $account->mail;
+
+//   return email_registration_cleanup_username($name);
+// }
+
+/**
+ * Implements hook_user_insert().
+ */
+function xdruple_commerce_user_insert(&$edit, $account, $category) {
+  $field_name = 'xd_contact_association';
+
+  // Get the XdrupleUserContact uuid from this user's Entity Reference and load that entity.
+  if (isset($edit[$field_name][LANGUAGE_NONE][0]['target_id'])) {
+    $field = field_info_field($field_name);
+    $entity_type = $field['settings']['target_type'];
+
+    $user_contact_key = $edit['xd_contact_association'][LANGUAGE_NONE][0]['target_id'];
+
+    // Update the uid now that one exists.
+    $user_contact = entity_load_single($entity_type, $user_contact_key);
+    $user_contact->uid = $edit['uid'];
+
+    // Save it back to xTuple.
+    entity_save($entity_type, $user_contact);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * The Product UI module instantiates the Product add/edit form alter the
+ * form here to xTuple properties as fields.
+ *
+ * @see commerce_product_ui_product_form()
+ */
+function xdruple_commerce_form_commerce_product_ui_product_form_alter(&$form, &$form_state) {
+  $product = $form_state['commerce_product'];
+  $op = 'edit';
+  $entityType = 'commerce_product';
+  $entityInfo = entity_get_info($entityType);
+  $handler_class = $entityInfo['operations ui']['operations'][$op]['handler'];
+
+  // Break the reference to $form_state.
+  $foo_state = (array)clone(object)$form_state;
+
+  $excluded_fields = array(
+    'product_id',
+    'revision_id',
+    'sku',
+    'title',
+    'type',
+    'language',
+    'uid',
+    'status',
+    'created',
+    'changed',
+    'data',
+    'commerce_price'
+  );
+
+  // Get the xtuple form version from our controler and loop over our fields in that
+  // form and add to the commerce_product from.
+  $xdruple_form = entity_operations_operation_form(array(), $foo_state, 'XdrupleCommerceProduct', $handler_class, $op, $product);
+  foreach ($entityInfo['json-schema']['XdrupleCommerceProduct']['properties'] as $prop_name => $prop_value) {
+    // Skip the fields that are already handled or should not be shown.
+    if (!in_array($prop_name, $excluded_fields)) {
+      $form[$prop_name] = $xdruple_form[$prop_name];
+      if (in_array($prop_name, array('notes', 'extDescrip'))) {
+        $form[$prop_name]['#type'] = 'textarea';
+        $form[$prop_name]['#rows'] = 4;
+      }
+      $form[$prop_name]['#weight'] = -3;
+    }
+  }
+}
+
+/**
+ * Implements hook_field_attach_submit.
+ */
+function xdruple_commerce_field_attach_submit($entity_type, $entity, $form, $form_state) {
+  if ($entity_type === 'commerce_product') {
+    // Save xTuple parameters back into the product entity object.
+    $entity->subTitle = $form_state['values']['subTitle'];
+    $entity->notes = $form_state['values']['notes'];
+    $entity->extDescrip = $form_state['values']['extDescrip'];
+    $entity->productWeight = $form_state['values']['productWeight'];
+    $entity->packageWeight = $form_state['values']['packageWeight'];
+    $entity->classCode = $form_state['values']['classCode'];
+    $entity->productCategory = $form_state['values']['productCategory'];
+    $entity->priceUnit = $form_state['values']['priceUnit'];
+  }
+}
+
+/**
+ * Implements hook_entity_query_alter.
+ *
+ * EntityFieldQuery used in _commerce_product_match_products_standard() does not
+ * allow OR clauses. Alter the query to string match on sku OR title.
+ *
+ * @param $query
+ */
+function xdruple_commerce_entity_query_alter(&$query) {
+  if (isset($query->tags['commerce_sku_or_title_match'])) {
+    $string = $query->metaData['commerce_sku_or_title_match']->string;
+    $match = $query->metaData['commerce_sku_or_title_match']->match;
+
+    if (isset($string, $match)) {
+      // Build a where clause matching on either the SKU or title.
+
+      // TODO: xTuple doesn't currently support an operator.
+      switch ($match) {
+        case 'contains':
+          $query->propertyCondition('q', $string, 'CONTAINS');
+          break;
+
+        case 'starts_with':
+          $query->propertyCondition('q', $string, 'CONTAINS');
+          break;
+
+        case 'equals':
+        default:
+          $query->propertyCondition('q', $string, '=');
+          break;
+      }
+    }
+  }
+}
+
+function xdruple_commerce_api_customer_item_price($discovery_client = 'xtuple', $resource = 'Customer', $postBody, $optParams = array()) {
+  $service = wsclient_service_load($discovery_client);
+  $endpoint = $service->endpoint();
+  $client = $endpoint->client();
+
+  $params = array('postBody' => $postBody);
+  $optParams = array();
+  $params = array_merge($params, $optParams);
+
+  // POST the resource.
+  $result = $client->$resource->itemPrice($params, $optParams);
+
+  return $result['price'];
+}
+
+function xdruple_commerce_get_customer_line_item_price($line_item) {
+  if (!isset($_SESSION['rescued']['customer'], $_SESSION['rescued']['scheduled_date'], $_SESSION['rescued']['ship_to'], $_SESSION['rescued']['site'])) {
+    // We cannot get a price quote without all of these set.
+    return;
+  }
+
+  $customer = $_SESSION['rescued']['customer'];
+  $date = $_SESSION['rescued']['scheduled_date'];
+  $shipto = $_SESSION['rescued']['ship_to'];
+  $site = $_SESSION['rescued']['site'];
+
+  $cid = 'xdruple_commerce_customer_line_item_price-' .
+         $customer . '-' .
+         $line_item->line_item_label . '-' .
+         strval($line_item->quantity) . '-' .
+         strval($date) . '-' .
+         $shipto . '-' .
+         $site;
+  $cache = cache_get($cid, 'cache');
+
+  if (empty($cache)) {
+    $postBody = array(
+      'attributes' => array(
+        $customer,
+        $line_item->line_item_label,
+        $line_item->quantity,
+        array(
+          'asOf' => $date, // The scheduled date for the order.
+          'shiptoId' => $shipto,
+          'siteId' => $site,
+          'effective' => format_date(REQUEST_TIME, 'custom', 'Y-m-d'), // Always today.
+        ),
+      ),
+    );
+
+    // Make the itemPrice service request.
+    $price = xdruple_commerce_api_customer_item_price('xtuple', 'Customer', $postBody);
+
+    cache_set($cid, $price, 'cache', CACHE_TEMPORARY);
+  } else {
+    $price = $cache->data;
+  }
+
+  if (isset($price) && $price >= 0) {
+    $price = round($price * 100); // Drupal Commerce doesn't use decimals for prices.
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
+  }
+}
+
+/**
+ * Implements hook_commerce_product_calculate_sell_price_line_item_alter().
+ *
+ * @param $line_item
+ *   The product line item used for sell price calculation.
+ */
+function xdruple_commerce_commerce_product_calculate_sell_price_line_item_alter($line_item) {
+  // Alter the list price.
+  if ($line_item->type === 'product') {
+    xdruple_commerce_get_customer_line_item_price($line_item);
+  }
+}
+
+
+/**
+ * Implements hook_commerce_cart_line_item_refresh().
+ *
+ * @param $line_item
+ *   The product line item used for sell price calculation.
+ *
+ * @param $order_wrapper
+ *   The order.
+ */
+function xdruple_commerce_commerce_cart_line_item_refresh($line_item, $order_wrapper){
+  // Alter the list price.
+  if ($line_item->type === 'product') {
+    xdruple_commerce_get_customer_line_item_price($line_item);
+  }
+}
+
+/**
+ * Implements hook_commerce_checkout_complete().
+ */
+function xdruple_commerce_commerce_checkout_complete($order) {
+  // TODO: If this user is not yet a customer, we'll need to insert one.
+
+  $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+
+  $cust_key = $order_wrapper->commerce_customer_billing->xd_customer->number->value();
+  // Load the full customer so we get Terms, Tax, etc. we normally do not expose.
+  // TODO: Assuming 'xtuple' here. Get setting.
+  $cust_entityType = 'xtuple_xdruplecustomer';
+  $customer = entity_load($cust_entityType, array($cust_key));
+  $customer = $customer[$cust_key];
+
+  // Get the Bill To Contact details from checkout.
+  // TODO: Assuming 'xtuple' here. Get setting.
+  $bill_to_contact = $order_wrapper->commerce_customer_billing->xd_bill_to_contact->value();
+
+  // Get the Bill To Address details from checkout.
+  $bill_to_address = $order_wrapper->commerce_customer_billing->xd_bill_to_address->value();
+
+  // Get the Ship To from checkout.
+  $ship_to = $order_wrapper->commerce_customer_shipping->xd_ship_to->value();
+  $full_ship_to = false;
+
+  if (isset($ship_to)) {
+    $ship_to_contact = json_decode(json_encode($ship_to->contact), FALSE);
+    $ship_to_address = json_decode(json_encode($ship_to->address), FALSE);
+
+    // Load the full customer ship to so we get ShipCharge, shipZone, etc. we normally do not expose.
+    foreach ($customer->shiptos as $cust_shipto) {
+      if ($cust_shipto['number'] === $ship_to->number) {
+        // Get the Ship To Contact details from customer default.
+        $full_ship_to = json_decode(json_encode($cust_shipto), FALSE);
+        $ship_to = $cust_shipto;
+
+        break;
+      }
+    }
+  } else {
+    // Get the Ship To Contact details from checkout.
+    $ship_to_contact = $order_wrapper->commerce_customer_shipping->xd_ship_to_contact->value();
+
+    // Get the Ship To Address details from checkout.
+    $ship_to_address = $order_wrapper->commerce_customer_shipping->xd_ship_to_address->value();
+  }
+
+  if (!$ship_to_contact) {
+    foreach ($customer->shiptos as $cust_shipto) {
+      if ($cust_shipto['isDefault']) {
+        // Get the Ship To Contact details from customer default.
+        $ship_to_contact = json_decode(json_encode($cust_shipto['contact']), FALSE);
+
+        // Get the Ship To Address details from customer default.
+        if (!$ship_to_address) {
+          $ship_to_address = json_decode(json_encode($cust_shipto['address']), FALSE);
+        }
+
+        // Load the full customer ship to so we get ShipCharge, shipZone, etc. we normally do not expose.
+        if (!$ship_to) {
+          $full_ship_to = json_decode(json_encode($cust_shipto), FALSE);
+          $ship_to = $cust_shipto;
+        }
+
+        break;
+      }
+    }
+  }
+
+  // Get the Ship To Address details from customer default.
+  // TODO: Business logic question... Do we assume the default ship to
+  // address here if the above logic didn't set it?
+  if (!$ship_to_address) {
+    foreach ($customer->shiptos as $cust_shipto) {
+      if ($cust_shipto['isDefault']) {
+        $ship_to_address = json_decode(json_encode($cust_shipto['address']), FALSE);
+
+        // Load the full customer ship to so we get ShipCharge, shipZone, etc. we normally do not expose.
+        if (!$ship_to && !$full_ship_to) {
+          $full_ship_to = json_decode(json_encode($cust_shipto), FALSE);
+          $ship_to = $cust_shipto;
+        }
+
+        break;
+      }
+    }
+  }
+
+  // Create a new Sales Order entity.
+  // TODO: Assuming 'xtuple' here. Get setting.
+  $so_entityType = 'xtuple_salesorder';
+  $so_entityInfo = entity_get_info($so_entityType);
+  $so_class = $so_entityInfo['entity class'];
+  $sales_order = new $so_class(array(), $so_entityType);
+
+  // Set all the defaults on the Sales Order.
+  $sales_order->is_new = true;
+  $sales_order->status = 'O';
+  $sales_order->saleType = 'CUST';
+  $sales_order->calculateFreight = true;
+  $sales_order->freight = 0;
+  $sales_order->orderDate = date("Y-m-d");
+  $sales_order->wasQuote = false;
+  //$sales_order->number = $order->order_number;
+  $sales_order->orderNotes = ''; // TODO: Get this from check out form.
+
+  // Set the Customer details on the Sales Order.
+  $sales_order->site = $customer->preferredSite;
+  $sales_order->customer = $customer->number;
+  $sales_order->terms = $customer->terms;
+  $sales_order->salesRep = $full_ship_to ? $full_ship_to->salesRep : $customer->salesRep;
+  $sales_order->taxZone = $full_ship_to ? $full_ship_to->taxZone : $customer->taxZone;
+  $sales_order->billtoContact = $bill_to_contact->number;
+  $sales_order->shipto = $ship_to ? $ship_to : null;
+  $sales_order->shiptoContact = $ship_to_contact->number;
+  $sales_order->currency = $customer->currency;
+  $sales_order->shipZone = $full_ship_to ? $full_ship_to->shipZone : null;
+  $sales_order->shipCharge = $full_ship_to ? $full_ship_to->shipCharge : $customer->shipCharge;
+  $sales_order->commission = $full_ship_to ? $full_ship_to->commission : $customer->commission;
+  $sales_order->shipVia = $full_ship_to ? $full_ship_to->shipVia : $customer->shipVia;
+  $sales_order->billtoName = $bill_to_contact->firstName . ' ' . $bill_to_contact->lastName;
+  $sales_order->billtoContactFirstName = $bill_to_contact->firstName;
+  $sales_order->billtoContactLastName = $bill_to_contact->lastName;
+  $sales_order->billtoContactPhone = $bill_to_contact->phone;
+  $sales_order->billtoContactFax = $bill_to_contact->fax;
+  $sales_order->billtoAddress1 = $bill_to_address->line1;
+  $sales_order->billtoAddress2 = $bill_to_address->line2;
+  $sales_order->billtoAddress3 = $bill_to_address->line3;
+  $sales_order->billtoCity = $bill_to_address->city;
+  $sales_order->billtoState = $bill_to_address->state;
+  $sales_order->billtoPostalCode = $bill_to_address->postalCode;
+  $sales_order->billtoCountry = $bill_to_address->country;
+  $sales_order->shiptoName = $full_ship_to ? $full_ship_to->name : null;
+  $sales_order->shipNotes = $full_ship_to ? $full_ship_to->notes : null;
+  $sales_order->shiptoContactFirstName = $ship_to_contact->firstName;
+  $sales_order->shiptoContactLastName = $ship_to_contact->lastName;
+  $sales_order->shiptoContactPhone = $ship_to_contact->phone;
+  $sales_order->shiptoContactFax = $ship_to_contact->fax;
+  $sales_order->shiptoAddress1 = $ship_to_address->line1;
+  $sales_order->shiptoAddress2 = $ship_to_address->line2;
+  $sales_order->shiptoAddress3 = $ship_to_address->line3;
+  $sales_order->shiptoCity = $ship_to_address->city;
+  $sales_order->shiptoState = $ship_to_address->state;
+  $sales_order->shiptoPostalCode = $ship_to_address->postalCode;
+  $sales_order->shiptoCountry = $ship_to_address->country;
+
+  // Loop over the lines and add new lines.
+  foreach ($order_wrapper->commerce_line_items->getIterator() as $delta => $line) {
+    // Handle normal "product" lines.
+    if (array_key_exists('commerce_product', $line->getPropertyInfo())) {
+      // Set the line defaults.
+      $sales_order->lineItems[$delta]['scheduleDate'] = isset($_SESSION['rescued']['scheduled_date']) ? $_SESSION['rescued']['scheduled_date'] : date("Y-m-d");
+      $sales_order->lineItems[$delta]['firm'] = false;
+      $sales_order->lineItems[$delta]['site'] = isset($_SESSION['rescued']['site']) ? $_SESSION['rescued']['site'] : $customer->preferredSite;
+      $sales_order->lineItems[$delta]['taxType'] = 'Taxable';
+
+      // TODO: Get Unit and Ratios from item.
+      // Set the line details.
+      $sales_order->lineItems[$delta]['quantityUnitRatio'] = 1;
+      $sales_order->lineItems[$delta]['item'] = $line->line_item_label->value();
+      $sales_order->lineItems[$delta]['lineNumber'] = $delta + 1;
+      $sales_order->lineItems[$delta]['subNumber'] = 0;
+      $sales_order->lineItems[$delta]['quantityUnit'] = $line->commerce_product->priceUnit->value();
+      $sales_order->lineItems[$delta]['priceUnit'] = $line->commerce_product->priceUnit->value();
+      $sales_order->lineItems[$delta]['priceUnitRatio'] = 1;
+      $sales_order->lineItems[$delta]['quantity'] = $line->quantity->value();
+      $sales_order->lineItems[$delta]['customerPrice'] = ($line->commerce_unit_price->amount->value() / 100);
+      $sales_order->lineItems[$delta]['price'] = ($line->commerce_unit_price->amount->value() / 100);
+    } else {
+      // TODO
+      // Handle shipping and tax lines.
+      $foo = true;
+    }
+  }
+
+  // Save the Sales Order.
+  try {
+    // We have to submit the order as the "admin" user because it has "MaintainSalesOrders" privs.
+    // TODO: We may want to handle this on the xTuple side so we don't have to switch the active
+    // user like this.
+    unset($_SESSION['access_token']);
+    unset($_SESSION['oauth_user']);
+    $cached_user = $_SESSION['rescued']['user'];
+    $_SESSION['rescued']['user'] = 'admin';
+    $sales_order->save();
+
+    unset($_SESSION['access_token']);
+    unset($_SESSION['oauth_user']);
+    $_SESSION['rescued']['user'] = $cached_user;
+
+    // Set the Drupal Commerce order_number to match the auto-number
+    // returned from xTuple after saving the order.
+    $order_wrapper->order_number->set($sales_order->number);
+    $order_wrapper->save();
+  } catch (Exception $e) {
+    // Use try/catch to make sure and reset the user even if there is an error.
+    $_SESSION['rescued']['user'] = $cached_user;
+    unset($_SESSION['access_token']);
+    unset($_SESSION['oauth_user']);
+
+    // TODO: Reset the order status?
+    // This is a good question for Commerce Guys.
+    drupal_set_message(t('Order Submit failed. Message = %message', array('%message' => $e->getMessage())), 'error');
+  }
+}
+
+/**
+ * Implements hook_commerce_checkout_complete().
+ */
+function xdruple_commerce_commerce_order_update($order) {
+
+}

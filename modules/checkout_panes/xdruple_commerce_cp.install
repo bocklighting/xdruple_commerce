@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * Implements hook_enable().
+ */
+function xdruple_commerce_cp_enable() {
+  // Create or enable xTuple entity pane reference fields in commerce order entity.
+  foreach (xdruple_commerce_cp_get_types() as $type_name => $type) {
+    if (entity_get_info($type_name)) {
+      $type = new stdClass();
+      $type->label = 'Contact';
+      $type->type = 'xtuple_contact';
+      xdruple_commerce_cp_configure_pane_type($type);
+    }
+  }
+}
+
+/**
+ * Implements hook_disable().
+ */
+function xdruple_commerce_cp_disable() {
+  // Disable xTuple entity pane reference fields in commerce order entity.
+  foreach (xdruple_commerce_cp_get_types() as $type_name => $type) {
+    //@TODO find a way to disable fields (without deleting data).
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function xdruple_commerce_cp_uninstall() {
+  include_once(drupal_get_path('module', 'xdruple_commerce_cp') . '/xdruple_commerce_cp.module');
+  // Delete xTuple entity pane reference fields in commerce order entity.
+  $batch_size = 0;
+  foreach (xdruple_commerce_cp_get_types() as $type_name => $type) {
+    $batch_size += xdruple_commerce_cp_delete_pane_type($type_name, TRUE);
+  }
+  field_purge_batch($batch_size);
+}

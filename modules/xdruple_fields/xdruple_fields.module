@@ -1,0 +1,771 @@
+<?php
+
+/**
+ * Implements hook_views_api().
+ */
+function xdruple_fields_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'xdruple_fields') . '/includes/views',
+  );
+}
+
+/**
+ * Implements hook_form_alter()
+ *
+ * Set Customer default on checkout forms.
+ */
+function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id === 'commerce_checkout_form_checkout' || $form_id === 'commerce_order_ui_order_form') {
+    if ($form_id === 'commerce_checkout_form_checkout') {
+      $form_billing = &$form['customer_profile_billing'];
+      $form_shipping = &$form['customer_profile_shipping'];
+      if (isset($form_state['values']['customer_profile_billing'])) {
+        $form_state_billing = &$form_state['values']['customer_profile_billing'];
+      }
+      if (isset($form_state['values']['customer_profile_shipping'])) {
+        $form_state_shipping = &$form_state['values']['customer_profile_shipping'];
+      }
+    } else if ($form_id === 'commerce_order_ui_order_form') {
+      $form_billing = &$form['commerce_customer_billing'][LANGUAGE_NONE]['profiles'][0];
+      $form_shipping = &$form['commerce_customer_shipping'][LANGUAGE_NONE]['profiles'][0];
+
+      if (isset($form_state['values']['xd_customer'])) {
+        $form_state_billing = &$form_state['values'];
+      }
+      if (isset($form_state['values']['xd_ship_to'])) {
+        $form_state_shipping = &$form_state['values'];
+      }
+    }
+
+    // Add ajax call back to the Ship To select so we can dynamically add the
+    // Contact and Address fields if no Ship To is set.
+    $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#ajax'] = array(
+      'callback' => 'xdruple_fields_checkout_shipto_ajax_callback',
+      'wrapper' => 'xtuple-ship-to-wrapper',
+      'method' => 'replace',
+      'effect' => 'fade',
+    );
+    $form_billing['xd_customer'][LANGUAGE_NONE]['#ajax'] = array(
+      'callback' => 'xdruple_fields_checkout_shipto_ajax_callback',
+      'wrapper' => 'xtuple-ship-to-wrapper',
+      'method' => 'replace',
+      'effect' => 'fade',
+    );
+
+    if ($form_id === 'commerce_order_ui_order_form') {
+      // Limit validation to skip the 'commerce_customer_billing' and 'commerce_customer_shipping' fields.
+      // @See: commerce_customer_profile_manager_validate()
+      foreach ($form_state['field'] as $field_name => $field) {
+        if ($field_name !== 'commerce_customer_billing' && $field_name !== 'commerce_customer_shipping') {
+          $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
+        }
+      }
+    }
+    if ($form_id === 'commerce_checkout_form_checkout') {
+      foreach ($form_state['field']['#parents'] as $field_name => $field) {
+        $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
+      }
+    }
+
+    $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#submit'] = array('');
+    $form_billing['xd_customer'][LANGUAGE_NONE]['#submit'] = array('');
+
+    $shiptos = array();
+    // Remove the Ship Tos that are not for this customer. Reset the #options array.
+    if (isset($form_billing['xd_customer'][LANGUAGE_NONE]['#default_value']) &&
+      (!isset($form_state['values']) || empty($form_state['values'])) &&
+      $default_customer = $form_billing['xd_customer'][LANGUAGE_NONE]['#default_value'][0]) {
+      // This is the first load of an edit form, use the default.
+
+      $shiptos = xdruple_fields_get_ship_to_list($default_customer);
+    } else {
+      // This is the second or more Ajax load, get it from the saved order.
+
+      if ($form_id === 'commerce_order_ui_order_form') {
+        $order = commerce_order_load_by_number($form_state['commerce_order']->order_number);
+        $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+        $cust_key = $order_wrapper->commerce_customer_billing->xd_customer->number->value();
+        $shiptos = xdruple_fields_get_ship_to_list($cust_key);
+      }
+      if ($form_id === 'commerce_checkout_form_checkout') {
+        if (isset($form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) &&
+          $default_customer = $form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) {
+
+          $shiptos = xdruple_fields_get_ship_to_list($default_customer);
+        }
+      }
+    }
+
+    if (count($shiptos) > 0) {
+      // Reset the '#empty_option' => '- None -' to be more descriptive.
+      $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] = array('_none' => '- Custom Ship To -');
+      $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] = $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] + $shiptos;
+    }
+
+    // Add wapper to 'customer_profile_shipping' fieldset so changing Ship To can do an ajax
+    // replace to update that section of the form.
+    $form_shipping['#prefix'] = '<div id="xtuple-ship-to-wrapper">';
+    $form_shipping['#suffix'] = '</div>';
+
+    if (isset($form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value'][0]) && (!isset($form_state['values']) || empty($form_state['values']))) {
+      // First time loading form with a default set.
+      $shipto_id = $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value'][0];
+    } else if (isset($form_state_shipping['xd_ship_to'][LANGUAGE_NONE][0]['target_id'])) {
+      // After first load with target_id set.
+      $shipto_id = $form_state_shipping['xd_ship_to'][LANGUAGE_NONE][0]['target_id'];
+    }
+
+    // If a default Ship To is set on first load of the form OR the Ship To
+    // select list was changed and a Ship To was selected, remove Contact and Address.
+    if (isset($shipto_id) && array_key_exists($shipto_id, $shiptos)) {
+      // Remove the Inline Entity Form entities so the Custom Ship To Contacta
+      // and Address will be blank if the user flips back to it.
+      $contact_ief_id = $form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['#ief_id'];
+      $address_ief_id = $form_shipping['xd_ship_to_address'][LANGUAGE_NONE]['#ief_id'];
+      foreach($form_state['inline_entity_form'] as $ief_key => $ief_child) {
+        if (strncmp($ief_key, $contact_ief_id, strlen($contact_ief_id)) === 0) {
+          unset($form_state['inline_entity_form'][$ief_key]);
+        }
+        if (strncmp($ief_key, $address_ief_id, strlen($address_ief_id)) === 0) {
+          unset($form_state['inline_entity_form'][$ief_key]);
+        }
+      }
+
+      // Remove the Ship To Contact and Address parts of the checkout form.
+      unset($form_shipping['xd_ship_to_contact']);
+      unset($form_shipping['xd_ship_to_address']);
+      if (isset($form_state_shipping['ship_to_contact_wrapper'])) {
+        unset($form_state_shipping['ship_to_contact_wrapper']);
+      }
+      if (isset($form_state_shipping['ship_to_address_wrapper'])) {
+        unset($form_state_shipping['ship_to_address_wrapper']);
+      }
+      if (isset($form_state_shipping['xd_ship_to_contact'])) {
+        unset($form_state_shipping['xd_ship_to_contact']);
+      } else {
+        // TODO
+      }
+      if (isset($form_state_shipping['xd_ship_to_address'])) {
+        unset($form_state_shipping['xd_ship_to_address']);
+      } else {
+        // TODO
+      }
+      unset($form_state['input']['customer_profile_shipping']['xd_ship_to_contact']);
+      unset($form_state['input']['customer_profile_shipping']['xd_ship_to_address']);
+
+      // Get and display as read-only the Contact and Address from the selected ship to.
+      $shipto = rescued_api_resource_load('xtuple', 'XdrupleCommerceShipto', $shipto_id, 'uuid');
+
+      // Show the user the selected Ship To's Contact and Address.
+      $form_shipping['ship_to_contact_wrapper'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Ship To Contact'),
+        'first_name' => array(
+          '#type' => 'textfield',
+          '#title' => t('First Name'),
+          '#default_value' => isset($shipto['data']['contact']['firstName']) ? $shipto['data']['contact']['firstName'] : '',
+          '#disabled' => true,
+        ),
+        'last_name' => array(
+          '#type' => 'textfield',
+          '#title' => t('Last Name'),
+          '#default_value' => isset($shipto['data']['contact']['lastName']) ? $shipto['data']['contact']['lastName'] : '',
+          '#disabled' => true,
+        ),
+        'email' => array(
+          '#type' => 'textfield',
+          '#title' => t('Primary Email'),
+          '#default_value' => isset($shipto['data']['contact']['primaryEmail']) ? $shipto['data']['contact']['primaryEmail'] : '',
+          '#disabled' => true,
+        ),
+        'phone' => array(
+          '#type' => 'textfield',
+          '#title' => t('Phone'),
+          '#default_value' => isset($shipto['data']['contact']['phone']) ? $shipto['data']['contact']['phone'] : '',
+          '#disabled' => true,
+        ),
+      );
+      $form_shipping['ship_to_address_wrapper'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Ship To Contact'),
+        'line1' => array(
+          '#type' => 'textfield',
+          '#title' => t('Line1'),
+          '#default_value' => isset($shipto['data']['address']['line1']) ? $shipto['data']['address']['line1'] : '',
+          '#disabled' => true,
+        ),
+        'line2' => array(
+          '#type' => 'textfield',
+          '#title' => t('Line2'),
+          '#default_value' => isset($shipto['data']['address']['line2']) ? $shipto['data']['address']['line2'] : '',
+          '#disabled' => true,
+        ),
+        'city' => array(
+          '#type' => 'textfield',
+          '#title' => t('City'),
+          '#default_value' => isset($shipto['data']['address']['city']) ? $shipto['data']['address']['city'] : '',
+          '#disabled' => true,
+        ),
+        'state' => array(
+          '#type' => 'select',
+          '#title' => t('State'),
+          '#options' => array(isset($shipto['data']['address']['state']) ? $shipto['data']['address']['state'] : ''),
+          '#default_value' => isset($shipto['data']['address']['state']) ? $shipto['data']['address']['state'] : '',
+          '#disabled' => true,
+        ),
+      );
+    } else {
+      // This is a Custom Ship To. Unset the default value.
+      unset($form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value']);
+      $_SESSION['rescued']['custom_ship_to'] = true;
+    }
+  }
+}
+
+/**
+ * Ajax callback to return the Ship To select list when the Customer list is populated.
+ */
+function xdruple_fields_checkout_shipto_ajax_callback($form, $form_state) {
+  if (isset($form['customer_profile_shipping'])) {
+    return $form['customer_profile_shipping'];
+  } else if ($form['commerce_customer_shipping']) {
+    return $form['commerce_customer_shipping'][LANGUAGE_NONE]['profiles'][0];
+  }
+}
+
+/**
+ * Perform alterations before the default ids are returned with Entityreference
+ * Prepopulate module.
+ *
+ * @param $ids
+ *   The array of existing defualt ids.
+ * @param $field
+ *   The entityreference field.
+ * @param $instance
+ *   The entityreference field instance.
+ */
+function xdruple_fields_entityreference_prepopulate_default_ids_alter(&$ids, $field, $instance) {
+  if (!$ids) {
+    // TODO: Add your id to the array.
+    //$ids[] = 1;
+    //$ids = array('95');
+  } else {
+    // TODO: Modify the Existing defualt ids.
+    //$ids[0] = 2;
+    //$ids = array('95');
+  }
+
+  if ($field['field_name'] === 'xd_customer' && isset($_SESSION['rescued']['customer'])) {
+    $ids = array($_SESSION['rescued']['customer']);
+  }
+
+  if ($field['field_name'] === 'xd_bill_to_contact' && isset($_SESSION['rescued']['customer'])) {
+    $ids = array(xdruple_fields_get_bill_to_cntct_default($_SESSION['rescued']['customer']));
+  }
+
+  if ($field['field_name'] === 'xd_bill_to_address' && isset($_SESSION['rescued']['customer'])) {
+    $ids = array(xdruple_fields_get_bill_to_addr_default($_SESSION['rescued']['customer']));
+  }
+
+  if ($field['field_name'] === 'xd_ship_to' && !$_SESSION['rescued']['custom_ship_to']) {
+    if (isset($_SESSION['rescued']['ship_to'])) {
+      $ids = array($_SESSION['rescued']['ship_to']);
+    } else {
+      $ids = array(xdruple_fields_get_ship_to_default($_SESSION['rescued']['customer']));
+    }
+  }
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function xdruple_fields_block_info() {
+  $blocks = array();
+
+  $blocks['xtuple_order_defaults'] = array(
+    'info' => t('Order Defaults'),
+    'cache' => DRUPAL_NO_CACHE,
+    'status' => 1,
+    'region' => 'sidebar_first',
+    'visibility' => 0,
+    'pages' => 'checkout*',
+
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function xdruple_fields_block_view($delta) {
+  // TODO: Should probably create a special permisison for this.
+  if (user_access('edit personal rescued entities')) {
+    // Display the xTuple default order settings form.
+    if ($delta == 'xtuple_order_defaults') {
+      $block = array();
+      $block['subject'] = t('Order Settings');
+      $block['content'] = drupal_get_form('xtuple_order_defaults_form');
+      return $block;
+    }
+  }
+}
+
+/**
+ * Implements hook_forms().
+ */
+function xdruple_fields_forms() {
+  $forms['xtuple_order_defaults_form']= array(
+    'callback' => 'xdruple_fields_order_defaults',
+    'callback arguments' => array('xtuple_order_defaults_form'),
+  );
+  return $forms;
+}
+
+/**
+ * Form builder; Output xTuple Default Order Settings form.
+ */
+function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
+  $customer = isset($form_state['values']['customer']) ? $form_state['values']['customer'] : null;
+
+  if (empty($customer)) {
+    $customer = isset($_SESSION['rescued']['customer']) ? $_SESSION['rescued']['customer'] : null;
+  } else {
+    unset($form_state['input']['ship_to']);
+    unset($form_state['input']['site']);
+
+    if (isset($_SESSION['rescued']['customer']) && $_SESSION['rescued']['customer'] !== $customer) {
+      unset($_SESSION['rescued']['ship_to']);
+      unset($_SESSION['rescued']['site']);
+    }
+  }
+
+  $form[$form_id] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline'))
+  );
+
+  $default_customer = isset($_SESSION['rescued']['customer']) ? $_SESSION['rescued']['customer'] : '';
+  $form[$form_id]['customer'] = array(
+    '#type' => 'select',
+    '#title' => t('Customer'),
+    //'#title_display' => 'invisible',
+    '#options' => xdruple_fields_get_customer_list(),
+    '#empty_option' => '- None -',
+    '#default_value' => $default_customer,
+    '#attributes' => array('title' => t('Select the Customer to use when placing an order.')),
+    '#ajax' => array(
+      'callback' => 'xdruple_fields_customer_ajax_callback',
+      'wrapper' => 'xtuple-defaults-wrapper',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+  );
+
+  // Put ship_to and site in a fieldset so changing customer can do an ajax
+  // replace to update those fields to the defaults.
+  $form[$form_id]['defaults_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Customer Defaults'),
+    '#title_display' => 'attribute',
+    '#prefix' => '<div id="xtuple-defaults-wrapper">',
+    '#suffix' => '</div>',
+  );
+
+  $default_ship_to = isset($_SESSION['rescued']['ship_to']) && !empty($_SESSION['rescued']['ship_to']) ? $_SESSION['rescued']['ship_to'] : xdruple_fields_get_ship_to_default($customer);
+  $form[$form_id]['defaults_wrapper']['ship_to'] = array(
+    '#type' => 'select',
+    '#title' => t('Ship To'),
+    //'#title_display' => 'invisible',
+    '#options' => xdruple_fields_get_ship_to_list($customer),
+    '#empty_option' => '- None -',
+    '#default_value' => $default_ship_to,
+    '#attributes' => array('title' => t('Select the Ship To to use when placing an order.')),
+  );
+
+  $sites = xdruple_fields_get_site_list();
+  if (count($sites) > 0) {
+    $form[$form_id]['defaults_wrapper']['site'] = array(
+      '#type' => 'select',
+      '#title' => t('Warehouse/Site'),
+      //'#title_display' => 'invisible',
+      '#options' => $sites,
+      '#empty_option' => '- None -',
+      '#default_value' => isset($_SESSION['rescued']['site']) ? $_SESSION['rescued']['site'] : xdruple_fields_get_site_default($customer),
+      '#attributes' => array('title' => t('Select the Warehouse to use when placing an order.')),
+    );
+  }
+
+  // Is the $_SESSION is stale, it could have an older date. Set it to today.
+  if (isset($_SESSION['rescued']['scheduled_date']) && strtotime($_SESSION['rescued']['scheduled_date']) < strtotime(format_date(REQUEST_TIME, 'custom', 'Y-m-d'))) {
+    $_SESSION['rescued']['scheduled_date'] = format_date(REQUEST_TIME, 'custom', 'Y-m-d');
+  }
+  $form[$form_id]['scheduled_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Scheduled Date'),
+    '#date_label_position' => 'hidden',
+    //'#title_display' => 'invisible',
+    '#size' => 15,
+    '#default_value' => isset($_SESSION['rescued']['scheduled_date']) ? $_SESSION['rescued']['scheduled_date'] : format_date(REQUEST_TIME, 'custom', 'Y-m-d'),
+    '#date_format' => 'Y-m-d',
+    '#date_year_range' => '-0:+1',
+    '#attributes' => array('title' => t('Select the Scheduled Date to use when placing an order.')),
+  );
+
+  $form[$form_id]['actions'] = array('#type' => 'actions');
+  $form[$form_id]['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  $form[$form_id]['#submit'][] = 'xtuple_order_defaults_form_submit';
+
+  return $form;
+}
+
+/**
+ * Process a block search form submission.
+ */
+function xtuple_order_defaults_form_submit($form, &$form_state) {
+  // TODO: validation.
+
+  $form_id = $form['form_id']['#value'];
+
+  // Some fields in this form are dynamic like 'site'. Only change the
+  // $_SESSION['rescued'] value if the field was shown to the user.
+  if (isset($form_state['values']['customer'])) {
+    if (!empty($form_state['values']['customer'])) {
+      // When there is a real value, store it in $_SESSION['rescued'].
+      $_SESSION['rescued']['customer'] = $form_state['values']['customer'];
+    } else {
+      // When the value is null, unset() $_SESSION['rescued'].
+      unset($_SESSION['rescued']['customer']);
+    }
+  }
+
+  if (isset($form_state['values']['ship_to'])) {
+    if (!empty($form_state['values']['ship_to'])) {
+      $_SESSION['rescued']['ship_to'] = $form_state['values']['ship_to'];
+      $_SESSION['rescued']['custom_ship_to'] = false;
+    } else {
+      unset($_SESSION['rescued']['ship_to']);
+    }
+  }
+
+  if (isset($form_state['values']['site'])) {
+    if (!empty($form_state['values']['site'])) {
+      $_SESSION['rescued']['site'] = $form_state['values']['site'];
+    } else {
+      unset($_SESSION['rescued']['site']);
+    }
+  }
+
+  // Default to today.
+  $_SESSION['rescued']['scheduled_date'] = !empty($form_state['values']['scheduled_date']) ? $form_state['values']['scheduled_date'] : format_date(REQUEST_TIME, 'custom', 'Y-m-d');
+
+  // TODO: set a message.
+}
+
+/**
+ * Implements hook_theme().
+ */
+function xdruple_fields_theme() {
+  return array(
+    'xtuple_order_defaults' => array(
+      'render element' => 'form',
+      'template' => 'xtuple-order-defaults',
+      'path' => drupal_get_path('module', 'xdruple_fields') . '/theme',
+    ),
+  );
+}
+
+/**
+ * Process variables for xtuple-order-defaults.tpl.php.
+ *
+ * The $variables array contains the following arguments:
+ * - $form
+ *
+ * @see xtuple-order-defaults.tpl.php
+ */
+function template_preprocess_xtuple_order_defaults(&$variables) {
+  $variables['search'] = array();
+  $hidden = array();
+  // Provide variables named after form keys so themers can print each element independently.
+  foreach (element_children($variables['form']['xtuple_order_defaults_form']) as $key) {
+    $type = $variables['form']['xtuple_order_defaults_form'][$key]['#type'];
+    if ($type == 'hidden' || $type == 'token') {
+      $hidden[] = drupal_render($variables['form']['xtuple_order_defaults_form'][$key]);
+    }
+    else {
+      $variables['search'][$key] = drupal_render($variables['form']['xtuple_order_defaults_form'][$key]);
+    }
+  }
+  // Hidden form elements have no value to themers. No need for separation.
+  $variables['search']['hidden'] = implode($hidden);
+  // Collect all form elements to make it easier to print the whole form.
+  $variables['search_form'] = implode($variables['search']);
+}
+
+/**
+ * Ajax callback to return the Ship To select list when the Customer list is populated.
+ */
+function xdruple_fields_customer_ajax_callback($form, $form_state) {
+  $form_id = $form['#form_id'];
+
+  return $form[$form_id]['defaults_wrapper'];
+}
+
+/**
+ * Get a list of Customers for the current user.
+ *
+ * @return Array of Customers.
+ */
+function xdruple_fields_get_customer_list() {
+  global $user;
+  $cid = 'xdruple_customer_list-' . $user->uid;
+  $options = cache_get($cid, 'cache');
+
+  if (empty($options)) {
+    $options = array();
+
+    $customers = rescued_api_resource_list('xtuple', 'XdrupleCommerceCustomer');
+    $schema = rescued_get_single_json_schema('XdrupleCommerceCustomer', null, 'xtuple');
+    $key = rescued_json_schema_get_resource_key($schema['XdrupleCommerceCustomer']['properties']);
+
+    foreach ($customers as $customer) {
+      $options[$customer[$key]] = $customer['name'];
+    }
+
+    cache_set($cid, $options, 'cache', CACHE_TEMPORARY);
+
+    return $options;
+  } else {
+    return $options->data;
+  }
+}
+
+/**
+ * Get a list of Ship Tos for the current user.
+ *
+ * @param $customer
+ *   The id of the customer to return Ship Tos for.
+ *
+ * @return Array of Ship Tos.
+ */
+function xdruple_fields_get_ship_to_list($customer) {
+  global $user;
+  $cid = 'xdruple_ship_to_list-' . $user->uid . '-' . strval($customer);
+  $options = cache_get($cid, 'cache');
+
+  if (empty($options)) {
+    $options = array();
+
+    if (!empty($customer)) {
+      $optParams = array(
+        'query' => array(
+          'customer' => array(
+            'EQUALS' => $customer,
+          ),
+        )
+      );
+    } else {
+      $optParams = array();
+    }
+
+    $shiptos = rescued_api_resource_list('xtuple', 'XdrupleCommerceShipto', $optParams);
+    $schema = rescued_get_single_json_schema('XdrupleCommerceShipto', null, 'xtuple');
+    $key = rescued_json_schema_get_resource_key($schema['XdrupleCommerceShipto']['properties']);
+
+    foreach ($shiptos as $shipto) {
+      $options[$shipto[$key]] = $shipto['name'];
+    }
+
+    cache_set($cid, $options, 'cache', CACHE_TEMPORARY);
+
+    return $options;
+  } else {
+    return $options->data;
+  }
+}
+
+/**
+ * Get a Customer's defualt Ship To for the current user.
+ *
+ * @param $customer
+ *   The id of the customer to return Ship Tos for.
+ *
+ * @return Id of defualt Customer Ship To.
+ */
+function xdruple_fields_get_ship_to_default($customer) {
+  if (empty($customer)) {
+    // Need a customer to return the default. Return empty string in this case.
+    return '';
+  }
+
+  global $user;
+  $cid = 'xdruple_ship_to_default-' . $user->uid . '-' . strval($customer);
+  $options = cache_get($cid, 'cache');
+
+  if (empty($options)) {
+    $options = array();
+
+    $optParams = array(
+      'query' => array(
+        'customer' => array(
+          'EQUALS' => $customer,
+        ),
+        'isDefault' => array(
+          'EQUALS' => true,
+        ),
+      )
+    );
+
+    $shiptos = rescued_api_resource_list('xtuple', 'XdrupleCommerceShipto', $optParams);
+    $schema = rescued_get_single_json_schema('XdrupleCommerceShipto', null, 'xtuple');
+    $key = rescued_json_schema_get_resource_key($schema['XdrupleCommerceShipto']['properties']);
+
+    if (count($shiptos) === 0) {
+      // This user doesn't have access to the customer default or none was set in xTuple.
+      cache_set($cid, '', 'cache', CACHE_TEMPORARY);
+
+      return '';
+    }
+
+    cache_set($cid, $shiptos[0][$key], 'cache', CACHE_TEMPORARY);
+
+    // There can only be one default per customer. Return it.
+    return $shiptos[0][$key];
+  } else {
+    return $options->data;
+  }
+}
+
+/**
+ * Get a list of Warehouse/Sites for the current user.
+ *
+ * @return Array of Warehouse/Sites.
+ */
+function xdruple_fields_get_site_list() {
+  global $user;
+  $cid = 'xdruple_site_list-' . $user->uid;
+  $options = cache_get($cid, 'cache');
+
+  if (empty($options)) {
+    $options = array();
+
+    $sites = rescued_api_resource_list('xtuple', 'Site');
+    $schema = rescued_get_single_json_schema('Site', null, 'xtuple');
+    $key = rescued_json_schema_get_resource_key($schema['Site']['properties']);
+
+    foreach ($sites as $site) {
+      $options[$site[$key]] = $site['code'] . ' - ' . $site['description'];
+    }
+
+    cache_set($cid, $options, 'cache', CACHE_TEMPORARY);
+
+    return $options;
+  } else {
+    return $options->data;
+  }
+}
+
+/**
+ * Get a list of Warehouse/Sites for the current user.
+ *
+ * @param $customer
+ *   The id of the customer to return Ship Tos for.
+ *
+ * @return Array of Warehouse/Sites.
+ */
+function xdruple_fields_get_site_default($cust_id) {
+  if (empty($cust_id)) {
+    // Need a customer to return the default. Return empty string in this case.
+    return '';
+  }
+
+  global $user;
+  $cid = 'xdruple_site_default-' . $cust_id;
+  $default_site = cache_get($cid, 'cache');
+
+  if (empty($default_site)) {
+    $options = array();
+
+    $customer = rescued_api_resource_load('xtuple', 'XdrupleCustomer', $cust_id, 'number');
+
+    if (isset($customer['data'])) {
+      $default_site = $customer['data']['preferredSite'];
+    } else {
+      $default_site = '';
+    }
+    cache_set($cid, $default_site, 'cache', CACHE_TEMPORARY);
+
+    return $default_site;
+  } else {
+    return $default_site->data;
+  }
+}
+
+/**
+ * Get a Customer's defualt Bill To Contact.
+ *
+ * @param $customer
+ *   The id of the customer to return Contact for.
+ *
+ * @return Id of defualt Customer Bill To Contact.
+ */
+function xdruple_fields_get_bill_to_cntct_default($cust_id) {
+  if (empty($cust_id)) {
+    // Need a customer to return the default. Return empty string in this case.
+    return '';
+  }
+
+  global $user;
+  $cid = 'xdruple_bill_to_cntct_default-' . strval($cust_id);
+  $default_bill_to = cache_get($cid, 'cache');
+
+  if (empty($default_bill_to)) {
+    $customer = rescued_api_resource_load('xtuple', 'XdrupleCustomer', $cust_id, 'number');
+
+    if (isset($customer['data'])) {
+      $default_bill_to = $customer['data']['billingContact']['number'];
+    } else {
+      $default_bill_to = null;
+    }
+    cache_set($cid, $default_bill_to, 'cache', CACHE_TEMPORARY);
+
+    return $default_bill_to;
+  } else {
+    return $default_bill_to->data;
+  }
+}
+
+/**
+ * Get a Customer's defualt Bill To Address.
+ *
+ * @param $customer
+ *   The id of the customer to return the Address for.
+ *
+ * @return Id of defualt Customer Bill To Address.
+ */
+function xdruple_fields_get_bill_to_addr_default($cust_id) {
+  if (empty($cust_id)) {
+    // Need a customer to return the default. Return empty string in this case.
+    return '';
+  }
+
+  global $user;
+  $cid = 'xdruple_bill_to_addr_default-' . strval($cust_id);
+  $default_bill_to = cache_get($cid, 'cache');
+
+  if (empty($default_bill_to)) {
+    $customer = rescued_api_resource_load('xtuple', 'XdrupleCustomer', $cust_id, 'number');
+
+    if (isset($customer['data'])) {
+      $default_bill_to = $customer['data']['billingContact']['address']['number'];
+    } else {
+      $default_bill_to = null;
+    }
+    cache_set($cid, $default_bill_to, 'cache', CACHE_TEMPORARY);
+
+    return $default_bill_to;
+  } else {
+    return $default_bill_to->data;
+  }
+}

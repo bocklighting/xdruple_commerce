@@ -1,0 +1,9 @@
+name = xTuple's Drupal Commerce Custom Fields Module
+description = Add custom xTuple fields to Drupal Commerce checkout
+core = 7.x
+package = xDruple
+
+dependencies[] = xdruple_commerce
+dependencies[] = date_popup
+dependencies[] = field_permissions
+dependencies[] = entityreference_prepopulate
