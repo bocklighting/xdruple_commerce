@@ -1005,6 +1005,8 @@ function xdruple_commerce_commerce_cart_line_item_refresh($line_item, $order_wra
  * Implements hook_commerce_checkout_complete().
  */
 function xdruple_commerce_commerce_checkout_complete($order) {
+  global $user;
+
   // TODO: If this user is not yet a customer, we'll need to insert one.
 
   $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
@@ -1182,15 +1184,20 @@ function xdruple_commerce_commerce_checkout_complete($order) {
     // We have to submit the order as the "admin" user because it has "MaintainSalesOrders" privs.
     // TODO: We may want to handle this on the xTuple side so we don't have to switch the active
     // user like this.
-    unset($_SESSION['access_token']);
-    unset($_SESSION['oauth_user']);
-    $cached_user = $_SESSION['rescued']['user'];
-    $_SESSION['rescued']['user'] = 'admin';
-    $sales_order->save();
+    if (!user_access('administer rescued entities', $user)) {
+      unset($_SESSION['access_token']);
+      unset($_SESSION['oauth_user']);
+      $cached_user = $_SESSION['rescued']['user'];
+      $_SESSION['rescued']['user'] = 'admin';
+      $sales_order->save();
 
-    unset($_SESSION['access_token']);
-    unset($_SESSION['oauth_user']);
-    $_SESSION['rescued']['user'] = $cached_user;
+      unset($_SESSION['access_token']);
+      unset($_SESSION['oauth_user']);
+      $_SESSION['rescued']['user'] = $cached_user;
+    } else {
+      // For admin users, we can save directly with their OAauth token.
+      $sales_order->save();
+    }
 
     // Set the Drupal Commerce order_number to match the auto-number
     // returned from xTuple after saving the order.
@@ -1198,9 +1205,11 @@ function xdruple_commerce_commerce_checkout_complete($order) {
     $order_wrapper->save();
   } catch (Exception $e) {
     // Use try/catch to make sure and reset the user even if there is an error.
-    $_SESSION['rescued']['user'] = $cached_user;
-    unset($_SESSION['access_token']);
-    unset($_SESSION['oauth_user']);
+    if (!user_access('administer rescued entities', $user)) {
+      unset($_SESSION['access_token']);
+      unset($_SESSION['oauth_user']);
+      $_SESSION['rescued']['user'] = $cached_user;
+    }
 
     // TODO: Reset the order status?
     // This is a good question for Commerce Guys.
