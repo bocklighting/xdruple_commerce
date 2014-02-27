@@ -1177,7 +1177,6 @@ function xdruple_fields_install() {
  */
 function _xdruple_fields_install_permissions() {
   $role_names = array(
-    'administrator',
     'rescued_admin',
     'rescued_contact',
     'rescued_personal',
@@ -1185,6 +1184,10 @@ function _xdruple_fields_install_permissions() {
     'rescued_employee'
   );
 
+  // Get the 'administrator' role's rid.
+  if ($admin_role_name = variable_get('user_admin_role')) {
+    $role_names[] = $admin_role_name;
+  }
 
   $fields = array();
   $fields[] = field_info_field('xd_customer');
@@ -1203,16 +1206,21 @@ function _xdruple_fields_install_permissions() {
     $permissions = array();
     // Define this role's permissions.
     // @See: rescued_permission()
+    if ($admin_role_name) {
+      switch ($name) {
+        case $admin_role_name:
+          foreach ($fields as $field) {
+            $permissions[] = 'create ' . $field['field_name'];
+            $permissions[] = 'edit ' . $field['field_name'];
+            $permissions[] = 'edit own ' . $field['field_name'];
+            $permissions[] = 'view ' . $field['field_name'];
+            $permissions[] = 'view own ' . $field['field_name'];
+          }
+          break;
+      }
+    }
+
     switch ($name) {
-      case 'administrator':
-        foreach ($fields as $field) {
-          $permissions[] = 'create ' . $field['field_name'];
-          $permissions[] = 'edit ' . $field['field_name'];
-          $permissions[] = 'edit own ' . $field['field_name'];
-          $permissions[] = 'view ' . $field['field_name'];
-          $permissions[] = 'view own ' . $field['field_name'];
-        }
-        break;
       case 'rescued_admin':
         foreach ($fields as $field) {
           $permissions[] = 'create ' . $field['field_name'];
