@@ -429,7 +429,7 @@ function xdruple_fields_views_default_views() {
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'role';
   $handler->display->display_options['access']['role'] = array(
-    6 => '6',
+    user_role_load_by_name('rescued_personal')->rid => strval(user_role_load_by_name('rescued_personal')->rid),
   );
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
@@ -575,7 +575,7 @@ function xdruple_fields_views_default_views() {
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'role';
   $handler->display->display_options['access']['role'] = array(
-    6 => '6',
+    user_role_load_by_name('rescued_personal')->rid => strval(user_role_load_by_name('rescued_personal')->rid),
   );
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
@@ -683,7 +683,7 @@ function xdruple_fields_views_default_views() {
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'role';
   $handler->display->display_options['access']['role'] = array(
-    6 => '6',
+    user_role_load_by_name('rescued_personal')->rid => strval(user_role_load_by_name('rescued_personal')->rid),
   );
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
