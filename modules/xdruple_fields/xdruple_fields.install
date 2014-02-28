@@ -1165,7 +1165,4 @@ function xdruple_fields_install() {
       field_update_instance($instance);
     }
   }
-
-  // Add the field correct permissions to the roles.
-  _xdruple_fields_install_permissions();
 }
