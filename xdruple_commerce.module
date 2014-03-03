@@ -452,40 +452,61 @@ function xdruple_commerce_field_extra_fields_alter(&$info) {
   }
 
   if (isset($info['xtuple_xdruplecommercecontact'])) {
-    $contact_fields = &$info['xtuple_xdruplecommercecontact']['xtuple_xdruplecommercecontact']['display'];
+    $contact_fields = &$info['xtuple_xdruplecommercecontact']['xtuple_xdruplecommercecontact'];
 
-    $contact_fields['firstName']['weight'] = -54;
-    $contact_fields['lastName']['weight'] = -53;
-    $contact_fields['primaryEmail']['weight'] = -52;
-    $contact_fields['phone']['weight'] = -51;
+    $contact_fields['display']['firstName']['weight'] = -54;
+    $contact_fields['display']['lastName']['weight'] = -53;
+    $contact_fields['display']['primaryEmail']['weight'] = -52;
+    $contact_fields['display']['phone']['weight'] = -51;
+
+    $contact_fields['form']['firstName']['weight'] = -44;
+    $contact_fields['form']['lastName']['weight'] = -43;
+    $contact_fields['form']['primaryEmail']['weight'] = -42;
+    $contact_fields['form']['phone']['weight'] = -41;
   }
 
   if (isset($info['xtuple_xdruplecommerceaddress'])) {
-    $address_fields = &$info['xtuple_xdruplecommerceaddress']['xtuple_xdruplecommerceaddress']['display'];
+    $address_fields = &$info['xtuple_xdruplecommerceaddress']['xtuple_xdruplecommerceaddress'];
 
-    $address_fields['line1']['weight'] = -57;
-    $address_fields['line2']['weight'] = -56;
-    $address_fields['line3']['weight'] = -55;
-    $address_fields['city']['weight'] = -54;
-    $address_fields['state']['weight'] = -53;
-    $address_fields['postalCode']['weight'] = -52;
-    $address_fields['country']['weight'] = -51;
+    $address_fields['display']['line1']['weight'] = -57;
+    $address_fields['display']['line2']['weight'] = -56;
+    $address_fields['display']['line3']['weight'] = -55;
+    $address_fields['display']['city']['weight'] = -54;
+    $address_fields['display']['state']['weight'] = -53;
+    $address_fields['display']['postalCode']['weight'] = -52;
+    $address_fields['display']['country']['weight'] = -51;
+
+    $address_fields['form']['country']['weight'] = -47;
+    $address_fields['form']['line1']['weight'] = -46;
+    $address_fields['form']['line2']['weight'] = -45;
+    $address_fields['form']['line3']['weight'] = -44;
+    $address_fields['form']['city']['weight'] = -43;
+    $address_fields['form']['state']['weight'] = -42;
+    $address_fields['form']['postalCode']['weight'] = -41;
   }
 
   if (isset($info['xtuple_xdruplecommerceshipto'])) {
-    $shipto_fields = &$info['xtuple_xdruplecommerceshipto']['xtuple_xdruplecommerceshipto']['display'];
+    $shipto_fields = &$info['xtuple_xdruplecommerceshipto']['xtuple_xdruplecommerceshipto'];
 
-    $shipto_fields['number']['weight'] = -54;
-    $shipto_fields['name']['weight'] = -53;
-    $shipto_fields['isDefault']['weight'] = -52;
-    $shipto_fields['customer']['weight'] = -51;
+    $shipto_fields['display']['number']['weight'] = -54;
+    $shipto_fields['display']['name']['weight'] = -53;
+    $shipto_fields['display']['isDefault']['weight'] = -52;
+    $shipto_fields['display']['customer']['weight'] = -51;
+
+    $shipto_fields['form']['number']['weight'] = -44;
+    $shipto_fields['form']['name']['weight'] = -43;
+    $shipto_fields['form']['isDefault']['weight'] = -42;
+    $shipto_fields['form']['customer']['weight'] = -41;
   }
 
   if (isset($info['xtuple_xdruplecommercecustomer'])) {
-    $shipto_fields = &$info['xtuple_xdruplecommercecustomer']['xtuple_xdruplecommercecustomer']['display'];
+    $shipto_fields = &$info['xtuple_xdruplecommercecustomer']['xtuple_xdruplecommercecustomer'];
 
-    $shipto_fields['number']['weight'] = -52;
-    $shipto_fields['name']['weight'] = -51;
+    $shipto_fields['display']['number']['weight'] = -52;
+    $shipto_fields['display']['name']['weight'] = -51;
+
+    $shipto_fields['form']['number']['weight'] = -42;
+    $shipto_fields['form']['name']['weight'] = -41;
   }
 
 //   if (isset($info['xtuple_xdruplecommercecustomerprofile'],
@@ -1005,6 +1026,8 @@ function xdruple_commerce_commerce_cart_line_item_refresh($line_item, $order_wra
  * Implements hook_commerce_checkout_complete().
  */
 function xdruple_commerce_commerce_checkout_complete($order) {
+  global $user;
+
   // TODO: If this user is not yet a customer, we'll need to insert one.
 
   $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
@@ -1182,15 +1205,20 @@ function xdruple_commerce_commerce_checkout_complete($order) {
     // We have to submit the order as the "admin" user because it has "MaintainSalesOrders" privs.
     // TODO: We may want to handle this on the xTuple side so we don't have to switch the active
     // user like this.
-    unset($_SESSION['access_token']);
-    unset($_SESSION['oauth_user']);
-    $cached_user = $_SESSION['rescued']['user'];
-    $_SESSION['rescued']['user'] = 'admin';
-    $sales_order->save();
+    if (!user_access('administer rescued entities', $user)) {
+      unset($_SESSION['access_token']);
+      unset($_SESSION['oauth_user']);
+      $cached_user = $_SESSION['rescued']['user'];
+      $_SESSION['rescued']['user'] = 'admin';
+      $sales_order->save();
 
-    unset($_SESSION['access_token']);
-    unset($_SESSION['oauth_user']);
-    $_SESSION['rescued']['user'] = $cached_user;
+      unset($_SESSION['access_token']);
+      unset($_SESSION['oauth_user']);
+      $_SESSION['rescued']['user'] = $cached_user;
+    } else {
+      // For admin users, we can save directly with their OAauth token.
+      $sales_order->save();
+    }
 
     // Set the Drupal Commerce order_number to match the auto-number
     // returned from xTuple after saving the order.
@@ -1198,9 +1226,11 @@ function xdruple_commerce_commerce_checkout_complete($order) {
     $order_wrapper->save();
   } catch (Exception $e) {
     // Use try/catch to make sure and reset the user even if there is an error.
-    $_SESSION['rescued']['user'] = $cached_user;
-    unset($_SESSION['access_token']);
-    unset($_SESSION['oauth_user']);
+    if (!user_access('administer rescued entities', $user)) {
+      unset($_SESSION['access_token']);
+      unset($_SESSION['oauth_user']);
+      $_SESSION['rescued']['user'] = $cached_user;
+    }
 
     // TODO: Reset the order status?
     // This is a good question for Commerce Guys.

@@ -11,6 +11,69 @@ function xdruple_fields_views_api() {
 }
 
 /**
+ * Implements hook_user_access_extend().
+ *
+ * Determine what type of xTuple user this is and grant them the correct
+ * field permissions.
+ *
+ * @param $user_id Drupal uid of the user.
+ *
+ * @return array of permissions names for the user.
+ */
+function xdruple_fields_user_access_extend($user_id) {
+  $permissions = array();
+
+  // Determine the xTuple user type.
+  if (isset($_SESSION['rescued']['user_type'])) {
+    // Define fields that need special permissions to access them.
+    $fields = array(
+      'xd_customer',
+      'xd_bill_to_contact',
+      'xd_bill_to_address',
+      'xd_ship_to',
+      'xd_ship_to_contact',
+      'xd_ship_to_address',
+    );
+
+    // Assign field permissions based on the user_type.
+    switch ($_SESSION['rescued']['user_type']) {
+      case 'rescued_contact':
+        foreach ($fields as $field) {
+          $permissions[] = 'view own ' . $field;
+        }
+
+        break;
+      case 'rescued_personal':
+        foreach ($fields as $field) {
+          $permissions[] = 'create ' . $field;
+          $permissions[] = 'view own ' . $field;
+        }
+
+        break;
+      case 'rescued_employee':
+        foreach ($fields as $field) {
+          $permissions[] = 'create ' . $field;
+          $permissions[] = 'edit ' . $field;
+          $permissions[] = 'edit own ' . $field;
+          $permissions[] = 'view ' . $field;
+          $permissions[] = 'view own ' . $field;
+        }
+
+        break;
+      case 'rescued_limited':
+        foreach ($fields as $field) {
+          $permissions[] = 'create ' . $field;
+          $permissions[] = 'view own ' . $field;
+        }
+
+        break;
+    }
+  }
+
+  return $permissions;
+}
+
+/**
  * Implements hook_form_alter()
  *
  * Set Customer default on checkout forms.
