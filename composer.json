@@ -9,8 +9,5 @@
       "email": "ben@xtuple.com",
       "role": "Software Engineer"
     }
-  ],
-  "require": {
-    "modules/cdd/extensions": "dev-master"
-  }
+  ]
 }
