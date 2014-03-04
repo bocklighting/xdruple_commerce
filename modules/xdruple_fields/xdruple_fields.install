@@ -87,7 +87,7 @@ function xdruple_fields_install() {
         'field_name' => 'xd_customer',
         'entity_type' => 'commerce_customer_profile',
         'bundle' => 'billing',
-        'label' => 'Bill To Customer',
+        'label' => 'Customer',
         'required' => true,
         'widget' => array(
           'weight' => -30,
@@ -646,7 +646,7 @@ function xdruple_fields_install() {
 
   // This field is created in rescued_field_extra_fields(), but not fully
   // configured to use IEF and EFQ.
-  if ($field = field_info_field('xd_xdruplecommercecontactaddress')) {
+  if ($field = field_info_field('erp_xdruplecommercecontactaddress')) {
     $field['settings'] = array(
       'target_type' => 'xtuple_xdruplecommerceaddress',
       'handler' => 'efq_views',
@@ -672,7 +672,7 @@ function xdruple_fields_install() {
     );
     field_update_field($field);
 
-    $instance = field_info_instance('xtuple_xdruplecommercecontact', 'xd_xdruplecommercecontactaddress', 'xtuple_xdruplecommercecontact');
+    $instance = field_info_instance('xtuple_xdruplecommercecontact', 'erp_xdruplecommercecontactaddress', 'xtuple_xdruplecommercecontact');
     if ($instance) {
       $instance['label'] = 'Contact Address';
       $instance['widget'] = array(
@@ -723,7 +723,7 @@ function xdruple_fields_install() {
 
   // This field is created in rescued_field_extra_fields(), but not fully
   // configured to use IEF and EFQ.
-  if ($field = field_info_field('xd_xdruplecommerceshiptocontact')) {
+  if ($field = field_info_field('erp_xdruplecommerceshiptocontact')) {
     $field['settings'] = array(
       'target_type' => 'xtuple_xdruplecommercecontact',
       'handler' => 'efq_views',
@@ -749,7 +749,7 @@ function xdruple_fields_install() {
     );
     field_update_field($field);
 
-    $instance = field_info_instance('xtuple_xdruplecommerceshipto', 'xd_xdruplecommerceshiptocontact', 'xtuple_xdruplecommerceshipto');
+    $instance = field_info_instance('xtuple_xdruplecommerceshipto', 'erp_xdruplecommerceshiptocontact', 'xtuple_xdruplecommerceshipto');
     if ($instance) {
       $instance['label'] = 'Ship To Contact';
       $instance['widget'] = array(
@@ -800,7 +800,7 @@ function xdruple_fields_install() {
 
   // This field is created in rescued_field_extra_fields(), but not fully
   // configured to use IEF and EFQ.
-  if ($field = field_info_field('xd_xdruplecommerceshiptoaddress')) {
+  if ($field = field_info_field('erp_xdruplecommerceshiptoaddress')) {
     $field['settings'] = array(
       'target_type' => 'xtuple_xdruplecommerceaddress',
       'handler' => 'efq_views',
@@ -826,7 +826,7 @@ function xdruple_fields_install() {
     );
     field_update_field($field);
 
-    $instance = field_info_instance('xtuple_xdruplecommerceshipto', 'xd_xdruplecommerceshiptoaddress', 'xtuple_xdruplecommerceshipto');
+    $instance = field_info_instance('xtuple_xdruplecommerceshipto', 'erp_xdruplecommerceshiptoaddress', 'xtuple_xdruplecommerceshipto');
     if ($instance) {
       $instance['label'] = 'Ship To Address';
       $instance['widget'] = array(
@@ -877,7 +877,7 @@ function xdruple_fields_install() {
 
   // This field is created in rescued_field_extra_fields(), but not fully
   // configured to use IEF and EFQ.
-  if ($field = field_info_field('xd_xdruplecommercecustomershipto')) {
+  if ($field = field_info_field('erp_xdruplecommercecustomershipto')) {
     $field['settings'] = array(
       'target_type' => 'xtuple_xdruplecommerceshipto',
       'handler' => 'efq_views',
@@ -903,7 +903,7 @@ function xdruple_fields_install() {
     );
     field_update_field($field);
 
-    $instance = field_info_instance('xtuple_xdruplecommercecustomer', 'xd_xdruplecommercecustomershipto', 'xtuple_xdruplecommercecustomer');
+    $instance = field_info_instance('xtuple_xdruplecommercecustomer', 'erp_xdruplecommercecustomershipto', 'xtuple_xdruplecommercecustomer');
     if ($instance) {
       $instance['label'] = 'Customer Ship Tos';
       $instance['widget'] = array(
@@ -954,7 +954,7 @@ function xdruple_fields_install() {
 
   // This field is created in rescued_field_extra_fields(), but not fully
   // configured to use IEF and EFQ.
-  if ($field = field_info_field('xd_xdruplecommercecustomerbillingcontact')) {
+  if ($field = field_info_field('erp_xdruplecommercecustomerbillingcontact')) {
     $field['settings'] = array(
       'target_type' => 'xtuple_xdruplecommercecontact',
       'handler' => 'efq_views',
@@ -980,7 +980,7 @@ function xdruple_fields_install() {
     );
     field_update_field($field);
 
-    $instance = field_info_instance('xtuple_xdruplecommercecustomer', 'xd_xdruplecommercecustomerbillingcontact', 'xtuple_xdruplecommercecustomer');
+    $instance = field_info_instance('xtuple_xdruplecommercecustomer', 'erp_xdruplecommercecustomerbillingcontact', 'xtuple_xdruplecommercecustomer');
     if ($instance) {
       $instance['label'] = 'Customer Bill To Contact';
       $instance['widget'] = array(
@@ -1031,7 +1031,7 @@ function xdruple_fields_install() {
 
   // This field is created in rescued_field_extra_fields(), but not fully
   // configured to use IEF and EFQ.
-  if ($field = field_info_field('xd_xdruplecommercecustomercorrespondencecontact')) {
+  if ($field = field_info_field('erp_xdruplecommercecustomercorrespondencecontact')) {
     $field['settings'] = array(
       'target_type' => 'xtuple_xdruplecommercecontact',
       'handler' => 'efq_views',
@@ -1057,7 +1057,7 @@ function xdruple_fields_install() {
     );
     field_update_field($field);
 
-    $instance = field_info_instance('xtuple_xdruplecommercecustomer', 'xd_xdruplecommercecustomercorrespondencecontact', 'xtuple_xdruplecommercecustomer');
+    $instance = field_info_instance('xtuple_xdruplecommercecustomer', 'erp_xdruplecommercecustomercorrespondencecontact', 'xtuple_xdruplecommercecustomer');
     if ($instance) {
       $instance['label'] = 'Customer Correspondence Contact';
       $instance['widget'] = array(
@@ -1108,7 +1108,7 @@ function xdruple_fields_install() {
 
   // This field is created in rescued_field_extra_fields(), but not fully
   // configured to use IEF and EFQ.
-  if ($field = field_info_field('xd_xdrupleusercontactcontact')) {
+  if ($field = field_info_field('erp_xdrupleusercontactcontact')) {
     $field['settings'] = array(
       'target_type' => 'xtuple_xdruplecommercecontact',
       'handler' => 'base',
@@ -1117,7 +1117,7 @@ function xdruple_fields_install() {
     );
     field_update_field($field);
 
-    $instance = field_info_instance('xtuple_xdrupleusercontact', 'xd_xdrupleusercontactcontact', 'xtuple_xdrupleusercontact');
+    $instance = field_info_instance('xtuple_xdrupleusercontact', 'erp_xdrupleusercontactcontact', 'xtuple_xdrupleusercontact');
     if ($instance) {
       $instance['label'] = 'Associated Contact';
       $instance['widget'] = array(
