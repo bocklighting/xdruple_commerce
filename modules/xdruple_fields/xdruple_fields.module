@@ -251,7 +251,7 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
       );
       $form_shipping['ship_to_address_wrapper'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Ship To Contact'),
+        '#title' => t('Ship To Address'),
         'line1' => array(
           '#type' => 'textfield',
           '#title' => t('Line1'),
