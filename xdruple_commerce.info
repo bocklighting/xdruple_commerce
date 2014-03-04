@@ -5,6 +5,7 @@ package = xDruple
 
 dependencies[] = entity_operations
 dependencies[] = rescued
+dependencies[] = xdruple
 dependencies[] = commerce
 dependencies[] = commerce_line_item
 dependencies[] = commerce_price
