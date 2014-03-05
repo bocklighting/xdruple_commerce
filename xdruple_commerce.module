@@ -701,8 +701,8 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
 
   // Modify the user registration form to work with xTuple.
   if ($form_id === 'user_register_form' || $form_id === 'user_profile_form') {
-    if (isset($form['xd_contact_association'][LANGUAGE_NONE]['form']['xd_xdrupleusercontactcontact'][LANGUAGE_NONE]['form']['primaryEmail'])) {
-      $contact_form = &$form['xd_contact_association'][LANGUAGE_NONE]['form']['xd_xdrupleusercontactcontact'][LANGUAGE_NONE]['form'];
+    if (isset($form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdrupleusercontactcontact'][LANGUAGE_NONE]['form']['primaryEmail'])) {
+      $contact_form = &$form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdrupleusercontactcontact'][LANGUAGE_NONE]['form'];
 
       // Make the Contact's first and last name required.
       $contact_form['firstName']['#required'] = true;
@@ -720,7 +720,7 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
       array_unshift($contact_form['#element_validate'], 'xdruple_commerce_user_reg_form_validate');
 
       // Hide the IEF entity_id select list field on the Address.
-      $addr_form = &$contact_form['xd_xdruplecommercecontactaddress'][LANGUAGE_NONE]['form'];
+      $addr_form = &$contact_form['erp_xdruplecommercecontactaddress'][LANGUAGE_NONE]['form'];
       $addr_form['entity_id']['#type'] = 'hidden';
       $addr_form['entity_id']['#attributes']['disabled'] = TRUE;
     }
