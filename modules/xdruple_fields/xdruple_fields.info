@@ -5,7 +5,6 @@ package = xDruple
 
 dependencies[] = rescued
 dependencies[] = xdruple
-dependencies[] = xdruple_commerce
 dependencies[] = date_popup
 dependencies[] = field_permissions
 dependencies[] = entityreference_prepopulate
