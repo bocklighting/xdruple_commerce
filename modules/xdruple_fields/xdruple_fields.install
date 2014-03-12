@@ -8,6 +8,10 @@
  * Implements hook_install().
  */
 function xdruple_fields_install() {
+  // Call rescued_field_extra_fields() so all erp fields get created.
+  // Then we set them up below.
+  rescued_field_extra_fields();
+
   // Remove default "Address" fields Drupal Commerce creates.
   $billing_address = field_info_instance('commerce_customer_profile', 'commerce_customer_address', 'billing');
   if (isset($billing_address)) {
