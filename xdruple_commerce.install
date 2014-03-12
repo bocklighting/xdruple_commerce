@@ -1,0 +1,9 @@
+<?php
+
+/**
+* Implements hook_enable().
+*/
+function xdruple_commerce_enable() {
+  // Clear caches so xdruple_commerce module can override commerce module.
+  cache_clear_all();
+}
