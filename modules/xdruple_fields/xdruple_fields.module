@@ -218,7 +218,7 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
       unset($form_state['input']['customer_profile_shipping']['xd_ship_to_address']);
 
       // Get and display as read-only the Contact and Address from the selected ship to.
-      $shipto = rescued_api_resource_load('xtuple', 'XdrupleCommerceShipto', $shipto_id, 'uuid');
+      $shipto = entity_load_single('xtuple_xdruplecommerceshipto', $shipto_id);
 
       // Show the user the selected Ship To's Contact and Address.
       $form_shipping['ship_to_contact_wrapper'] = array(
@@ -227,25 +227,25 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
         'first_name' => array(
           '#type' => 'textfield',
           '#title' => t('First Name'),
-          '#default_value' => isset($shipto['data']['contact']['firstName']) ? $shipto['data']['contact']['firstName'] : '',
+          '#default_value' => isset($shipto->contact['firstName']) ? $shipto->contact['firstName'] : '',
           '#disabled' => true,
         ),
         'last_name' => array(
           '#type' => 'textfield',
           '#title' => t('Last Name'),
-          '#default_value' => isset($shipto['data']['contact']['lastName']) ? $shipto['data']['contact']['lastName'] : '',
+          '#default_value' => isset($shipto->contact['lastName']) ? $shipto->contact['lastName'] : '',
           '#disabled' => true,
         ),
         'email' => array(
           '#type' => 'textfield',
           '#title' => t('Primary Email'),
-          '#default_value' => isset($shipto['data']['contact']['primaryEmail']) ? $shipto['data']['contact']['primaryEmail'] : '',
+          '#default_value' => isset($shipto->contact['primaryEmail']) ? $shipto->contact['primaryEmail'] : '',
           '#disabled' => true,
         ),
         'phone' => array(
           '#type' => 'textfield',
           '#title' => t('Phone'),
-          '#default_value' => isset($shipto['data']['contact']['phone']) ? $shipto['data']['contact']['phone'] : '',
+          '#default_value' => isset($shipto->contact['phone']) ? $shipto->contact['phone'] : '',
           '#disabled' => true,
         ),
       );
@@ -255,26 +255,26 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
         'line1' => array(
           '#type' => 'textfield',
           '#title' => t('Line1'),
-          '#default_value' => isset($shipto['data']['address']['line1']) ? $shipto['data']['address']['line1'] : '',
+          '#default_value' => isset($shipto->address['line1']) ? $shipto->address['line1'] : '',
           '#disabled' => true,
         ),
         'line2' => array(
           '#type' => 'textfield',
           '#title' => t('Line2'),
-          '#default_value' => isset($shipto['data']['address']['line2']) ? $shipto['data']['address']['line2'] : '',
+          '#default_value' => isset($shipto->address['line2']) ? $shipto->address['line2'] : '',
           '#disabled' => true,
         ),
         'city' => array(
           '#type' => 'textfield',
           '#title' => t('City'),
-          '#default_value' => isset($shipto['data']['address']['city']) ? $shipto['data']['address']['city'] : '',
+          '#default_value' => isset($shipto->address['city']) ? $shipto->address['city'] : '',
           '#disabled' => true,
         ),
         'state' => array(
           '#type' => 'select',
           '#title' => t('State'),
-          '#options' => array(isset($shipto['data']['address']['state']) ? $shipto['data']['address']['state'] : ''),
-          '#default_value' => isset($shipto['data']['address']['state']) ? $shipto['data']['address']['state'] : '',
+          '#options' => array(isset($shipto->address['state']) ? $shipto->address['state'] : ''),
+          '#default_value' => isset($shipto->address['state']) ? $shipto->address['state'] : '',
           '#disabled' => true,
         ),
       );
