@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/pages/user_preferences.inc';
+
 /**
  * Implements hook_views_api().
  */
@@ -8,6 +10,24 @@ function xdruple_fields_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'xdruple_fields') . '/includes/views',
   );
+}
+
+/**
+ * Implements hook_menu()
+ */
+function xdruple_menu() {
+  $items = array();
+
+  $items['user/%user/preferences'] = array(
+    'title'            => 'Preferences',
+    'page callback'    => 'xdruple_fields_user_preferences_page',
+    'page arguments'   => array(1),
+    'access callback'  => 'xdruple_fields_user_preferences_access',
+    'access arguments' => array(1),
+    'type'             => MENU_LOCAL_TASK,
+  );
+
+  return $items;
 }
 
 /**
