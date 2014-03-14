@@ -67,21 +67,67 @@ function xdruple_commerce_entity_operation_info_alter(&$operation_info) {
 /**
  * Implements hook_rescued_operation_entityform_alter().
  */
-function xdruple_commerce_rescued_operation_entityform_alter (&$form, &$form_state, $context) {
+function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_state, $context) {
   $form_id = $form_state['build_info']['form_id'];
+
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdstdorditem') {
+    // Default this form to the customer and ship to in the user's session.
+    if (isset($_SESSION['rescued']['customer'])) {
+      $customer = $_SESSION['rescued']['customer'];
+      $form['customer']['#default_value'] = $customer;
+      $form['customer']['#options'] = array($customer => $customer);
+    } else {
+      $customer = null;
+    }
+    if (isset($_SESSION['rescued']['ship_to'])) {
+      $form['shipTo']['#default_value'] = $_SESSION['rescued']['ship_to'];
+      $form['shipTo']['#options'] = xdruple_fields_get_ship_to_list($customer);
+    }
+  }
 
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdrupleusercontact') {
     // Modify this entity form to hide some properties/fields.
-    unset ($form['uuid']);
-    unset ($form['uid']);
+    if (!user_access('administer users')) {
+      $form['create_new_customer']['#type'] = 'hidden';
+      $form['create_new_customer']['#attributes']['disabled'] = TRUE;
+      $form['create_new_customer']['#default_value'] = TRUE;
+
+      $form['create_xtuple_user_association']['#type'] = 'hidden';
+      $form['create_xtuple_user_association']['#attributes']['disabled'] = TRUE;
+      $form['create_xtuple_user_association']['#default_value'] = TRUE;
+    } else {
+      $form['create_new_customer']['#title'] = 'Create new xTuple Customer';
+      $form['create_new_customer']['#description'] = 'Check this box to create an xTuple Customer for this user. If this is not checked, this user may not be able to place orders.';
+      $form['create_new_customer']['#default_value'] = !isset($context['entity']->is_new) ? $context['entity']->create_new_customer : TRUE;
+
+      if (isset($context['entity']->is_new) && $context['entity']->is_new) {
+        $context['entity']->create_new_customer = TRUE;
+
+        if (isset($form_state['input']['xd_contact_association'][LANGUAGE_NONE]['form'])) {
+          $form_state['input']['xd_contact_association'][LANGUAGE_NONE]['form']['create_new_customer'] =  true;
+        }
+      }
+
+      if (!isset($context['entity']->is_new) && $context['entity']->create_new_customer) {
+        // Once create_new_customer is set, you can't unset it.
+        $form['create_new_customer']['#type'] = 'hidden';
+        $form['create_new_customer']['#attributes']['disabled'] = TRUE;
+      }
+    }
+    $form['create_new_customer']['#element_validate'] = array('xdruple_commerce_user_reg_form_validate');
 
     $form['xdruple_site']['#type'] = 'hidden';
-    $form['xdruple_site']['#default_value'] = 'b2c';
     $form['xdruple_site']['#attributes']['disabled'] = TRUE;
+    $form['xdruple_site']['#options'][''] = ' - None - ';
+    // We add this below in xdruple_commerce_form_alter().
+    $form['xdruple_site']['#required'] = FALSE;
+    $form['xdruple_site']['#element_validate'] = array('xdruple_commerce_user_reg_form_validate');
 
-    $form['create_new_customer']['#type'] = 'hidden';
-    $form['create_new_customer']['#default_value'] = TRUE;
-    $form['create_new_customer']['#attributes']['disabled'] = TRUE;
+    $form['drupalUserUuid']['#type'] = 'hidden';
+    $form['drupalUserUuid']['#attributes']['disabled'] = TRUE;
+    $form['drupalUserUuid']['#default_value'] = isset($context['entity']->drupalUserUuid) ? $context['entity']->drupalUserUuid : null;
+
+    unset ($form['uuid']);
   }
 
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommercecontact') {
@@ -242,6 +288,31 @@ function xdruple_commerce_rescued_operation_entityform_alter (&$form, &$form_sta
     $form['number']['#weight'] = -42;
     $form['name']['#weight'] = -41;
   }
+}
+
+function xdruple_commerce_user_association_callback(&$form, &$form_state) {
+  $create_association = false;
+  if (isset($form_state['values']['create_xtuple_user_association'])) {
+    $create_association = $form_state['values']['create_xtuple_user_association'];
+  }
+
+  $ief_key = $form['xd_contact_association'][LANGUAGE_NONE]['#ief_id'];
+
+  if (!$create_association) {
+    foreach ($form_state['inline_entity_form'] as $ief_id => $ief) {
+      $length = strlen($ief_key);
+      if (substr($ief_id, 0, $length) === $ief_key) {
+        unset($form_state['inline_entity_form'][$ief_id]);
+      }
+    }
+
+    unset($form['xd_contact_association'][LANGUAGE_NONE]);
+    unset($form_state['complete form']['xd_contact_association'][LANGUAGE_NONE]);
+    unset($form_state['input']['xd_contact_association']);
+    unset($form_state['values']['xd_contact_association']);
+  }
+
+  return $form['xd_contact_association'];
 }
 
 /**
@@ -701,28 +772,55 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
 
   // Modify the user registration form to work with xTuple.
   if ($form_id === 'user_register_form' || $form_id === 'user_profile_form') {
+    $wrapper_id = 'xd_contact_association_wrapper';
+    $form['xd_contact_association']['#wrapper_id'] = $wrapper_id;
+    $form['xd_contact_association']['#prefix'] = '<div id="' . $wrapper_id . '">';
+    $form['xd_contact_association']['#suffix'] = '</div>';
+
+    $form['create_xtuple_user_association'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Create xTuple User Association',
+      '#description' => 'Check this box to create an xTuple Contact Association for this user. If this is not checked, this user will not be able to place orders.',
+      '#default_value' => TRUE,
+      '#required' => FALSE,
+      '#weight' => 6,
+      '#ajax' => array(
+        'callback' => 'xdruple_commerce_user_association_callback',
+        'wrapper' => $wrapper_id,
+      ),
+      '#limit_validation_errors' => array(),
+    );
+
+    if (!user_access('administer users')) {
+      $form['create_xtuple_user_association']['#type'] = 'hidden';
+      $form['create_xtuple_user_association']['#attributes']['disabled'] = TRUE;
+      $form['create_xtuple_user_association']['#default_value'] = TRUE;
+    }
+
     if (isset($form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdrupleusercontactcontact'][LANGUAGE_NONE]['form']['primaryEmail'])) {
       $contact_form = &$form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdrupleusercontactcontact'][LANGUAGE_NONE]['form'];
+      $addr_form = &$contact_form['erp_xdruplecommercecontactaddress'][LANGUAGE_NONE]['form'];
+
+      if (!user_access('administer users')) {
+        // Hide the IEF entity_id select list field on the Contact.
+        $contact_form['entity_id']['#type'] = 'hidden';
+        $contact_form['entity_id']['#attributes']['disabled'] = TRUE;
+
+        // Hide the IEF entity_id select list field on the Address.
+        $addr_form['entity_id']['#type'] = 'hidden';
+        $addr_form['entity_id']['#attributes']['disabled'] = TRUE;
+      }
 
       // Make the Contact's first and last name required.
       $contact_form['firstName']['#required'] = true;
       $contact_form['lastName']['#required'] = true;
 
-      // Hide the IEF entity_id select list field on the Contact.
-      $contact_form['entity_id']['#type'] = 'hidden';
-      $contact_form['entity_id']['#attributes']['disabled'] = TRUE;
+      // We want our validate function to be first so it adds the user's email to the contact before IEF does it's thing.
+      array_unshift($contact_form['#element_validate'], 'xdruple_commerce_user_reg_form_validate');
 
       // Hide the primaryEmail field since we get this from the Drupal User's mail field.
       $contact_form['primaryEmail']['#type'] = 'hidden';
       $contact_form['primaryEmail']['#attributes']['disabled'] = TRUE;
-
-      // We want our validate function to be first so it adds the user's email to the contact before IEF does it's thing.
-      array_unshift($contact_form['#element_validate'], 'xdruple_commerce_user_reg_form_validate');
-
-      // Hide the IEF entity_id select list field on the Address.
-      $addr_form = &$contact_form['erp_xdruplecommercecontactaddress'][LANGUAGE_NONE]['form'];
-      $addr_form['entity_id']['#type'] = 'hidden';
-      $addr_form['entity_id']['#attributes']['disabled'] = TRUE;
     }
   }
 }
@@ -733,13 +831,143 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
  * the user.
  */
 function xdruple_commerce_user_reg_form_validate(&$element_form, &$form_state, $complete_form) {
+  // Figure out if create_xtuple_user_association flag is set.
+  $create_association = false;
+  if (isset($form_state['values']['create_xtuple_user_association'])) {
+    $create_association = $form_state['values']['create_xtuple_user_association'];
+  }
+
+  if (isset($complete_form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdrupleusercontactcontact'][LANGUAGE_NONE]['form'])) {
+    // Clear out the 'xd_contact_association' part of the form so it's not used.
+    if (empty($create_association)) {
+      $contact_form = &$complete_form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdrupleusercontactcontact'][LANGUAGE_NONE]['form'];
+      $addr_form = &$contact_form['erp_xdruplecommercecontactaddress'][LANGUAGE_NONE]['form'];
+
+      // Make the Contact's first and last name not required because we're removed it from the form.
+      $contact_form['firstName']['#required'] = false;
+      $contact_form['lastName']['#required'] = false;
+
+      // Make the Address fields not required because we're removed it from the form.
+      // Recurse through all children.
+      foreach (element_children($addr_form) as $key) {
+        if (isset($addr_form[$key]) && $addr_form[$key]) {
+          $addr_form[$key]['#required'] = false;
+        }
+      }
+
+      if ($form_state['triggering_element']['#type'] === 'submit') {
+        unset($form_state['complete form']['xd_contact_association']);
+        unset($form_state['input']['xd_contact_association']);
+        unset($form_state['values']['xd_contact_association']);
+      }
+    }
+  }
+
+  // If this is create customer, check the email agianst customer names.
+  if (isset($element_form['#id']) && $element_form['#id'] === 'edit-xd-contact-association-und-form-create-new-customer') {
+    if (!empty($create_association)) {
+      // On main form submit.
+      if ($form_state['triggering_element']['#type'] === 'submit') {
+        $create_customer_parents = $element_form['#parents'];
+        $create_customer = drupal_array_get_nested_value($form_state['values'], $create_customer_parents);
+
+        if (isset($complete_form['xd_contact_association'][LANGUAGE_NONE]['form']['#entity'])) {
+          $association_entity = $complete_form['xd_contact_association'][LANGUAGE_NONE]['form']['#entity'];
+        } else {
+          $association_entity = null;
+        }
+
+        if (!empty($create_customer) && isset($association_entity->is_new) &&
+          $association_entity->is_new) {
+
+          // If this is a new create customer that wasn't checked before on a new entity.
+          $check_existing_customer = true;
+        } elseif (!empty($create_customer) &&
+          isset($association_entity->originalEntity['create_new_customer']) &&
+          $create_customer != $association_entity->originalEntity['create_new_customer']) {
+
+          // If this is an old entity and it wasn't checked before.
+          $check_existing_customer = true;
+        } else {
+          $check_existing_customer = false;
+        }
+
+        if ($check_existing_customer) {
+          // Search xTuple for existing customer with email as their name.
+          $conditions = array(
+            'query' => array(
+              'number' => array(
+                'EQUALS' => strtoupper($form_state['values']['mail']),
+              ),
+            ),
+          );
+          $existing_customers = entity_load('xtuple_xdruplecommercecustomer', FALSE, $conditions);
+
+          if (count($existing_customers) > 0) {
+            // Set form error.
+            $message = 'The Email address: %email is already in use. Cannot create a Customer with this email address. Please use a different Email address, !login_url or !reset_url.';
+            $message = t($message, array(
+                '%email' => $form_state['values']['mail'],
+                '!login_url' => l(t('Log In'), "user"),
+                '!reset_url' => l(t('Request a new password'), "user/password"),
+              )
+            );
+            form_set_error('mail', $message);
+          }
+        }
+      }
+    }
+  }
+
+  if (isset($element_form['#id']) && $element_form['#id'] === 'edit-xd-contact-association-und-form-xdruple-site') {
+    if (!empty($create_association)) {
+      $site_parents = $element_form['#parents'];
+
+      // Set the site to the default before we save.
+      drupal_array_set_nested_value($form_state['values'], $site_parents, 'b2c');
+    }
+  }
+
   if (isset($element_form['#entity_type'], $element_form['#parents']) && $element_form['#entity_type'] = 'xtuple_xdruplecommercecontact') {
-    if (isset($form_state['values']['mail'])) {
+    if (!empty($create_association) && isset($form_state['values']['mail'])) {
       $cntct_email_parents = $element_form['#parents'];
       $cntct_email_parents[] = 'primaryEmail';
 
-      // Set the contact's primaryEmail to the Drupal user's email/username before we save.
-      drupal_array_set_nested_value($form_state['values'], $cntct_email_parents, $form_state['values']['mail']);
+      $email_set = drupal_array_get_nested_value($form_state['values'], $cntct_email_parents);
+
+      // On main form submit.
+      if ($form_state['triggering_element']['#type'] === 'submit') {
+        // When this is a new contact, not "Use existing Contact".
+        if (isset($element_form['#entity']->is_new) && $element_form['#entity']->is_new) {
+          // Check the Drupal email address against contacts.
+          $conditions = array(
+            'query' => array(
+              'primaryEmail' => array(
+                'EQUALS' => $form_state['values']['mail'],
+              ),
+            ),
+          );
+          $existing_contacts = entity_load('xtuple_xdruplecommercecontact', FALSE, $conditions);
+
+          if (count($existing_contacts) > 0) {
+            // Set form error.
+            $message = 'The Email address: %email is already in use. Please use a different Email address, !login_url or !reset_url.';
+            $message = t($message, array(
+                '%email' => $form_state['values']['mail'],
+                '!login_url' => l(t('Log In'), "user"),
+                '!reset_url' => l(t('Request a new password'), "user/password"),
+              )
+            );
+            form_set_error('mail', $message);
+          }
+        }
+      }
+
+      // Only set the email if this contact doesn't have one.
+      if (empty($email_set)) {
+        // Set the contact's primaryEmail to the Drupal user's email/username before we save.
+        drupal_array_set_nested_value($form_state['values'], $cntct_email_parents, $form_state['values']['mail']);
+      }
 
       // Unset the IEF entity so it gets reprocessed if there's a validation error.
       $form_state['inline_entity_form'][$element_form['#ief_id']]['entities'] = array();
@@ -819,7 +1047,29 @@ function xdruple_commerce_user_insert(&$edit, $account, $category) {
 
     // Update the uid now that one exists.
     $user_contact = entity_load_single($entity_type, $user_contact_key);
-    $user_contact->uid = $edit['uid'];
+    $user_contact->drupalUserUuid = $account->uuid;
+
+    // Save it back to xTuple.
+    entity_save($entity_type, $user_contact);
+  }
+}
+
+/**
+ * Implements hook_user_update().
+ */
+function xdruple_commerce_user_update(&$edit, $account, $category) {
+  $field_name = 'xd_contact_association';
+
+  // Get the XdrupleUserContact uuid from this user's Entity Reference and load that entity.
+  if (isset($edit[$field_name][LANGUAGE_NONE][0]['target_id'])) {
+    $field = field_info_field($field_name);
+    $entity_type = $field['settings']['target_type'];
+
+    $user_contact_key = $edit['xd_contact_association'][LANGUAGE_NONE][0]['target_id'];
+
+    // Update the uid now that one exists.
+    $user_contact = entity_load_single($entity_type, $user_contact_key);
+    $user_contact->drupalUserUuid = $account->uuid;
 
     // Save it back to xTuple.
     entity_save($entity_type, $user_contact);
