@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * Implements hook_ctools_plugin_directory()
+ */
+function xdruple_commerce_ctools_plugin_directory($module, $plugin) {
+  return "plugins/$plugin";
+}
+
+/**
 * Implements hook_entity_info_alter().
 *
 * Override Drupal Commerce's entities to use xTuples.
