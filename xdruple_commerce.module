@@ -110,7 +110,6 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
 
       if (!isset($context['entity']->is_new) && $context['entity']->create_new_customer) {
         // Once create_new_customer is set, you can't unset it.
-        $form['create_new_customer']['#type'] = 'hidden';
         $form['create_new_customer']['#attributes']['disabled'] = TRUE;
       }
     }
