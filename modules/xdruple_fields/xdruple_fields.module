@@ -154,6 +154,17 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
     $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#submit'] = array('');
     $form_billing['xd_customer'][LANGUAGE_NONE]['#submit'] = array('');
 
+    // Remove the 'erp_xdruplecommercecontactaddress' field from the form.
+    // There is a seperate address field on billing and shipping profiles
+    // that we use for orders. This allows the user to set a different address
+    // from the one associated with their contact.
+    if (isset($form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress'])) {
+      unset($form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress']);
+    }
+    if (isset($form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress'])) {
+      unset($form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress']);
+    }
+
     $shiptos = array();
     // Remove the Ship Tos that are not for this customer. Reset the #options array.
     if (isset($form_billing['xd_customer'][LANGUAGE_NONE]['#default_value']) &&
@@ -202,7 +213,7 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
     // If a default Ship To is set on first load of the form OR the Ship To
     // select list was changed and a Ship To was selected, remove Contact and Address.
     if (isset($shipto_id) && array_key_exists($shipto_id, $shiptos)) {
-      // Remove the Inline Entity Form entities so the Custom Ship To Contacta
+      // Remove the Inline Entity Form entities so the Custom Ship To Contact
       // and Address will be blank if the user flips back to it.
       $contact_ief_id = $form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['#ief_id'];
       $address_ief_id = $form_shipping['xd_ship_to_address'][LANGUAGE_NONE]['#ief_id'];

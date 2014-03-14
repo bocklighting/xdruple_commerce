@@ -145,6 +145,9 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
     $form['lastName']['#weight'] = -43;
     $form['primaryEmail']['#weight'] = -42;
     $form['phone']['#weight'] = -41;
+
+    $form['firstName']['#required'] = true;
+    $form['lastName']['#required'] = true;
   }
 
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceaddress') {
@@ -421,7 +424,7 @@ function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langco
     $entity->content['primaryEmail']['#weight'] = -2;
     $entity->content['phone']['#weight'] = -1;
 
-    // Unset the address and use the 'xtuple_xdruplecommercecontactaddress' field instead.
+    // Unset the address and use the 'erp_xdruplecommercecontactaddress' field instead.
     unset($entity->content['address']);
   }
 
@@ -448,7 +451,7 @@ function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langco
     $entity->content['isDefault']['#weight'] = -2;
     $entity->content['customer']['#weight'] = -1;
 
-    // Unset the address and contact. Use the 'xtuple_xdruplecommerceshiptoxxx' fields instead.
+    // Unset the address and contact. Use the 'erp_xdruplecommerceshiptoxxx' fields instead.
     unset($entity->content['address']);
     unset($entity->content['contact']);
   }
@@ -458,7 +461,7 @@ function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langco
     $entity->content['number']['#weight'] = -2;
     $entity->content['name']['#weight'] = -1;
 
-    // Unset some things. Use the 'xtuple_xdruplecommerceshiptoxxx' fields instead.
+    // Unset some things. Use the 'erp_xdruplecommerceshiptoxxx' fields instead.
     unset($entity->content['isActive']);
     unset($entity->content['billingContact']);
     unset($entity->content['correspondenceContact']);
@@ -715,18 +718,6 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
   }
 
   return $extra;
-}
-
-/**
- * Implements hook_inline_entity_form_default_entity_alter().
- */
-function xdruple_commerce_inline_entity_form_default_entity_alter(&$items, &$settings, &$form_state) {
-  if ($settings['entity_type'] == 'xtuple_xdruplecommercecontact') {
-    if (count($items) === 0) {
-      // TODO: Figure out which target_id to use.
-      //$items[] = array($settings['column'] => 1);
-    }
-  }
 }
 
 /**
