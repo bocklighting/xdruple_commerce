@@ -1116,7 +1116,21 @@ function xdruple_fields_install() {
     $field['settings'] = array(
       'target_type' => 'xtuple_xdruplecommercecontact',
       'handler' => 'base',
-      'handler_settings' => array(),
+      'handler_settings' => array(
+        'view' => array(
+          'view_name' => 'xd_contact_list',
+          'display_name' => 'entityreference_efq_views_1',
+          'args' => array(),
+        ),
+        'behaviors' => array(
+          'views-select-list' => array(
+            'status' => 0,
+          ),
+          'reference-nkey' => array(
+            'status' => 0,
+          ),
+        ),
+      ),
       'resource_property' => 'contact',
     );
     field_update_field($field);
@@ -1132,7 +1146,7 @@ function xdruple_fields_install() {
         'settings' => array(
           'fields' => array(),
           'type_settings' => array(
-            'allow_existing' => false,
+            'allow_existing' => true,
             'match_operator' => 'CONTAINS',
             'existing_widget' => 'options_select',
             'delete_references' => 0,
