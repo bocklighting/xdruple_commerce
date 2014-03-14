@@ -1026,6 +1026,17 @@ function xdruple_commerce_theme() {
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
       'template' => 'xdruple-commerce-ext-descrip',
     ),
+    'xdruple_commerce_cart_dropdown' => array(
+      'variables' => array(
+        'link' => NULL,
+        'title' => NULL,
+        'count' => NULL,
+        'amount' => NULL,
+      ),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'file' => 'theme.inc',
+      'template' => 'xdruple-commerce-cart-dropdown',
+    ),
   );
 }
 
