@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * Implements hook_ctools_plugin_directory()
+ */
+function xdruple_commerce_ctools_plugin_directory($module, $plugin) {
+  return "plugins/$plugin";
+}
+
+/**
 * Implements hook_entity_info_alter().
 *
 * Override Drupal Commerce's entities to use xTuples.
@@ -1018,6 +1025,17 @@ function xdruple_commerce_theme() {
       'variables' => array('extDescrip' => NULL, 'label' => NULL, 'product' => NULL),
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
       'template' => 'xdruple-commerce-ext-descrip',
+    ),
+    'xdruple_commerce_cart_dropdown' => array(
+      'variables' => array(
+        'link' => NULL,
+        'title' => NULL,
+        'count' => NULL,
+        'amount' => NULL,
+      ),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'file' => 'theme.inc',
+      'template' => 'xdruple-commerce-cart-dropdown',
     ),
   );
 }
