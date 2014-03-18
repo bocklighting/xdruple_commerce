@@ -437,7 +437,6 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
 
   $form[$form_id] = array(
     '#type' => 'container',
-    '#attributes' => array('class' => array('container-inline'))
   );
 
   $default_customer = isset($_SESSION['rescued']['customer']) ? $_SESSION['rescued']['customer'] : '';
