@@ -1100,7 +1100,7 @@ function xdruple_commerce_form_commerce_product_ui_product_form_alter(&$form, &$
   $handler_class = $entityInfo['operations ui']['operations'][$op]['handler'];
 
   // Break the reference to $form_state.
-  $foo_state = (array)clone(object)$form_state;
+  $foo_state = (array) clone ((object) $form_state);
 
   $excluded_fields = array(
     'product_id',
