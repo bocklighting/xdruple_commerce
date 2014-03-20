@@ -15,7 +15,8 @@ function xdruple_queries_ctools_plugin_directory($module, $plugin) {
  * Implements hook_init()
  */
 function xdruple_queries_init() {
-  
+  module_load_include('inc', 'xdruple_queries', 'pages/categories');
+  module_load_include('inc', 'xdruple_queries', 'pages/products_by_category');
 }
 
 /**
@@ -23,6 +24,23 @@ function xdruple_queries_init() {
  */
 function xdruple_queries_menu() {
   $items = array();
+
+  $items['products/categories']   = array(
+    'title'            => 'Categories',
+    'page callback'    => 'xdruple_queries_categories_page',
+    'access arguments' => array('access content'),
+    'file'             => 'pages/categories.inc',
+    'type'             => MENU_CALLBACK,
+  );
+
+  $items['products/categories/%'] = array(
+    'title'            => 'Products by category',
+    'page callback'    => 'xdruple_queries_products_by_category_page',
+    'page arguments'   => array(2),
+    'access arguments' => array('access content'),
+    'file'             => 'pages/products_by_category.inc',
+    'type'             => MENU_CALLBACK,
+  );
 
   return $items;
 }
@@ -32,6 +50,24 @@ function xdruple_queries_menu() {
  */
 function xdruple_queries_theme() {
   $items = array();
+
+  $items['products_page'] = array(
+    'variables' => array(
+      'products' => array(),
+    ),
+    'template'  => 'theme/products-page',
+  );
+
+  $items['products_page_item'] = array(
+    'variables' => array(
+      'id'       => NULL,
+      'title'    => NULL,
+      'subtitle' => NULL,
+      'price'    => NULL,
+      'img'      => NULL,
+    ),
+    'template'  => 'theme/products-page-item',
+  );
 
   return $items;
 }

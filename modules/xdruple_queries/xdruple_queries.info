@@ -3,4 +3,5 @@ description = Provides queries to the REST API
 package = xDruple
 core = 7.x
 
+dependencies[] = extensions
 dependencies[] = xdruple_commerce
