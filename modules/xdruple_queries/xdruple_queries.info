@@ -1,0 +1,6 @@
+name = xDruple Queries
+description = Provides queries to the REST API
+package = xDruple
+core = 7.x
+
+dependencies[] = xdruple_commerce
