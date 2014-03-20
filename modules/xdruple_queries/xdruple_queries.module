@@ -3,3 +3,10 @@
 /**
  * @file keep Drupal hooks implementations
  */
+
+/**
+ * Implements hook_ctools_plugin_directory()
+ */
+function xdruple_queries_ctools_plugin_directory($module, $plugin) {
+  return "plugins/$plugin";
+}
