@@ -19,3 +19,12 @@ function xdruple_queries_menu() {
 
   return $items;
 }
+
+/**
+ * Implements hook_theme()
+ */
+function xdruple_queries_theme() {
+  $items = array();
+
+  return $items;
+}
