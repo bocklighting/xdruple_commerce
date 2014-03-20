@@ -10,3 +10,12 @@
 function xdruple_queries_ctools_plugin_directory($module, $plugin) {
   return "plugins/$plugin";
 }
+
+/**
+ * Implements hook_menu()
+ */
+function xdruple_queries_menu() {
+  $items = array();
+
+  return $items;
+}
