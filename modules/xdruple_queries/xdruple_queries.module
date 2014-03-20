@@ -12,6 +12,13 @@ function xdruple_queries_ctools_plugin_directory($module, $plugin) {
 }
 
 /**
+ * Implements hook_init()
+ */
+function xdruple_queries_init() {
+  
+}
+
+/**
  * Implements hook_menu()
  */
 function xdruple_queries_menu() {
