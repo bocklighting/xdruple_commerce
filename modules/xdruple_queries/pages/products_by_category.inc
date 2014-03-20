@@ -31,7 +31,7 @@ function xdruple_queries_products_by_category_page($group_id) {
 
     $list[] = theme('products_page_item', array(
       'id'          => $product->product_id,
-      'price'       => commerce_currency_format($product->commerce_price['und'][0]['amount'], $product->commerce_price['und'][0]['currency_code']),
+      'price'       => _xdruple_queries_price($product),
       'title'       => l($product->title, "products/{$product->product_id}"),
       'subtitle'    => $product->subTitle,
       'img'         => _xdruple_queries_product_image($product, 'ft_commerce_product_thumb'),
@@ -52,6 +52,17 @@ function xdruple_queries_products_by_category_page($group_id) {
 }
 
 /**
+ * Helper function to show correct Product price
+ */
+function _xdruple_queries_price($product) {
+  $line_item = commerce_product_line_item_new($product, 1, 0, array(), NULL);
+  xdruple_commerce_get_customer_line_item_price($line_item);
+  $unit_price = $line_item->commerce_unit_price[LANGUAGE_NONE]['0'];
+
+  return commerce_currency_format($unit_price['amount'], $unit_price['currency_code']);
+}
+
+/**
  * Helper function to build "Add to cart" button
  */
 function _xdruple_queries_add_to_cart_button($product) {
@@ -69,9 +80,9 @@ function _xdruple_queries_add_to_cart_button($product) {
  * Helper function to build Image field
  */
 function _xdruple_queries_product_image($product, $style = '') {
-  $img = !empty($product->field_product_image['und'][0]['uri']) ? l(theme('image_style', array(
+  $img = !empty($product->field_product_image[LANGUAGE_NONE][0]['uri']) ? l(theme('image_style', array(
     'style_name' => $style,
-    'path'       => $product->field_product_image['und'][0]['uri'],
+    'path'       => $product->field_product_image[LANGUAGE_NONE][0]['uri'],
   )), "products/{$product->product_id}", array(
     'html' => TRUE,
   )) : '';
