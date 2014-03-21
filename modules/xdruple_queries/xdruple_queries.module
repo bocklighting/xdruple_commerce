@@ -26,6 +26,21 @@ function xdruple_queries_init() {
 function xdruple_queries_menu() {
   $items = array();
 
+  $items['products'] = array(
+    'title'            => 'Products',
+    'page callback'    => 'xdruple_queries_products_page',
+    'page arguments'   => array(1),
+    'access arguments' => array('access content'),
+    'file'             => 'pages/products.inc',
+    'type'             => MENU_NORMAL_ITEM,
+  );
+
+  $items['products/list'] = array(
+    'title'  => 'Products',
+    'type'   => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
   $items['products/%'] = array(
     'title'            => 'Product',
     'page callback'    => 'xdruple_queries_product_page',
@@ -40,7 +55,7 @@ function xdruple_queries_menu() {
     'page callback'    => 'xdruple_queries_categories_page',
     'access arguments' => array('access content'),
     'file'             => 'pages/categories.inc',
-    'type'             => MENU_CALLBACK,
+    'type'             => MENU_LOCAL_TASK,
   );
 
   $items['products/categories/%'] = array(
@@ -50,6 +65,14 @@ function xdruple_queries_menu() {
     'access arguments' => array('access content'),
     'file'             => 'pages/products_by_category.inc',
     'type'             => MENU_CALLBACK,
+  );
+
+  $items['products/recent'] = array(
+    'title'            => 'Recently ordered',
+    'page callback'    => 'xdruple_queries_products_recent_page',
+    'access arguments' => array('access content'),
+    'file'             => 'pages/products_recent.inc',
+    'type'             => MENU_LOCAL_TASK,
   );
 
   return $items;
