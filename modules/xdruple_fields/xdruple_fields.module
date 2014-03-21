@@ -321,11 +321,14 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
     $view = reset($form_state['build_info']['args']);
 
     if (!empty($view->result)) {
+      // We add some fields to the order and display them on /cart. We want them
+      // saved for all cart submit buttons.
       // Add our submit handler to the other submit buttons.
       $form['actions']['checkout']['#submit'] = array_merge(array('xdruple_fields_cart_form_submit'), $form['actions']['checkout']['#submit']);
       $form['actions']['submit']['#submit'] = array_merge(array('xdruple_fields_cart_form_submit'),$form['actions']['submit']['#submit']);
       $form['actions']['#weight'] = 110;
 
+      // Attach our PO Number and Order Notes fields to the cart form.
       $entity_type = 'commerce_order';
       $entity = $form_state['order'];
 
@@ -349,7 +352,7 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- * Submit handler to move a cart to state = 'saved_cart'.
+ * Submit handler to save the attached PO Number and Order Notes fields.
  */
 function xdruple_fields_cart_form_submit($form, &$form_state) {
   // We add some fields to the order and display them on /cart. We want them
