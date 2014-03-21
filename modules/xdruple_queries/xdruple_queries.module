@@ -66,17 +66,15 @@ function xdruple_queries_theme() {
       'products' => array(),
     ),
     'template'  => 'theme/products-page',
+    'file'      => 'theme/theme.inc',
   );
 
   $items['products_page_item'] = array(
     'variables' => array(
-      'id'       => NULL,
-      'title'    => NULL,
-      'subtitle' => NULL,
-      'price'    => NULL,
-      'img'      => NULL,
+      'product' => NULL,
     ),
     'template'  => 'theme/products-page-item',
+    'file'      => 'theme/theme.inc',
   );
 
   return $items;
