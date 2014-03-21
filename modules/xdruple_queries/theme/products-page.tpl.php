@@ -1,23 +1,15 @@
 <div class="view-ft-commerce-xd-products">
   <div class="view-content">
-    <?php if (!empty($products)): ?>
-    <?php $closed = TRUE; ?>
-    <?php foreach ($products as $i => $product): ?>
-      <?php if ($i % 3 == 0): ?>
-        <?php $closed = FALSE; ?>
+    <?php if (!empty($columns)): ?>
+      <?php foreach ($columns as $column): ?>
         <div class="views-columns">
-      <?php endif; ?>
-      <div class="views-row">
-        <?php print $product ?>
-      </div>
-      <?php if ($i % 3 == 2): ?>
-        <?php $closed = TRUE; ?>
+          <?php foreach ($column as $product): ?>
+            <div class="views-row">
+              <?php print $product ?>
+            </div>
+          <?php endforeach; ?>
         </div>
-      <?php endif; ?>
-    <?php endforeach; ?>
-    <?php if (!$closed): ?>
+      <?php endforeach; ?>
+    <?php endif; ?>
   </div>
-  <?php endif; ?>
-  <?php endif; ?>
-</div>
 </div>
