@@ -22,7 +22,7 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
     $order->order_id = $this->get_value($values, 'order_id');
     $order->uid = $this->get_value($values, 'uid');
 
-    if (!commerce_order_access('update', $order)) {
+    if (!user_access('view own commerce_order entities')) {
       return;
     }
 
