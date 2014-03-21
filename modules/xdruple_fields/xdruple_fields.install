@@ -648,6 +648,96 @@ function xdruple_fields_install() {
     }
   }
 
+  if (!field_info_field('xd_order_po_number')) {
+    $field = array(
+      'field_name' => 'xd_order_po_number',
+      'type' => 'text',
+      'cardinality' => 1,
+      'module' => 'text',
+      'field_permissions' => array(
+        'type' => 0,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_order', 'xd_order_po_number', 'commerce_order');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_order_po_number',
+        'entity_type' => 'commerce_order',
+        'bundle' => 'commerce_order',
+        'label' => 'PO Number',
+        'widget' => array(
+          'weight' => -5,
+          'type' => 'text_textfield',
+          'module' => 'text',
+          'active' => 1,
+          'settings' => array(
+            'size' => 30,
+          ),
+        ),
+        'settings' => array(
+          'text_processing' => 0,
+          'user_register_form' => false,
+        ),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'text_default',
+            'weight' => -5,
+            'module' => 'text',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+
+  if (!field_info_field('xd_order_notes')) {
+    $field = array(
+      'field_name' => 'xd_order_notes',
+      'type' => 'text_long',
+      'cardinality' => 1,
+      'module' => 'text',
+      'field_permissions' => array(
+        'type' => 0,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_order', 'xd_order_notes', 'commerce_order');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_order_notes',
+        'entity_type' => 'commerce_order',
+        'bundle' => 'commerce_order',
+        'label' => 'Order Notes',
+        'widget' => array(
+          'weight' => -4,
+          'type' => 'text_textarea',
+          'module' => 'text',
+          'active' => 1,
+          'settings' => array(
+            'rows' => 3,
+          ),
+        ),
+        'settings' => array(
+          'text_processing' => 0,
+          'user_register_form' => false,
+        ),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'text_default',
+            'weight' => -4,
+            'module' => 'text',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+
   // This field is created in rescued_field_extra_fields(), but not fully
   // configured to use IEF and EFQ.
   if ($field = field_info_field('erp_xdruplecommercecontactaddress')) {

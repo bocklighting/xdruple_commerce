@@ -1,0 +1,225 @@
+<?php
+
+/**
+ * Implements hook_views_api().
+ */
+function xdruple_save_cart_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'xdruple_save_cart') . '/includes/views',
+  );
+}
+
+/**
+ * Implements hook_commerce_order_state_info().
+ */
+function xdruple_save_cart_commerce_order_state_info() {
+  $order_states = array();
+
+  $order_states['saved_cart'] = array(
+    'name' => 'saved_cart',
+    'title' => t('Saved Shopping Cart'),
+    'description' => t('Orders in this state have not been completed by the customer yet and are not currently in the cart.'),
+    'weight' => -5,
+    'default_status' => 'saved_cart',
+  );
+
+  return $order_states;
+}
+
+/**
+ * Implements hook_commerce_order_status_info().
+ */
+function xdruple_save_cart_commerce_order_status_info() {
+  $order_statuses = array();
+
+  $order_statuses['saved_cart'] = array(
+    'name' => 'saved_cart',
+    'title' => t('Saved Shopping Cart'),
+    'state' => 'saved_cart',
+    'cart' => false,
+  );
+
+  return $order_statuses;
+}
+
+/**
+ * Implements hook_menu()
+ */
+function xdruple_save_cart_menu() {
+  $items = array();
+
+  $items['admin/commerce/orders/%commerce_order/move'] = array(
+    'title' => 'Move to Active Cart',
+    'page callback' => 'xdruple_save_cart_move_order_form_wrapper',
+    'page arguments' => array(3),
+    'access callback' => 'commerce_order_access',
+    'access arguments' => array('update', 3),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20,
+    'context' => MENU_CONTEXT_INLINE,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_forms().
+ */
+function xdruple_save_cart_forms() {
+  // Define a wrapper ID for the Saved Cart Orders move confirmation form.
+  $forms['xdruple_save_cart_move_order_form'] = array(
+    'callback' => 'xdruple_save_cart_move_order_form',
+  );
+
+  return $forms;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function xdruple_save_cart_form_alter(&$form, &$form_state, $form_id) {
+  if (strpos($form_id, 'views_form_commerce_cart_form_') === 0) {
+    // Only alter buttons if the cart form View shows line items.
+    $view = reset($form_state['build_info']['args']);
+
+    if (!empty($view->result)) {
+      // Change the Save button to say Update cart.
+      $form['actions']['save_cart']['#type'] = 'submit';
+      $form['actions']['save_cart']['#value'] = t('Move to saved cart');
+      $form['actions']['save_cart']['#weight'] = -1;
+      // TODO: Add permission? This isn't very different from changing qty on a line.
+      $form['actions']['save_cart']['#access'] = true;
+      $form['actions']['save_cart']['#submit'] = array_merge($form['#submit'], array('xdruple_save_cart_form_submit'));
+
+      // Add our submit handler to the other submit buttons.
+      $form['actions']['save_cart']['#submit'] = array_merge(array('xdruple_fields_cart_form_submit'),$form['actions']['save_cart']['#submit']);
+    }
+  }
+}
+
+/**
+ * Submit handler to move a cart to state = 'saved_cart'.
+ */
+function xdruple_save_cart_form_submit($form, &$form_state) {
+  if ($form_state['triggering_element']['#id'] === 'edit-save-cart') {
+    global $user;
+
+    // Reset the status of the order to cart.
+    $order = commerce_order_load($form_state['order']->order_id);
+    $form_state['order'] = commerce_order_status_update($order, 'saved_cart', TRUE);
+
+    // Skip saving in the status update and manually save here to force a save
+    // even when the status doesn't actually change.
+    if (variable_get('commerce_order_auto_revision', TRUE)) {
+      $form_state['order']->revision = TRUE;
+      $form_state['order']->log = t('Customer moved the cart to "Saved Cart" via the shopping cart form.');
+    }
+
+    commerce_order_save($form_state['order']);
+
+    $message = 'Your shopping cart has been moved to your !saved_carts_url.';
+    $message = t($message, array(
+        '!saved_carts_url' => l(t('Saved Carts'), "user/$user->uid/saved-carts"),
+      )
+    );
+
+    drupal_set_message($message);
+  }
+}
+
+/**
+ * Form callback wrapper: confirmation form for moving an order.
+ *
+ * @param $order
+ *   The order object to move through the form.
+ */
+function xdruple_save_cart_move_order_form_wrapper($order) {
+  return drupal_get_form('xdruple_save_cart_move_order_form', $order);
+}
+
+/**
+ * Form callback wrapper: confirmation form for moving an order.
+ *
+ * @param $order
+ *   The order object to move through the form.
+ */
+function xdruple_save_cart_move_order_form($form, &$form_state, $order) {
+  $form_state['order'] = $order;
+
+  $form['#submit'][] = 'xdruple_save_cart_move_order_form_submit';
+
+  $form = confirm_form($form,
+    t('Are you sure you want to move order @number?', array('@number' => $order->order_number)),
+    '',
+    '<p>' . t('Any active cart items will be moved to your saved carts.') . '</p>',
+    t('Move'),
+    t('Cancel'),
+    'confirm'
+  );
+
+  return $form;
+}
+
+/**
+ * Form callback wrapper: confirmation form for moving an order.
+ *
+ * @param $order
+ *   The order object to move through the form.
+ */
+function xdruple_save_cart_move_order_form_submit($form, &$form_state) {
+  $order = $form_state['order'];
+
+  if ($order) {
+    global $user;
+
+    // If there is currently an active cart, move it to Saved Carts.
+    $curr_cart_id = commerce_cart_order_id($user->uid);
+
+    if ($curr_cart_id) {
+      $curr_order = commerce_order_load($curr_cart_id);
+      $curr_order = commerce_order_status_update($curr_order, 'saved_cart', TRUE);
+
+      // Skip saving in the status update and manually save here to force a save
+      // even when the status doesn't actually change.
+      if (variable_get('commerce_order_auto_revision', TRUE)) {
+        $form_state['order']->revision = TRUE;
+        $form_state['order']->log = t('Customer moved the cart to "Cart" via the Saved Carts form.');
+      }
+
+      commerce_order_save($curr_order);
+
+      $message = 'Your old shopping cart has been moved to your !saved_carts_url.';
+      $message = t($message, array(
+          '!saved_carts_url' => l(t('Saved Carts'), "user/$user->uid/saved-carts"),
+        )
+      );
+
+      drupal_set_message($message);
+    }
+
+    // Reset the status of the order to cart.
+    $order = commerce_order_load($form_state['order']->order_id);
+    $form_state['order'] = commerce_order_status_update($order, 'cart', TRUE);
+
+    // Skip saving in the status update and manually save here to force a save
+    // even when the status doesn't actually change.
+    if (variable_get('commerce_order_auto_revision', TRUE)) {
+      $form_state['order']->revision = TRUE;
+      $form_state['order']->log = t('Customer moved the cart to "Cart" via the Saved Carts form.');
+    }
+
+    $message = 'The saved shopping cart you selected has been moved to your !active_cart_url.';
+    $message = t($message, array(
+        '!active_cart_url' => l(t('Active Cart'), "cart"),
+      )
+    );
+
+    drupal_set_message($message);
+
+    commerce_order_save($form_state['order']);
+  }
+  else {
+    drupal_set_message(t('Order @number could not be moved.', array('@number' => $order->order_number)), 'error');
+  }
+}
