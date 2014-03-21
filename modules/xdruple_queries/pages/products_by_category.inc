@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file keeps callbacks for products/categories/% page
+ * @file keeps callbacks for /products/categories/% page
  */
 
 /**
