@@ -1381,7 +1381,7 @@ function xdruple_commerce_commerce_checkout_complete($order) {
   // Set all the defaults on the Sales Order.
   $sales_order->is_new = true;
   $sales_order->status = 'O';
-  $sales_order->saleType = 'CUST';
+  $sales_order->saleType = 'INT';
   $sales_order->calculateFreight = true;
   $sales_order->freight = 0;
   $sales_order->orderDate = date("Y-m-d");
