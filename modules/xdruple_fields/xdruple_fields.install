@@ -696,7 +696,7 @@ function xdruple_fields_install() {
   if (!field_info_field('xd_order_notes')) {
     $field = array(
       'field_name' => 'xd_order_notes',
-      'type' => 'text_long',
+      'type' => 'text_with_summary',
       'cardinality' => 1,
       'module' => 'text',
       'field_permissions' => array(
@@ -714,7 +714,7 @@ function xdruple_fields_install() {
         'label' => 'Order Notes',
         'widget' => array(
           'weight' => -4,
-          'type' => 'text_textarea',
+          'type' => 'text_textarea_with_summary',
           'module' => 'text',
           'active' => 1,
           'settings' => array(
@@ -722,6 +722,7 @@ function xdruple_fields_install() {
           ),
         ),
         'settings' => array(
+          'display_summary' => 0,
           'text_processing' => 0,
           'user_register_form' => false,
         ),
