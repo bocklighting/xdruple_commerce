@@ -1,0 +1,9 @@
+name = xTuple's Drupal Commerce Save Cart Orders Module
+description = Add support for saving a cart by changing it's order status.
+core = 7.x
+package = xDruple
+
+dependencies[] = xdruple_commerce
+
+; Views handlers
+files[] = includes/views/handlers/xdruple_save_cart_handler_field_move_order.inc

@@ -15,7 +15,7 @@ function xdruple_fields_views_api() {
 /**
  * Implements hook_menu()
  */
-function xdruple_menu() {
+function xdruple_fields_menu() {
   $items = array();
 
   $items['user/%user/preferences'] = array(
@@ -315,6 +315,53 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
       $_SESSION['rescued']['custom_ship_to'] = true;
     }
   }
+
+  if (strpos($form_id, 'views_form_commerce_cart_form_') === 0) {
+    // Only alter button submits if the cart form View shows line items.
+    $view = reset($form_state['build_info']['args']);
+
+    if (!empty($view->result)) {
+      // We add some fields to the order and display them on /cart. We want them
+      // saved for all cart submit buttons.
+      // Add our submit handler to the other submit buttons.
+      $form['actions']['checkout']['#submit'] = array_merge(array('xdruple_fields_cart_form_submit'), $form['actions']['checkout']['#submit']);
+      $form['actions']['submit']['#submit'] = array_merge(array('xdruple_fields_cart_form_submit'),$form['actions']['submit']['#submit']);
+      $form['actions']['#weight'] = 110;
+
+      // Attach our PO Number and Order Notes fields to the cart form.
+      $entity_type = 'commerce_order';
+      $entity = $form_state['order'];
+
+      $po_field_name = 'xd_order_po_number';
+      $po_items = isset($entity->{$po_field_name}[LANGUAGE_NONE]) ? $entity->{$po_field_name}[LANGUAGE_NONE] : array();
+      $po_field = field_info_field($po_field_name);
+      $po_instance = field_info_instance($entity_type, $po_field_name, $entity->type);
+      $po_field_form = field_default_form($entity_type, $entity, $po_field, $po_instance, LANGUAGE_NONE, $po_items, $form, $form_state);
+      $po_field_form[$po_field_name]['#weight'] = 100;
+      $form += (array) $po_field_form;
+
+      $notes_field_name = 'xd_order_notes';
+      $notes_items = isset($entity->{$notes_field_name}[LANGUAGE_NONE]) ? $entity->{$notes_field_name}[LANGUAGE_NONE] : array();
+      $notes_field = field_info_field($notes_field_name);
+      $notes_instance = field_info_instance($entity_type, $notes_field_name, $entity->type);
+      $notes_field_form = field_default_form($entity_type, $entity, $notes_field, $notes_instance, LANGUAGE_NONE, $notes_items, $form, $form_state);
+      $notes_field_form[$notes_field_name]['#weight'] = 105;
+      $form += (array) $notes_field_form;
+    }
+  }
+}
+
+/**
+ * Submit handler to save the attached PO Number and Order Notes fields.
+ */
+function xdruple_fields_cart_form_submit($form, &$form_state) {
+  // We add some fields to the order and display them on /cart. We want them
+  // saved for all cart submit buttons.
+
+  // Notify field widgets.
+  field_attach_submit('commerce_order', $form_state['order'], $form, $form_state);
+
+  commerce_order_save($form_state['order']);
 }
 
 /**
@@ -414,6 +461,7 @@ function xdruple_fields_forms() {
     'callback' => 'xdruple_fields_order_defaults',
     'callback arguments' => array('xtuple_order_defaults_form'),
   );
+
   return $forms;
 }
 
@@ -554,6 +602,30 @@ function xtuple_order_defaults_form_submit($form, &$form_state) {
   $_SESSION['rescued']['scheduled_date'] = !empty($form_state['values']['scheduled_date']) ? $form_state['values']['scheduled_date'] : format_date(REQUEST_TIME, 'custom', 'Y-m-d');
 
   // TODO: set a message.
+}
+
+function xdruple_fields_field_widget_properties_alter(&$widget, $context) {
+// TODO: Testing switching select list to auto complete.
+//  $entity_info = entity_get_info($context['field']['settings']['target_type']);
+//   if ($widget['type'] === 'inline_entity_form_single' &&
+//     $widget['settings']['type_settings']['allow_existing'] &&
+//     $entity_info['entity class'] === 'RescuedEntityNew') {
+//     global $user;
+
+//     if (user_access('view employee rescued entities', $user)) {
+//       // This is an admin or an employee user. Therefore, the have access to
+//       // most resources from the xTuple API. The inline_entity_form_single will
+//       // load a select list for all possible resources of that type. For these
+//       // users, that list could be in the 100's or 1000's.
+//       // Switch this widget's "Add Existing" widget to an auto-complete search.
+
+//       if ($context['field']['field_name'] === 'xd_ship_to_address' || $context['field']['field_name'] === 'xd_bill_to_address') {
+//         $widget['settings']['type_settings']['existing_widget_settings']['module'] = 'entityreference';
+//         $widget['settings']['type_settings']['existing_widget_settings']['type'] = 'entityreference_autocomplete';
+//         $widget['settings']['type_settings']['existing_widget_settings']['size'] =  60;
+//       }
+//     }
+//   }
 }
 
 /**
