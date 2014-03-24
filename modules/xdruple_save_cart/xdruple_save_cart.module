@@ -79,12 +79,14 @@ function xdruple_save_cart_forms() {
  * Implements hook_form_alter().
  */
 function xdruple_save_cart_form_alter(&$form, &$form_state, $form_id) {
-  if (strpos($form_id, 'views_form_commerce_cart_form_') === 0) {
+  if (strpos($form_id, 'views_form_commerce_cart_form_') === 0 ||
+      strpos($form_id, 'views_form_ft_commerce_cart_form_') === 0) {
+
     // Only alter buttons if the cart form View shows line items.
     $view = reset($form_state['build_info']['args']);
 
     if (!empty($view->result)) {
-      // Change the Save button to say Update cart.
+      // Add the Move to saved cart button.
       $form['actions']['save_cart']['#type'] = 'submit';
       $form['actions']['save_cart']['#value'] = t('Move to saved cart');
       $form['actions']['save_cart']['#weight'] = -1;
@@ -92,7 +94,7 @@ function xdruple_save_cart_form_alter(&$form, &$form_state, $form_id) {
       $form['actions']['save_cart']['#access'] = true;
       $form['actions']['save_cart']['#submit'] = array_merge($form['#submit'], array('xdruple_save_cart_form_submit'));
 
-      // Add our submit handler to the other submit buttons.
+      // Add our submit handler to the submit button.
       $form['actions']['save_cart']['#submit'] = array_merge(array('xdruple_fields_cart_form_submit'),$form['actions']['save_cart']['#submit']);
     }
   }
