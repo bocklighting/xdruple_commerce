@@ -678,7 +678,7 @@ function xdruple_fields_field_widget_properties_alter(&$widget, $context) {
       }
     }
   } elseif ($widget['type'] === 'options_select' && $context['field']['field_name'] !== 'xd_ship_to') {
-    // Ship the 'xd_ship_to' because we already filter by customer and it has
+    // Skip the 'xd_ship_to' because we already filter by customer and it has
     // custom logic in xdruple_fields_form_alter().
     if (user_access('view employee rescued entities', $user)) {
       $widget['type'] = 'entityreference_autocomplete';
