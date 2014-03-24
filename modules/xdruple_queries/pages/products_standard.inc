@@ -30,7 +30,7 @@ function xdruple_queries_products_standard_page() {
   foreach ($orders as $order) {
     if (!empty($order->products)) {
       foreach ($order->products as $product_id) {
-        $list[] = theme('products_page_item', array(
+        $list[] = theme('products_page_item__standard_order', array(
           'product' => entity_load_single('commerce_product', $product_id),
           'params'  => $params,
         ));

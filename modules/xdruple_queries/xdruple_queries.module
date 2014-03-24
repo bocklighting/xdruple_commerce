@@ -15,6 +15,8 @@ function xdruple_queries_ctools_plugin_directory($module, $plugin) {
  * Implements hook_init()
  */
 function xdruple_queries_init() {
+  module_load_include('inc', 'xdruple_queries', 'forms/add_to_standard_order');
+  module_load_include('inc', 'xdruple_queries', 'forms/remove_from_standard_order');
   module_load_include('inc', 'xdruple_queries', 'pages/categories');
   module_load_include('inc', 'xdruple_queries', 'pages/product');
   module_load_include('inc', 'xdruple_queries', 'pages/products_by_category');
@@ -84,6 +86,27 @@ function xdruple_queries_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_forms()
+ */
+function xdruple_queries_forms($form_id, $args) {
+  $forms = array();
+
+  if (strpos($form_id, 'xdruple_queries_add_to_standard_order_form_') === 0) {
+    $forms[$form_id] = array(
+      'callback' => 'xdruple_queries_add_to_standard_order_form',
+    );
+  }
+
+  if (strpos($form_id, 'xdruple_queries_remove_from_standard_order_form_') === 0) {
+    $forms[$form_id] = array(
+      'callback' => 'xdruple_queries_remove_from_standard_order_form',
+    );
+  }
+
+  return $forms;
 }
 
 /**
