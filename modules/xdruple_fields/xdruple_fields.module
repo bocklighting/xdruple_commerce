@@ -655,7 +655,7 @@ function xtuple_order_defaults_form_submit($form, &$form_state) {
   // TODO: set a message.
 }
 
-// Switching select lists to auto complete saerch when the user is an admin.
+// Switching select lists to auto complete search when the user is an admin.
 function xdruple_fields_field_widget_properties_alter(&$widget, $context) {
   global $user;
 
