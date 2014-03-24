@@ -1382,7 +1382,7 @@ function xdruple_commerce_commerce_checkout_complete($order) {
   $sales_order->salesRep = $full_ship_to ? $full_ship_to->salesRep : $customer->salesRep;
   $sales_order->taxZone = $full_ship_to ? $full_ship_to->taxZone : $customer->taxZone;
   $sales_order->billtoContact = $bill_to_contact->number;
-  $sales_order->shipto = $ship_to ? $ship_to : null;
+  $sales_order->shipto = $ship_to['uuid'] ? $ship_to['uuid'] : null;
   $sales_order->shiptoContact = $ship_to_contact->number;
   $sales_order->currency = $customer->currency;
   $sales_order->shipZone = $full_ship_to ? $full_ship_to->shipZone : null;
