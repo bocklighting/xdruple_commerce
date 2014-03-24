@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function xdruple_cache_entity_info_alter(&$entity_info) {
+  if (isset($entity_info['commerce_product'])) {
+    // TODO: Expand this to check for a variable_get for each entity type
+    // so we can control it on the fly from settings.php
+    $entity_info['commerce_product']['entity cache'] = TRUE;
+  }
+  if (isset($entity_info['xdruple_commerce_product'])) {
+    // TODO: Expand this to check for a variable_get for each entity type
+    // so we can control it on the fly from settings.php
+    $entity_info['commerce_product']['entity cache'] = TRUE;
+  }
+}
+
+// TODO: Add UI to flush cache for one entity type.
