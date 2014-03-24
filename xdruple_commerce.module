@@ -331,7 +331,6 @@ function xdruple_commerce_rescued_entity_default_label_alter($entity, &$label, $
 
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceaddress') {
     $label = $entity->line1;
-    $label .= isset($entity->line2) ? ' ' . $entity->line2 : '';
     $label .= ' ' . $entity->city;
     $label .= isset($entity->state) ? ', ' . $entity->state : '';
   }
