@@ -50,6 +50,11 @@ function xdruple_queries_add_to_standard_order_form_submit($form, &$form_state) 
       'shipTo'   => $values['ship_to'],
     ));
     entity_save($entity_type, $std_order_item);
+
+    // Invalidate cache.
+    $cid = 'xdruple_xdcatalogshiptostdord-' . $values['ship_to'];
+    cache_clear_all($cid, 'cache');
+
     drupal_set_message(t("Product added to the Standard order"));
   } catch (Google_ServiceException $e) {
     $errors = $e->getErrors();
