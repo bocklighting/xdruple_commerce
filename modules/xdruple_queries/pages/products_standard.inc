@@ -52,7 +52,7 @@ function xdruple_queries_products_standard_page() {
           ),
         ),
       );
-      $products = entity_load('xtuple_xdruplecommerceproduct', FALSE, $prod_conditions);
+      $products = entity_load('commerce_product', FALSE, $prod_conditions);
       foreach ($products as $product) {
         $list[] = theme('products_page_item__standard_order', array(
           'product' => $product,
