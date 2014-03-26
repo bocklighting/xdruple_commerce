@@ -52,6 +52,10 @@ function xdruple_queries_remove_from_standard_order_form_submit($form, &$form_st
     if (count($std_order_item) === 1) {
       $uuid = key($std_order_item);
       entity_delete($entity_type, $uuid);
+
+      // Invalidate cache.
+      $cid = 'xdruple_xdcatalogshiptostdord-' . $values['ship_to'];
+      cache_clear_all($cid, 'cache');
     }
     drupal_set_message(t("Product removed from the Standard order"));
   } catch (\Exception $e) {
