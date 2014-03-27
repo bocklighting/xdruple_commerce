@@ -1206,7 +1206,7 @@ function xdruple_fields_install() {
   if ($field = field_info_field('erp_xdrupleusercontactcontact')) {
     $field['settings'] = array(
       'target_type' => 'xtuple_xdruplecommercecontact',
-      'handler' => 'base',
+      'handler' => 'efq_views',
       'handler_settings' => array(
         'view' => array(
           'view_name' => 'xd_contact_list',

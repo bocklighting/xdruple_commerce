@@ -194,7 +194,7 @@ function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
 
           $shiptos = xdruple_fields_get_ship_to_list($default_customer);
         } elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
-          preg_match("/.+\(([\w\+@\.]+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches);
+          preg_match("/.+\((.+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches);
           // This is the first load of an edit form, use the default from autocomplete.
 
           $shiptos = xdruple_fields_get_ship_to_list($matches[1]);
