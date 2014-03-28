@@ -40,20 +40,26 @@ function xdruple_queries_products_standard_page() {
     $orders = $cache->data;
   }
 
-  // TODO: Add pager support.
   foreach ($orders as $order) {
     if (!empty($order->products)) {
-      $prod_conditions = array(
-        'query' => array(
-          'product_id' => array(
-            // TODO: Implement pager request. Node.js seems to max out around
-            //  180 products. Using 50 as a default for now.
-            'ANY' => array_slice($order->products, 0, 50),
-          ),
-        ),
-      );
-      $products = entity_load('commerce_product', FALSE, $prod_conditions);
-      foreach ($products as $product) {
+      $query = new EntityFieldQuery();
+      $products = $query->entityCondition('entity_type', 'commerce_product')
+        // TODO: nginx seems to max out around 180 products. Then it returns a
+        // 414 Request-URI Too Large. Using 50 as a default for now until this
+        // is fixed by dev ops.
+        ->propertyCondition('product_id', array_slice($order->products, 0, 50), 'ANY')
+        ->pager(20)
+        ->execute();
+
+      // TODO: The rescued_entity_field_query_builder(EntityFieldQuery $query)
+      // function runs through entity_load to do the actual query. In theory,
+      // an EntityFieldQuery() could go directly to the API and then you would
+      // call entity_load() for the returned ids which will attach fields, etc.
+      // We can skip this call for now. This is one reason why the entity cache
+      // and EntityFieldQuery cache need to work together.
+      //$products = entity_load('commerce_product', array_keys($products['commerce_product']));
+
+      foreach ($products['commerce_product'] as $product) {
         $list[] = theme('products_page_item__standard_order', array(
           'product' => $product,
           'params' => $params,
@@ -65,6 +71,8 @@ function xdruple_queries_products_standard_page() {
   $output .= theme('products_page', array(
     'products' => $list,
   ));
+
+  $output .= theme('pager');
 
   return $output;
 }
