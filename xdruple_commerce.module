@@ -1190,11 +1190,10 @@ function xdruple_commerce_api_customer_item_price($discovery_client = 'xtuple', 
   $client = $endpoint->client();
 
   $params = array('postBody' => $postBody);
-  $optParams = array();
   $params = array_merge($params, $optParams);
 
-  // POST the resource.
-  $result = $client->$resource->itemPrice($params, $optParams);
+  // POST the service request.
+  $result = $client->$resource->itemPrice($params);
 
   return $result['price'];
 }
