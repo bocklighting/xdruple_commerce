@@ -1,4 +1,4 @@
-<?php if (!empty($img)): ?>
+<?php if (isset($img)): ?>
   <div class="views-field views-field-field-product-image">
     <span class="field-content"><?php print $img ?></span>
   </div>
