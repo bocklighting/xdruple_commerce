@@ -27,6 +27,14 @@ function xdruple_fields_menu() {
     'type'             => MENU_LOCAL_TASK,
   );
 
+  $items['user/%user/preferences/customer/autocomplete'] = array(
+    'title'            => 'Customer Autocomplete',
+    'page callback'    => 'xdruple_fields_get_customer_callback',
+    'access callback'  => 'xdruple_fields_user_preferences_access',
+    'access arguments' => array(1),
+    'type'             => MENU_CALLBACK,
+  );
+
   return $items;
 }
 
@@ -519,6 +527,8 @@ function xdruple_fields_forms() {
  * Form builder; Output xTuple Default Order Settings form.
  */
 function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
+  global $user;
+
   $customer = isset($form_state['values']['customer']) ? $form_state['values']['customer'] : null;
 
   if (empty($customer)) {
@@ -539,10 +549,10 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
 
   $default_customer = isset($_SESSION['rescued']['customer']) ? $_SESSION['rescued']['customer'] : '';
   $form[$form_id]['customer'] = array(
-    '#type' => 'select',
+    '#type' => 'textfield',
     '#title' => t('Customer'),
+    '#autocomplete_path' => 'user/' . $user->uid . '/preferences/customer/autocomplete',
     //'#title_display' => 'invisible',
-    '#options' => xdruple_fields_get_customer_list(),
     '#empty_option' => '- None -',
     '#default_value' => $default_customer,
     '#attributes' => array('title' => t('Select the Customer to use when placing an order.')),
@@ -767,6 +777,31 @@ function xdruple_fields_get_customer_list() {
   } else {
     return $options->data;
   }
+}
+
+/**
+ * Do an auto complete search for a matching Customer for the current user.
+ *
+ * @param string $customer_str The partial Customer name string to search for.
+ * @return string The JSON string of matches.
+ */
+function xdruple_fields_get_customer_callback($customer_str = NULL) {
+  global $user;
+
+  $options = array();
+  $optParams = array(
+    'q' => $customer_str,
+  );
+
+  $customers = rescued_api_resource_list('xtuple', 'XdrupleCommerceCustomer', $optParams, true);
+  $schema = rescued_get_single_json_schema('XdrupleCommerceCustomer', null, 'xtuple');
+  $key = rescued_json_schema_get_resource_key($schema['XdrupleCommerceCustomer']['properties']);
+
+  foreach ($customers as $customer) {
+    $options[$customer[$key]] = $customer['name'];
+  }
+  drupal_json_output($options);
+  exit;
 }
 
 /**
