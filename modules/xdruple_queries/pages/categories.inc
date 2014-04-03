@@ -4,6 +4,11 @@
  * @file keeps callbacks for /products/categories page
  */
 
+/**
+ * Get the formatted Product Catalog page.
+ *
+ * @return string The Product Catalog page's HTML unordered list.
+ */
 function xdruple_queries_categories_page() {
   $output = '';
 
@@ -13,41 +18,73 @@ function xdruple_queries_categories_page() {
   return $output;
 }
 
+/**
+ * Get the Product Catalog tree.
+ *
+ * @return array The Product Catalog tree array and an array of all Product
+ *   Catalog branches.
+ */
 function _xdruple_queries_categories_tree() {
-  $catalog = entity_load('xtuple_xdruplecatalog');
+  $cid = 'xtuple_xdruplecatalog-tree';
+  $cache = cache_get($cid, 'cache');
 
-  // Lookup for root group
-  $tree = array();
-  foreach ($catalog as $group) {
-    if ($group->catalog === TRUE) {
-      $tree = array(
-        $group->id => array(),
-      );
-      break;
+  if (empty($cache)) {
+    $query = new EntityFieldQuery();
+    $root_group = $query->entityCondition('entity_type', 'xtuple_xdruplecatalog')
+                        ->propertyCondition('catalog', true, '=')
+                        ->execute();
+
+    $root_key = key($root_group['xtuple_xdruplecatalog']);
+
+    $tree = array(
+      $root_key => array(),
+    );
+    $catalog = array();
+
+    if (!empty($tree)) {
+      _xdruple_queries_categories_build_tree($tree, $catalog);
     }
+
+    $cache_data = array(
+      'tree'    => $tree,
+      'catalog' => $catalog
+    );
+
+    cache_set($cid, $cache_data, 'cache', CACHE_TEMPORARY);
+  } else {
+    $cache_data = $cache->data;
   }
 
-  if (!empty($tree)) {
-    _xdruple_queries_categories_build_tree($tree, $catalog);
-  }
-
-  return array(
-    'tree'    => $tree,
-    'catalog' => $catalog,
-  );
+  return $cache_data;
 }
 
-function _xdruple_queries_categories_build_tree(&$group, $catalog) {
-  foreach ($group as $id => $temp) {
-    if (!empty($catalog[$id]->groups)) {
-      foreach ($catalog[$id]->groups as $group_id) {
-        $group[$id][$group_id] = array();
-      }
-      _xdruple_queries_categories_build_tree($group[$id], $catalog);
+/**
+ * Build the Product Catalog tree up from it's root id.
+ *
+ * @param array $tree The catalog tree/branch to build.
+ * @param arrat $catalog An array of all Product Catalog branches.
+ */
+function _xdruple_queries_categories_build_tree(&$tree, &$catalog) {
+  foreach ($tree as $id => $temp) {
+    $group = entity_load_single('xtuple_xdruplecatalog', $id);
+    $catalog[$id] = $group;
+
+    foreach ($group->groups as $group_id) {
+      $tree[$id][$group_id] = array();
     }
+
+    _xdruple_queries_categories_build_tree($tree[$id], $catalog);
   }
 }
 
+/**
+ * Build the Product Catalog tree HTML unordered list.
+ *
+ * @param array $tree The catalog tree/branch to build.
+ * @param arrat $catalog An array of all Product Catalog branches.
+ *
+ * @return string The HTML unordered list.
+ */
 function _xdruple_queries_categories_build_html($tree, $catalog) {
   $html = '';
 
@@ -65,4 +102,3 @@ function _xdruple_queries_categories_build_html($tree, $catalog) {
 
   return $html;
 }
-
