@@ -14,3 +14,6 @@ dependencies[] = commerce_product_reference
 dependencies[] = commerce_price_savings_formatter
 dependencies[] = email_registration
 dependencies[] = xdruple_fields
+
+; Views handlers
+files[] = includes/views/handlers/xdruple_commerce_handler_currency_formatter.inc
