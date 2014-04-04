@@ -11,6 +11,31 @@ function xdruple_invoice_views_api() {
 }
 
 /**
+ * Implements hook_init()
+ */
+function xdruple_invoice_init() {
+  module_load_include('inc', 'xdruple_invoice', 'pages/invoice');
+}
+
+/**
+ * Implements hook_menu()
+ */
+function xdruple_invoice_menu() {
+  $items = array();
+
+  $items['invoice/%'] = array(
+    'title'            => 'Invoice',
+    'page callback'    => 'xdruple_invoice_page',
+    'page arguments'   => array(1),
+    'access arguments' => array('access content'),
+    'file'             => 'pages/invoice.inc',
+    'type'             => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
  * Implements hook_views_pre_execute().
  */
 function xdruple_invoice_views_pre_execute($view) {
@@ -44,4 +69,21 @@ function xdruple_invoice_views_pre_execute($view) {
 //       );
 //     }
   }
+}
+
+/**
+ * Implements hook_theme()
+ */
+function xdruple_invoice_theme() {
+  $items = array();
+
+  $items['invoice_page'] = array(
+    'variables' => array(
+      'invoice' => array(),
+    ),
+    'template'  => 'theme/invoice-page',
+    'file'      => 'theme/theme.inc',
+  );
+
+  return $items;
 }
