@@ -1,0 +1,7 @@
+name = xTuple's Drupal Commerce Sales Order Module
+description = Interface to xTuple's Sales Orders.
+core = 7.x
+package = xDruple
+
+dependencies[] = rescued
+dependencies[] = xdruple

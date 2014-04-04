@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * Implements hook_views_api().
+ */
+function xdruple_order_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'xdruple_order') . '/includes/views',
+  );
+}
+
+/**
+ * Implements hook_views_pre_execute().
+ */
+function xdruple_order_views_pre_execute($view) {
+  if ($view->name === 'xd_pending_orders') {
+    // Query on Customer.
+    if (isset($_SESSION['rescued']['customer'])) {
+      $view->query->query->propertyConditions[] = array(
+        'column' => 'customer',
+        'value' => $_SESSION['rescued']['customer'],
+        'operator' => '=',
+      );
+      $view->build_info['count_query']->propertyConditions[] = array(
+        'column' => 'customer',
+        'value' => $_SESSION['rescued']['customer'],
+        'operator' => '=',
+      );
+    }
+
+    // Query on Ship To.
+    if (isset($_SESSION['rescued']['ship_to'])) {
+      // Get the Ship To Name.
+      $shipto_name = entity_load_single('xtuple_xdruplecommerceshipto', $_SESSION['rescued']['ship_to']);
+
+      $view->query->query->propertyConditions[] = array(
+        'column' => 'shiptoName',
+        'value' => $shipto_name->name,
+        'operator' => '=',
+      );
+      $view->build_info['count_query']->propertyConditions[] = array(
+        'column' => 'shiptoName',
+        'value' => $shipto_name->name,
+        'operator' => '=',
+      );
+    }
+  }
+}

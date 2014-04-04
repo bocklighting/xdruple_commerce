@@ -1,0 +1,7 @@
+name = xTuple's Drupal Commerce Invoice Module
+description = Interface to xTuple's Invoices.
+core = 7.x
+package = xDruple
+
+dependencies[] = rescued
+dependencies[] = xdruple
