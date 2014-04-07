@@ -13,7 +13,8 @@
 /**
  * Field handler to present a button to move a saved cart to the active cart.
  */
-class xdruple_commerce_handler_currency_formatter extends views_handler_field {
+//class xdruple_commerce_handler_currency_formatter extends views_handler_field {
+class xdruple_commerce_handler_currency_formatter extends entity_views_handler_field_numeric {
 
   /**
    * Implements the undocumented views_object::definition property.
@@ -28,6 +29,9 @@ class xdruple_commerce_handler_currency_formatter extends views_handler_field {
     // The name of the database table currency_field is in. Defaults to the
     // same table this handler is used on.
     'currency_code_table' => NULL,
+    'type' => 'decimal',
+    'float' => true,
+    'click sortable' => true,
   );
 
   /**
@@ -55,44 +59,19 @@ class xdruple_commerce_handler_currency_formatter extends views_handler_field {
   }
 
   /**
-   * Overrides parent::option_definition().
-   *
-   * @var array
-   */
-  function option_definition() {
-    $options = parent::option_definition();
-
-    // Whether to round amounts.
-    $options['currency_round'] = array(
-      'default' => FALSE,
-    );
-
-    return $options;
-  }
-
-  /**
-   * Overrides parent::options_form().
-   */
-  function options_form(&$form, &$form_state) {
-    parent::options_form($form, $form_state);
-
-    $form['currency_round'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Round amounts based on their currencies'),
-      '#default_value' => $this->options['currency_round'],
-    );
-  }
-
-  /**
    * Overrides parent::render().
+   * Dynamically adds currency symbol to the rendered amount based on the currency column.
    *
    * @throws RuntimeException
    */
   function render($values) {
+    $amount = parent::render($values);
     $currency = $this->getCurrency($values);
-    $amount = $this->getAmount($values);
 
-    return $this->format_currency($amount, $currency);
+    // Add the currency symbol to the rendered amount.
+    $format = $currency->symbol . $amount;
+
+    return $format;
   }
 
   /**
@@ -158,25 +137,5 @@ class xdruple_commerce_handler_currency_formatter extends views_handler_field {
     $currency = entity_load_single('xtuple_currency', $currency_code);
 
     return $currency;
-  }
-
-  /**
-   * Format the Currency for this field.
-   *
-   * @param $amount float
-   *   The currency amount. e.g. 1999.8642
-   *
-   * @param $currency object
-   *   Currency xTuple's Currecny resource for the matching code.
-   *
-   * @return A formatted amound with the currency symbol.
-   */
-  function format_currency($amount, $currency) {
-    // Add commas and round to two places.
-    $amount = number_format(round($amount, 2), 2);
-
-    $format = $currency->symbol . $amount;
-
-    return $format;
   }
 }
