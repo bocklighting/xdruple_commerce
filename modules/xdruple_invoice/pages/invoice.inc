@@ -7,23 +7,30 @@
 /**
  * Page callback
  *
- * @param $product_id
+ * @param $invc_num The Invoice number.
  *
- * @return string
+ * @return string Themed output.
  */
-function xdruple_invoice_page($invc_id) {
+function xdruple_invoice_page($invc_num) {
   $output = '';
+  $invoices = array();
 
-  $list           = array();
-
-  if (!empty($invc_id)) {
+  if (!empty($invc_num)) {
     $query = new EntityFieldQuery();
-    $invoices = $query->entityCondition('entity_type', 'xtuple_invoicelistitem')
-      // TODO: nginx seems to max out around 180 products. Then it returns a
-      // 414 Request-URI Too Large. Using 50 as a default for now until this
-      // is fixed by dev ops.
-      ->propertyCondition('number', $invc_id, '=')
-      ->execute();
+    $query->entityCondition('entity_type', 'xtuple_invoice')
+      ->propertyCondition('number', $invc_num, '=');
+
+    if (user_access('administer rescued entities')) {
+      $invoices = $query->execute();
+    } else if (isset($_SESSION['rescued']['customer'])) {
+      $query->propertyCondition('customer', $_SESSION['rescued']['customer'], '=');
+      $invoices = $query->execute();
+    }
+    // TODO: Add Sales Rep, Emplyee and Owner query filters.
+
+    $query_remitto = new EntityFieldQuery();
+    $remitto = $query_remitto->entityCondition('entity_type', 'xtuple_remitto')
+                 ->execute();
 
     // TODO: The rescued_entity_field_query_builder(EntityFieldQuery $query)
     // function runs through entity_load to do the actual query. In theory,
@@ -33,10 +40,34 @@ function xdruple_invoice_page($invc_id) {
     // and EntityFieldQuery cache need to work together.
     //$invoice = entity_load('xtuple_invoicelistitem', array_keys($invoice['xtuple_invoicelistitem']));
 
-    foreach ($invoices['xtuple_invoicelistitem'] as $invoice) {
-      $output = theme('invoice_page', array(
-        'invoice' => $invoice,
-      ));
+    foreach ($invoices['xtuple_invoice'] as $invoice) {
+      $currency = entity_load_single('xtuple_currency', $invoice->currency);
+
+      $query_order = new EntityFieldQuery();
+      $order = $query_order->entityCondition('entity_type', 'xtuple_salesorder')
+                    ->propertyCondition('number', $invoice->orderNumber, '=')
+                    ->execute();
+
+      $query_shipment = new EntityFieldQuery();
+      $shipment = $query_shipment->entityCondition('entity_type', 'xtuple_shipment')
+                    ->propertyCondition('order', $invoice->orderNumber, '=')
+                    ->execute();
+
+      $params = array(
+        'invoice'  => $invoice,
+        'remitto'  => $remitto['xtuple_remitto'][key($remitto['xtuple_remitto'])],
+        'currency' => $currency,
+      );
+
+      if (count($order) > 0) {
+        $params['order'] = $order['xtuple_salesorder'][$invoice->orderNumber];
+      }
+
+      if (count($shipment) > 0) {
+        $params['shipments'] = $shipment['xtuple_shipment'];
+      }
+
+      $output = theme('invoice_page', $params);
     }
   }
 

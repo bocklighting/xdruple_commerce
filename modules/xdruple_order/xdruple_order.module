@@ -11,6 +11,32 @@ function xdruple_order_views_api() {
 }
 
 /**
+ * Implements hook_init()
+ */
+function xdruple_order_init() {
+  module_load_include('inc', 'xdruple_order', 'pages/invoice');
+}
+
+/**
+ * Implements hook_menu()
+ */
+function xdruple_order_menu() {
+  $items = array();
+
+  $items['order/%'] = array(
+    'title'            => 'Order',
+    'page callback'    => 'xdruple_order_page',
+    'page arguments'   => array(1),
+    'access arguments' => array('access content'),
+    'file'             => 'pages/order.inc',
+    'type'             => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+
+/**
  * Implements hook_views_pre_execute().
  */
 function xdruple_order_views_pre_execute($view) {
@@ -46,4 +72,21 @@ function xdruple_order_views_pre_execute($view) {
       );
     }
   }
+}
+
+/**
+ * Implements hook_theme()
+ */
+function xdruple_order_theme() {
+  $items = array();
+
+  $items['order_page'] = array(
+    'variables' => array(
+      'order' => array(),
+    ),
+    'template'  => 'theme/order-page',
+    'file'      => 'theme/theme.inc',
+  );
+
+  return $items;
 }

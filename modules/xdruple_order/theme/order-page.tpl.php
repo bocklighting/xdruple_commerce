@@ -30,24 +30,6 @@
 <!-- Header Table -->
 <div>
   <table>
-  <?php if (!empty($invoice_num)): ?>
-    <tr>
-      <td>Invoice #:</td>
-      <td><?php print $invoice_num ?></td>
-    </tr>
-  <?php endif; ?>
-  <?php if (!empty($invoice_date)): ?>
-    <tr>
-      <td>Invoice Date:</td>
-      <td><?php print $invoice_date ?></td>
-    </tr>
-  <?php endif; ?>
-  <?php if (!empty($account_num)): ?>
-    <tr>
-      <td>Account #:</td>
-      <td><?php print $account_num ?></td>
-    </tr>
-  <?php endif; ?>
   <?php if (!empty($order_num)): ?>
     <tr>
       <td>Sales Order #:</td>
@@ -60,10 +42,22 @@
       <td><?php print $order_date ?></td>
     </tr>
   <?php endif; ?>
+  <?php if (!empty($account_num)): ?>
+    <tr>
+      <td>Account #:</td>
+      <td><?php print $account_num ?></td>
+    </tr>
+  <?php endif; ?>
   <?php if (!empty($po_num)): ?>
     <tr>
       <td>PO #:</td>
       <td><?php print $po_num ?></td>
+    </tr>
+  <?php endif; ?>
+  <?php if (!empty($sched_date)): ?>
+    <tr>
+      <td>Scheduled Date:</td>
+      <td><?php print $sched_date ?></td>
     </tr>
   <?php endif; ?>
     <tr>
@@ -71,12 +65,6 @@
       <td></td>
       <td></td>
     </tr>
-  <?php if (!empty($due_date)): ?>
-    <tr>
-      <td>Due Date:</td>
-      <td><?php print $due_date ?></td>
-    </tr>
-  <?php endif; ?>
   <?php if (!empty($total_due)): ?>
     <tr>
       <td>Total Due:</td>
@@ -181,16 +169,6 @@
     </tr>
   <?php endif; ?>
   </table>
-</div>
-
-<!-- Tracking -->
-<div>
-  <h2>Tracking:</h2>
-  <?php foreach ($tracking as $tracknumber): ?>
-    <div>
-      <span><?php print $tracknumber ?></span>
-    </div>
-  <?php endforeach; ?>
 </div>
 
 <!-- Footer Message -->
