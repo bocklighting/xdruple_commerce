@@ -38,7 +38,7 @@ function xdruple_invoice_views_default_views() {
     'billtoName' => 'billtoName',
     'billtoCity' => 'billtoCity',
     'billtoState' => 'billtoState',
-    'total_amount' => 'total_amount',
+    'total' => 'total',
   );
   $handler->display->display_options['style_options']['default'] = '-1';
   $handler->display->display_options['style_options']['info'] = array(
@@ -84,7 +84,9 @@ function xdruple_invoice_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
-    'total_amount' => array(
+    'total' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
       'align' => 'views-align-right',
       'separator' => '',
       'empty_column' => 0,
@@ -127,10 +129,12 @@ function xdruple_invoice_views_default_views() {
   $handler->display->display_options['fields']['billtoState']['field'] = 'billtoState';
   $handler->display->display_options['fields']['billtoState']['link_to_entity'] = 0;
   /* Field: InvoiceListItem: Total */
-  $handler->display->display_options['fields']['total_amount']['id'] = 'total_amount';
-  $handler->display->display_options['fields']['total_amount']['table'] = 'efq_xtuple_invoicelistitem';
-  $handler->display->display_options['fields']['total_amount']['field'] = 'total_amount';
-  $handler->display->display_options['fields']['total_amount']['currency_round'] = 1;
+  $handler->display->display_options['fields']['total']['id'] = 'total';
+  $handler->display->display_options['fields']['total']['table'] = 'efq_xtuple_invoicelistitem';
+  $handler->display->display_options['fields']['total']['field'] = 'total';
+  $handler->display->display_options['fields']['total']['set_precision'] = TRUE;
+  $handler->display->display_options['fields']['total']['precision'] = '2';
+  $handler->display->display_options['fields']['total']['link_to_entity'] = 0;
   /* Filter criterion: InvoiceListItem: Is Posted */
   $handler->display->display_options['filters']['isPosted']['id'] = 'isPosted';
   $handler->display->display_options['filters']['isPosted']['table'] = 'efq_xtuple_invoicelistitem';

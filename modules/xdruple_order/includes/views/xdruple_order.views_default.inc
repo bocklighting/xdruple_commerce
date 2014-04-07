@@ -33,39 +33,18 @@ function xdruple_order_views_default_views() {
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
     'number' => 'number',
-    'billtoCity' => 'billtoCity',
-    'billtoName' => 'billtoName',
-    'billtoState' => 'billtoState',
     'orderDate' => 'orderDate',
-    'shiptoCity' => 'shiptoCity',
+    'billtoName' => 'billtoName',
+    'billtoCity' => 'billtoCity',
+    'billtoState' => 'billtoState',
     'shiptoName' => 'shiptoName',
+    'shiptoCity' => 'shiptoCity',
     'shiptoState' => 'shiptoState',
-    'total_amount' => 'total_amount',
+    'total' => 'total',
   );
   $handler->display->display_options['style_options']['default'] = '-1';
   $handler->display->display_options['style_options']['info'] = array(
     'number' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'billtoCity' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'billtoName' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'billtoState' => array(
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
@@ -79,7 +58,21 @@ function xdruple_order_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
-    'shiptoCity' => array(
+    'billtoName' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'billtoCity' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'billtoState' => array(
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
@@ -93,6 +86,13 @@ function xdruple_order_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
+    'shiptoCity' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
     'shiptoState' => array(
       'sortable' => 1,
       'default_sort_order' => 'asc',
@@ -100,7 +100,9 @@ function xdruple_order_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
-    'total_amount' => array(
+    'total' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
       'align' => 'views-align-right',
       'separator' => '',
       'empty_column' => 0,
@@ -150,11 +152,13 @@ function xdruple_order_views_default_views() {
   $handler->display->display_options['fields']['shiptoState']['table'] = 'efq_xtuple_salesorderlistitem';
   $handler->display->display_options['fields']['shiptoState']['field'] = 'shiptoState';
   $handler->display->display_options['fields']['shiptoState']['link_to_entity'] = 0;
-  /* Field: InvoiceListItem: Total */
-  $handler->display->display_options['fields']['total_amount']['id'] = 'total_amount';
-  $handler->display->display_options['fields']['total_amount']['table'] = 'efq_xtuple_salesorderlistitem';
-  $handler->display->display_options['fields']['total_amount']['field'] = 'total_amount';
-  $handler->display->display_options['fields']['total_amount']['currency_round'] = 1;
+  /* Field: SalesOrderListItem: Total */
+  $handler->display->display_options['fields']['total']['id'] = 'total';
+  $handler->display->display_options['fields']['total']['table'] = 'efq_xtuple_salesorderlistitem';
+  $handler->display->display_options['fields']['total']['field'] = 'total';
+  $handler->display->display_options['fields']['total']['set_precision'] = TRUE;
+  $handler->display->display_options['fields']['total']['precision'] = '2';
+  $handler->display->display_options['fields']['total']['link_to_entity'] = 0;
   /* Filter criterion: SalesOrderListItem: Status */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'efq_xtuple_salesorderlistitem';
