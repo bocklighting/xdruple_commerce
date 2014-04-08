@@ -1504,3 +1504,80 @@ function xdruple_commerce_commerce_checkout_complete($order) {
 function xdruple_commerce_commerce_order_update($order) {
 
 }
+
+/**
+ * Helper function to format the Currency for this field.
+ *
+ * @param float $amount
+ *   The amount to format.
+ * @param object $currency
+ *   The Currency object.
+ *
+ * @return Formatted amount.
+ */
+function _xdruple_commerce_currency_format($amount, $currency) {
+  // Add commas and round to two places.
+  $amount = number_format(round($amount, 2), 2);
+
+  $format = $currency->symbol . $amount;
+
+  return $format;
+}
+
+/**
+ * Helper function to format a tracking number into a link to the tracking site.
+ *
+ * @param string $tracking
+ *
+ * @return Formatted link to the tracking site.
+ */
+function _xdruple_commerce_tracking_format($tracking) {
+  // @See: http://gummydev.com/regex/
+  $ups_pattern   = '/\b(1Z ?[0-9A-Z]{3} ?[0-9A-Z]{3} ?[0-9A-Z]{2} ?[0-9A-Z]{4} ?[0-9A-Z]{3} ?[0-9A-Z]|[\dT]\d\d\d ?\d\d\d\d ?\d\d\d)\b/';
+  $fedex_pattern = '/\b((96\d\d\d\d\d ?\d\d\d\d|96\d\d) ?\d\d\d\d ?d\d\d\d( ?\d\d\d)?)\b/';
+  $usps_pattern  = '/\b(91\d\d ?\d\d\d\d ?\d\d\d\d ?\d\d\d\d ?\d\d\d\d ?\d\d|91\d\d ?\d\d\d\d ?\d\d\d\d ?\d\d\d\d ?\d\d\d\d)\b/';
+
+  // Figure out carrier pattern.
+  if (preg_match($ups_pattern, $tracking)) {
+    // Create link to tracking site.
+    $format = 'UPS #: ' . l($tracking, 'http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=' . $tracking);
+  } else if (preg_match($fedex_pattern, $tracking)) {
+    // Create link to tracking site.
+    $format = 'FedEx #: ' . l($tracking, 'http://www.fedex.com/Tracking?action=track&tracknumbers=' . $tracking);;
+  } else if (preg_match($usps_pattern, $tracking)) {
+    // Create link to tracking site.
+    $format = 'USPS #: ' . l($tracking, 'https://tools.usps.com/go/TrackConfirmAction_input?qtc_tLabels1=' . $tracking);;
+  } else {
+    if (!empty($tracking)) {
+      $format = 'Unknown #: ' . $tracking;
+    } else {
+      $format = 'No tracking infoformation available';
+    }
+  }
+
+  return $format;
+}
+
+/**
+ * Helper function to format a link to the product page.
+ *
+ * @param string $product
+ *
+ * @return Formatted link to the product page.
+ */
+function _xdruple_commerce_product_format($item) {
+  $query = new EntityFieldQuery();
+  $product = $query->entityCondition('entity_type', 'commerce_product')
+                ->propertyCondition('sku', $item['number'], '=')
+                ->execute();
+
+  if (count($product['commerce_product']) > 0) {
+    $product_id = key($product['commerce_product']);
+    // Create link to product page.
+    $format = l($product['commerce_product'][$product_id]->sku, 'products/' . $product_id);
+  } else {
+    $format = $item['number'];
+  }
+
+  return $format;
+}
