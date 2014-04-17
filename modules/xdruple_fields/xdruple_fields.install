@@ -1274,4 +1274,47 @@ function xdruple_fields_install() {
       field_update_instance($instance);
     }
   }
+
+  // Add erp_url_image_field. Instances are created through
+  // hook_rescued_create_child_fields().
+  // @See: xdruple_fields_rescued_create_child_fields()
+  if (!field_info_field('erp_url_image_field')) {
+    $field = array(
+      'field_name' => 'erp_url_image_field',
+      'type' => 'image',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'module' => 'image',
+      'storage' => array(
+        'type' => 'xdfields_rest_storage',
+        'settings' => array(),
+        'module' => 'xdfields_rest_storage',
+        'active' => 1,
+      ),
+      'settings' => array(
+        'default_image' => 0,
+      ),
+    );
+
+    field_create_field($field);
+  }
+
+  // Add erp_url_file_field. Instances are created through
+  // hook_rescued_create_child_fields().
+  // @See: xdruple_fields_rescued_create_child_fields()
+  if (!field_info_field('erp_url_file_field')) {
+    $field = array(
+      'field_name' => 'erp_url_file_field',
+      'type' => 'file',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'module' => 'file',
+      'storage' => array(
+        'type' => 'xdfields_rest_storage',
+        'settings' => array(),
+        'module' => 'xdfields_rest_storage',
+        'active' => 1,
+      ),
+    );
+
+    field_create_field($field);
+  }
 }
