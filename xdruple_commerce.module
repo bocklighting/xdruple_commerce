@@ -666,6 +666,11 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'description' => t('Product module extended description form element'),
         'weight' => -3,
       ),
+      'urls' => array(
+        'label' => t('URLs'),
+        'description' => t('Product file URLs'),
+        'weight' => -3,
+      ),
     );
 
     $display = array(
@@ -715,6 +720,11 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'label' => t('Extended Description'),
         'description' => t('Extended description of the product'),
         'theme' => 'xdruple_commerce_ex_descrip',
+        'weight' => -3,
+      ),
+      'urls' => array(
+        'label' => t('URLs'),
+        'description' => t('Product file URLs'),
         'weight' => -3,
       ),
     );
@@ -1113,7 +1123,8 @@ function xdruple_commerce_form_commerce_product_ui_product_form_alter(&$form, &$
     'created',
     'changed',
     'data',
-    'commerce_price'
+    'commerce_price',
+    'urls', // URLs are loaded through the 'erp_xdruplecommerceproducturls' field.
   );
 
   // Get the xtuple form version from our controler and loop over our fields in that

@@ -102,6 +102,358 @@ function xdruple_fields_user_access_extend($user_id) {
 }
 
 /**
+ * Implements hook_rescued_handle_create_child_fields_alter().
+ */
+function xdruple_fields_rescued_handle_create_child_fields_alter(&$handled_properties) {
+  if (isset($handled_properties['xtuple'])) {
+    // Handle product URLs as item and file fields.
+    // @See: xdruple_fields_rescued_create_child_fields()
+    if (isset($handled_properties['xtuple']['XdrupleCommerceProduct']) &&
+      is_array($handled_properties['xtuple']['XdrupleCommerceProduct'])) {
+
+      array_push($handled_properties['xtuple']['XdrupleCommerceProduct'], 'urls');
+    } else {
+      $handled_properties['xtuple']['XdrupleCommerceProduct'] = array('urls');
+    }
+
+    // QueryOptions should have any fields. It's just a POST method, not full entity.
+    if (isset($handled_properties['xtuple']['QueryOptions']) &&
+      is_array($handled_properties['xtuple']['QueryOptions'])) {
+
+      array_push($handled_properties['xtuple']['QueryOptions'], 'query');
+    } else {
+      $handled_properties['xtuple']['QueryOptions'] = array('query');
+    }
+
+    // TODO: Customer ItemPrice is adding instances too:
+    // xtuple_xdruplecustomer
+  }
+
+  return $handled_properties;
+}
+
+/**
+ * Implements hook_rescued_create_child_fields().
+ */
+function xdruple_fields_rescued_create_child_fields($name, $resource, $property, $child, $title, $cardinality, $weight) {
+  if ($name === 'xtuple' && $resource === 'XdrupleCommerceProduct' && $property === 'urls') {
+    // Add image field instances.
+    $field_name = 'erp_url_image_field';
+
+    // This field should get created in xdruple_fields.install.
+    if (field_info_field($field_name)) {
+      // Add 'commerce_product' instance.
+      $instance = field_info_instance('commerce_product', $field_name, 'product');
+      if (is_null($instance)) {
+        $instance = array(
+          'field_name' => $field_name,
+          'entity_type' => 'commerce_product',
+          'bundle' => 'product',
+          'label' => 'Product Images',
+        );
+        $instance['widget']['weight'] = $weight;
+        $instance['display']['default']['weight'] = $weight;
+        field_create_instance($instance);
+      }
+
+      // Add 'xtuple_xdruplecommerceproduct' instance.
+      $entity_type = $name . '_' . strtolower($resource);
+      $instance = field_info_instance($entity_type, $field_name, $entity_type);
+      if (is_null($instance)) {
+        $instance = array(
+          'field_name' => $field_name,
+          'entity_type' => $name . '_' . strtolower($resource),
+          'bundle' => $name . '_' . strtolower($resource),
+          'label' => 'Product Images',
+        );
+        $instance['widget']['weight'] = $weight;
+        $instance['display']['default']['weight'] = $weight;
+        field_create_instance($instance);
+      }
+    }
+
+    // Add file field instances.
+    $field_name = 'erp_url_file_field';
+
+    // This field should get created in xdruple_fields.install.
+    if (field_info_field($field_name)) {
+      // Add 'commerce_product' instance.
+      $instance = field_info_instance('commerce_product', $field_name, 'product');
+      if (is_null($instance)) {
+        $instance = array(
+          'field_name' => $field_name,
+          'entity_type' => 'commerce_product',
+          'bundle' => 'product',
+          'label' => 'Product Files',
+        );
+        $instance['settings']['file_extensions'] = 'txt pdf';
+        $instance['widget']['weight'] = $weight;
+        $instance['display']['default']['weight'] = $weight;
+        field_create_instance($instance);
+      }
+
+      // Add 'xtuple_xdruplecommerceproduct' instance.
+      $entity_type = $name . '_' . strtolower($resource);
+      $instance = field_info_instance($entity_type, $field_name, $entity_type);
+      if (is_null($instance)) {
+        $instance = array(
+          'field_name' => $field_name,
+          'entity_type' => $name . '_' . strtolower($resource),
+          'bundle' => $name . '_' . strtolower($resource),
+          'label' => 'Product Files',
+        );
+        $instance['settings']['file_extensions'] = 'txt pdf';
+        $instance['widget']['weight'] = $weight;
+        $instance['display']['default']['weight'] = $weight;
+        field_create_instance($instance);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_storage_pre_insert().
+ */
+function xdruple_fields_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
+  // Wrap the update hook, which does everything we need.
+  xdruple_fields_field_storage_pre_update($entity_type, $entity, $skip_fields);
+}
+
+/**
+ * Implements hook_field_storage_pre_update().
+ */
+function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
+  // Check $entity_type and only act on ones we support.
+  $entity_info = entity_get_info($entity_type);
+
+  if (isset($entity_info['discovery-client']) && $entity_info['discovery-client'] === 'xtuple') {
+
+    // Get all the fields attached to this entity.
+    $bundle = $entity_type === 'commerce_product' ? 'product' : $entity_type;
+    $instances = field_info_instances($entity_type, $bundle);
+    foreach ($instances as $field_name => $instance) {
+      if ($field_name !== 'erp_url_image_field' && $field_name !== 'erp_url_file_field') {
+        continue;
+      }
+
+      $field_info = field_info_field($field_name);
+      $type = $field_info['type'];
+
+      $resource = $entity_info['resource'];
+      $entity_properties = $entity_info['json-schema'][$resource]['properties'];
+
+      // Check the entity for 'urls' property.
+      if (array_key_exists('urls', $entity_properties)) {
+        $field_type_urls = array();
+        $associated_urls = array();
+
+        if (!empty($entity->urls)) {
+          foreach ($entity->urls as $url_key => $url) {
+            $remote_url = parse_url($url['url']['path']);
+            $parts = explode('/', $remote_url['path']);
+            $file_name = array_pop($parts);
+            $file_parts = explode('.', $file_name);
+            $file_type = array_pop($file_parts);
+
+            // Handle images with the image field and pdfs with the file field.
+            $allowed_ext = explode(' ', $instance['settings']['file_extensions']);
+            if (!in_array($file_type, $allowed_ext)) {
+              continue;
+            }
+
+            $field_type_urls[$url_key] = $url;
+          }
+        }
+
+        // This url is handled by this field type.
+        foreach ($entity->{$field_name}[LANGUAGE_NONE] as $file_info) {
+          // Get the file info.
+          $file = file_load($file_info['fid']);
+
+          $url_url_uuids = array();
+          foreach ($field_type_urls as $url_key => $url) {
+            $url_url_uuids[$url['uuid']] = $url['url']['uuid'];
+          }
+
+          if ($matching_uuid = array_search($file->uuid, $url_url_uuids)) {
+
+            $associated_urls[] = $matching_uuid;
+
+            // TODO: Update any changes? Currently, file and image fields
+            // don't allow you to change a file, just remove it, which we
+            // handle below.
+          } else {
+            $url_values = array(
+              'uuid' => $file->uuid,
+              'name' => isset($file->title) ? $file->title : $file->filename,
+              'path' => file_create_url($file->uri),
+            );
+            $new_url = entity_create('xtuple_url', $url_values);
+            entity_save('xtuple_url', $new_url);
+
+            // The API may return a different UUID. Update the Drupal file to match.
+            $file->uuid = $new_url->uuid;
+            $file = file_save($file);
+
+            $new_uuid = xdruple_guidv4();
+            $entity->urls[] = array(
+              'uuid' => $new_uuid,
+              'url' => $new_url->uuid,
+              'purpose' => 'S'
+            );
+
+            // Set pointer to the last value we just added.
+            end($entity->urls);
+            // Get the key of the last value.
+            $new_key = key($entity->urls);
+
+            $associated_urls[] = $new_uuid;
+            $field_type_urls[$new_key] = $entity->urls[$new_key];
+
+            // Reset the array pointer back to the start.
+            reset($entity->urls);
+          }
+        }
+
+        // Find all urls that are not associated with a field and remove them.
+        foreach ($field_type_urls as $url_key => $url) {
+          if (!in_array($url['uuid'], $associated_urls)) {
+            unset($entity->urls[$url_key]);
+          }
+        }
+      }
+      // Add this field to $skip_fields.
+      $skip_fields[$field_info['id']] = $field_info;
+    }
+  }
+}
+
+/**
+ * Implements hook_field_storage_pre_load().
+ *
+ * Side loads images and files from a xTuple entity's 'urls' property into
+ * the 'erp_url_image_field' and 'erp_url_file_field' respective fields.
+ */
+function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$skip_fields, $options) {
+  // Check $entity_type and only act on ones we support.
+  $entity_info = entity_get_info($entity_type);
+
+  if (isset($entity_info['discovery-client']) && $entity_info['discovery-client'] === 'xtuple') {
+
+    // Get all the fields attached to this entity.
+    $bundle = $entity_type === 'commerce_product' ? 'product' : $entity_type;
+    $instances = field_info_instances($entity_type, $bundle);
+    foreach ($instances as $field_name => $instance) {
+      if ($field_name !== 'erp_url_image_field' && $field_name !== 'erp_url_file_field') {
+        continue;
+      }
+
+      $field_info = field_info_field($field_name);
+      $type = $field_info['type'];
+
+      $resource = $entity_info['resource'];
+      $entity_properties = $entity_info['json-schema'][$resource]['properties'];
+
+      // Check the entity for 'urls' property.
+      if (array_key_exists('urls', $entity_properties)) {
+        foreach ($entities as $entity_id => $entity) {
+          $image_delta = 0;
+          $file_delta = 0;
+          foreach ($entity->urls as $url) {
+            // Check file_associations for existing uuid.
+            $query = new EntityFieldQuery();
+            $result = $query->entityCondition('entity_type', 'file')
+              ->propertyCondition('uuid', $url['url']['uuid'])
+              ->execute();
+
+            $file_exists = false;
+
+            $remote_url = parse_url($url['url']['path']);
+            $parts = explode('/', $remote_url['path']);
+            $file_name = array_pop($parts);
+            $file_parts = explode('.', $file_name);
+            $file_type = array_pop($file_parts);
+
+            // Handle images with the image field and pdfs with the file field.
+            $allowed_ext = explode(' ', $instance['settings']['file_extensions']);
+            if (!in_array($file_type, $allowed_ext)) {
+              continue;
+            }
+
+            if (count($result) === 0) {
+              // If uuid doesn't exist, fetch the file from the remote URL.
+              $parts_path = implode('/', $parts);
+              $path = 'public://xtuple' . $parts_path;
+              $remote_file = file_get_contents($url['url']['path']);
+              file_prepare_directory($path, FILE_CREATE_DIRECTORY);
+              $destination = $path . '/' . $file_name;
+
+              // Insert the file into Drupal's file system.
+              $file = file_save_data($remote_file, $destination, FILE_EXISTS_RENAME);
+              $info = image_get_info($file->uri);
+            } else {
+              $file = file_load(key($result['file']));
+              $info = image_get_info($file->uri);
+
+              $file_exists = true;
+            }
+
+            if ($type === 'image') {
+              if (!$info || empty($info['extension'])) {
+                continue;
+              } else {
+                if (!$file_exists) {
+                  // Set the UUID to match xTuples.
+                  $file->uuid = $url['url']['uuid'];
+                  $file = file_save($file);
+                  file_usage_add($file, 'file', $entity_type, $entity_id);
+                }
+
+                if (!empty($file)) {
+                  // Associate that file with this product entity.
+                  $entity->erp_url_image_field[LANGUAGE_NONE][$image_delta] = array(
+                    'fid' => $file->fid,
+                    'alt' => '',
+                    'title' => '',
+                    'width' => $info['width'],
+                    'height' => $info['height'],
+                  );
+
+                  $image_delta++;
+                }
+              }
+            } else if ($type === 'file') {
+              // This is not an image.
+              if (!$info) {
+                if (!$file_exists) {
+                  // Set the UUID to match xTuples.
+                  $file->uuid = $url['url']['uuid'];
+                  $file = file_save($file);
+                  file_usage_add($file, 'file', $entity_type, $entity_id);
+                }
+
+                if (!empty($file)) {
+                  // Associate that file with this product entity.
+                  $entity->erp_url_file_field[LANGUAGE_NONE][$file_delta] = array(
+                    'fid' => $file->fid,
+                    'alt' => '',
+                    'title' => '',
+                  );
+
+                  $file_delta++;
+                }
+              }
+            }
+          }
+        }
+      }
+      // Add this field to $skip_fields.
+      $skip_fields[$field_info['id']] = $field_info;
+    }
+  }
+}
+
+/**
  * Implements hook_form_alter()
  *
  * Set Customer default on checkout forms.
