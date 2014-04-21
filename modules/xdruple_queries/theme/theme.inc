@@ -83,9 +83,9 @@ function _xdruple_queries_add_to_cart_button($product, $show_qty = FALSE, $conte
  * Helper function to build Image field
  */
 function _xdruple_queries_product_image($product, $style = '') {
-  $img = !empty($product->erp_url_image_field[LANGUAGE_NONE][0]['uri']) ? l(theme('image_style', array(
+  $img = !empty($product->xt_url_image_field[LANGUAGE_NONE][0]['uri']) ? l(theme('image_style', array(
     'style_name' => $style,
-    'path'       => $product->erp_url_image_field[LANGUAGE_NONE][0]['uri'],
+    'path'       => $product->xt_url_image_field[LANGUAGE_NONE][0]['uri'],
   )), "products/{$product->product_id}", array(
     'html' => TRUE,
   )) : '';
