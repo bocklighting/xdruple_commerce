@@ -188,7 +188,7 @@ function xdruple_fields_install() {
                 'module' => 'options',
                 'type' => 'options_select',
                 'multiple_entities' => true,
-                'carbinality' => 1
+                'cardinality' => 1
               ),
             ),
             'match_operator' => 'CONTAINS',
@@ -282,7 +282,7 @@ function xdruple_fields_install() {
                 'module' => 'options',
                 'type' => 'options_select',
                 'multiple_entities' => true,
-                'carbinality' => 1
+                'cardinality' => 1
               ),
             ),
             'match_operator' => 'CONTAINS',
@@ -453,7 +453,7 @@ function xdruple_fields_install() {
                 'module' => 'options',
                 'type' => 'options_select',
                 'multiple_entities' => true,
-                'carbinality' => 1
+                'cardinality' => 1
               ),
             ),
             'match_operator' => 'CONTAINS',
@@ -538,7 +538,7 @@ function xdruple_fields_install() {
                 'module' => 'options',
                 'type' => 'options_select',
                 'multiple_entities' => true,
-                'carbinality' => 1
+                'cardinality' => 1
               ),
             ),
             'match_operator' => 'CONTAINS',
@@ -618,7 +618,7 @@ function xdruple_fields_install() {
                 'module' => 'options',
                 'type' => 'options_select',
                 'multiple_entities' => true,
-                'carbinality' => 1
+                'cardinality' => 1
               ),
             ),
             'match_operator' => 'CONTAINS',
@@ -786,7 +786,7 @@ function xdruple_fields_install() {
               'module' => 'options',
               'type' => 'options_select',
               'multiple_entities' => true,
-              'carbinality' => 1
+              'cardinality' => 1
             ),
           ),
           'match_operator' => 'CONTAINS',
@@ -863,7 +863,7 @@ function xdruple_fields_install() {
               'module' => 'options',
               'type' => 'options_select',
               'multiple_entities' => true,
-              'carbinality' => 1
+              'cardinality' => 1
             ),
           ),
           'match_operator' => 'CONTAINS',
@@ -940,7 +940,7 @@ function xdruple_fields_install() {
               'module' => 'options',
               'type' => 'options_select',
               'multiple_entities' => true,
-              'carbinality' => 1
+              'cardinality' => 1
             ),
           ),
           'match_operator' => 'CONTAINS',
@@ -1017,7 +1017,7 @@ function xdruple_fields_install() {
               'module' => 'options',
               'type' => 'options_select',
               'multiple_entities' => true,
-              'carbinality' => -1
+              'cardinality' => -1
             ),
           ),
           'match_operator' => 'CONTAINS',
@@ -1094,7 +1094,7 @@ function xdruple_fields_install() {
               'module' => 'options',
               'type' => 'options_select',
               'multiple_entities' => true,
-              'carbinality' => 1
+              'cardinality' => 1
             ),
           ),
           'match_operator' => 'CONTAINS',
@@ -1171,7 +1171,7 @@ function xdruple_fields_install() {
               'module' => 'options',
               'type' => 'options_select',
               'multiple_entities' => true,
-              'carbinality' => 1
+              'cardinality' => 1
             ),
           ),
           'match_operator' => 'CONTAINS',
@@ -1245,7 +1245,7 @@ function xdruple_fields_install() {
               'module' => 'options',
               'type' => 'options_select',
               'multiple_entities' => true,
-              'carbinality' => 1
+              'cardinality' => 1
             ),
           ),
           'match_operator' => 'CONTAINS',
