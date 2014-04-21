@@ -1,5 +1,5 @@
 <?php if (isset($img)): ?>
-  <div class="views-field views-field-erp-url-image-field">
+  <div class="views-field views-field-xt-url-image-field">
     <span class="field-content"><?php print $img ?></span>
   </div>
 <?php endif; ?>

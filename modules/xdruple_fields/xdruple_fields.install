@@ -1275,12 +1275,12 @@ function xdruple_fields_install() {
     }
   }
 
-  // Add erp_url_image_field. Instances are created through
+  // Add xt_url_image_field. Instances are created through
   // hook_rescued_create_child_fields().
   // @See: xdruple_fields_rescued_create_child_fields()
-  if (!field_info_field('erp_url_image_field')) {
+  if (!field_info_field('xt_url_image_field')) {
     $field = array(
-      'field_name' => 'erp_url_image_field',
+      'field_name' => 'xt_url_image_field',
       'type' => 'image',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
       'module' => 'image',
@@ -1298,12 +1298,12 @@ function xdruple_fields_install() {
     field_create_field($field);
   }
 
-  // Add erp_url_file_field. Instances are created through
+  // Add xt_url_file_field. Instances are created through
   // hook_rescued_create_child_fields().
   // @See: xdruple_fields_rescued_create_child_fields()
-  if (!field_info_field('erp_url_file_field')) {
+  if (!field_info_field('xt_url_file_field')) {
     $field = array(
-      'field_name' => 'erp_url_file_field',
+      'field_name' => 'xt_url_file_field',
       'type' => 'file',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
       'module' => 'file',
@@ -1323,12 +1323,12 @@ function xdruple_fields_install() {
  * Ensure new fields are installed.
  */
 function xdruple_fields_update_7101(&$sandbox) {
-  // Add erp_url_image_field. Instances are created through
+  // Add xt_url_image_field. Instances are created through
   // hook_rescued_create_child_fields().
   // @See: xdruple_fields_rescued_create_child_fields()
-  if (!field_info_field('erp_url_image_field')) {
+  if (!field_info_field('xt_url_image_field')) {
     $field = array(
-      'field_name' => 'erp_url_image_field',
+      'field_name' => 'xt_url_image_field',
       'type' => 'image',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
       'module' => 'image',
@@ -1346,12 +1346,12 @@ function xdruple_fields_update_7101(&$sandbox) {
     field_create_field($field);
   }
 
-  // Add erp_url_file_field. Instances are created through
+  // Add xt_url_file_field. Instances are created through
   // hook_rescued_create_child_fields().
   // @See: xdruple_fields_rescued_create_child_fields()
-  if (!field_info_field('erp_url_file_field')) {
+  if (!field_info_field('xt_url_file_field')) {
     $field = array(
-      'field_name' => 'erp_url_file_field',
+      'field_name' => 'xt_url_file_field',
       'type' => 'file',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
       'module' => 'file',
