@@ -539,6 +539,7 @@ function xdruple_fields_views_default_views() {
   $handler->display->display_options['fields']['postalCode']['id'] = 'postalCode';
   $handler->display->display_options['fields']['postalCode']['table'] = 'efq_xtuple_xdruplecommerceaddress';
   $handler->display->display_options['fields']['postalCode']['field'] = 'postalCode';
+  $handler->display->display_options['fields']['postalCode']['label'] = 'Zip';
   $handler->display->display_options['fields']['postalCode']['link_to_entity'] = 0;
   /* Field: XdrupleCommerceAddress: Country */
   $handler->display->display_options['fields']['country']['id'] = 'country';
