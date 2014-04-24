@@ -1621,3 +1621,162 @@ function _xdruple_commerce_product_format($item) {
 
   return $format;
 }
+
+function xdruple_commerce_xtuple_xdruplecommerceshipto_view_alter(&$build, $entity_type) {
+  $build['#page'] = TRUE;
+  if (empty($build['erp_xdruplecommerceshiptoaddress'][0]['#markup'])) {
+    $build['erp_xdruplecommerceshiptoaddress']['#access'] = FALSE;
+  }
+  if (empty($build['erp_xdruplecommerceshiptocontact'][0]['#markup'])) {
+    $build['erp_xdruplecommerceshiptocontact']['#access'] = FALSE;
+  }
+  if (!empty($build['isDefault']['#access'])) {
+    $build['isDefault']['#access'] = FALSE;
+  }
+  if (!empty($build['number']['#access'])) {
+    $build['number']['#access'] = FALSE;
+  }
+  if (!empty($build['name'][0]['#markup'])) {
+    if (!empty($build['customer']['#access'])) {
+      $build['customer']['#access'] = FALSE;
+    }
+    $build['name']['#label_display'] = 'hidden';
+  }
+  else {
+    $build['name']['#access']            = FALSE;
+    $build['customer']['#label_display'] = 'hidden';
+  }
+}
+
+function xdruple_commerce_xtuple_xdruplecommercecustomer_view_alter(&$build, $entity_type) {
+  $build['#page'] = TRUE;
+  if (empty($build['erp_xdruplecommercecustomerbillingcontact'][0]['#markup'])) {
+    $build['erp_xdruplecommercecustomerbillingcontact']['#access'] = FALSE;
+  }
+  if (empty($build['erp_xdruplecommercecustomershipto'][0]['#markup'])) {
+    $build['erp_xdruplecommercecustomershipto']['#access'] = FALSE;
+  }
+  if (!empty($build['isActive']['#access'])) {
+    $build['isActive']['#access'] = FALSE;
+  }
+  if (!empty($build['number']['#access'])) {
+    $build['number']['#access'] = FALSE;
+  }
+  if (!empty($build['name'][0]['#markup'])) {
+    $build['name']['#label_display'] = 'hidden';
+  }
+  else {
+    $build['name']['#access'] = FALSE;
+  }
+}
+
+function xdruple_commerce_xtuple_xdruplecommercecontact_view_alter(&$build, $entity_type) {
+  $build['#page'] = TRUE;
+  $name           = array();
+  if (!empty($build['firstName'][0]['#markup'])) {
+    $name[] = $build['firstName'][0]['#markup'];
+  }
+  if (!empty($build['lastName'][0]['#markup'])) {
+    $name[] = $build['lastName'][0]['#markup'];
+  }
+  $build['firstName']['#label_display'] = 'hidden';
+  $build['lastName']['#access']         = FALSE;
+  $build['firstName'][0]['#markup']     = implode($name);
+  if (empty($build['firstName'][0]['#markup'])) {
+    $build['firstName']['#access'] = FALSE;
+  }
+
+  $build['phone']['#label_display']        = 'hidden';
+  $build['primaryEmail']['#label_display'] = 'hidden';
+}
+
+function xdruple_commerce_xtuple_xdruplecommerceaddress_view_alter(&$build, $entity_type) {
+  $build['#page'] = TRUE;
+  if (!empty($build['line1'][0]['#markup'])) {
+    $build['line1']['#label_display'] = 'hidden';
+  }
+  else {
+    $build['line1']['#access'] = FALSE;
+  }
+  if (!empty($build['line2'][0]['#markup'])) {
+    $build['line2']['#label_display'] = 'hidden';
+  }
+  else {
+    $build['line2']['#access'] = FALSE;
+  }
+  if (!empty($build['line3'][0]['#markup'])) {
+    $build['line3']['#label_display'] = 'hidden';
+  }
+  else {
+    $build['line3']['#access'] = FALSE;
+  }
+
+  $city_state_zip = array();
+  if (!empty($build['city'][0]['#markup'])) {
+    $city_state_zip[] = $build['city'][0]['#markup'];
+  }
+  if (!empty($build['state'][0]['#markup'])) {
+    $city_state_zip[] = $build['state'][0]['#markup'];
+  }
+  if (!empty($build['postalCode'][0]['#markup'])) {
+    $city_state_zip[] = $build['postalCode'][0]['#markup'];
+  }
+  $build['city'][0]['#markup']     = implode(', ', $city_state_zip);
+  $build['city']['#label_display'] = 'hidden';
+  $build['state']['#access']       = FALSE;
+  $build['postalCode']['#access']  = FALSE;
+
+  $build['country']['#label_display'] = 'hidden';
+  if (empty($build['country'][0]['#markup'])) {
+    $build['country']['#access'] = FALSE;
+  }
+
+  if (!empty($build['number'])) {
+    $build['number']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter()
+ */
+function xdruple_commerce_theme_registry_alter(&$theme_registry) {
+  $module = drupal_get_path('module', 'xdruple_commerce');
+  $theme_registry['commerce_checkout_review']['file'] = 'xdruple_commerce.module';
+  $theme_registry['commerce_checkout_review']['theme path'] = $module;
+  $theme_registry['commerce_checkout_review']['includes'][0] = "$module/xdruple_commerce.module";
+  $theme_registry['commerce_checkout_review']['function'] = 'xdruple_commerce_checkout_review';
+}
+
+function xdruple_commerce_checkout_review($variables) {
+  $rows = array();
+  foreach ($variables['form']['#data'] as $pane_id => $pane) {
+    $fieldset = theme('fieldset', array(
+      'element' => array(
+        '#title' => $pane['title'],
+        '#value' => $pane['data'],
+        '#children' => '',
+        '#attributes' => array(
+          'class' => array(
+            'checkout-review-fieldset',
+            'checkout-review-fieldset--' . drupal_clean_css_identifier($pane_id)
+          ),
+        ),
+      ),
+    ));
+
+    $rows[] = theme('html_tag', array(
+      'element' => array(
+        '#tag' => 'div',
+        '#value' => $fieldset,
+        '#attributes' => array(
+          'class' => array(
+            'checkout-review-pane',
+            'checkout-review-pane--' . drupal_clean_css_identifier($pane_id),
+          ),
+        ),
+      )
+    ));
+  }
+
+  return implode('', $rows);
+}
