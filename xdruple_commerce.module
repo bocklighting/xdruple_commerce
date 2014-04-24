@@ -1735,3 +1735,48 @@ function xdruple_commerce_xtuple_xdruplecommerceaddress_view_alter(&$build, $ent
     $build['number']['#access'] = FALSE;
   }
 }
+
+/**
+ * Implements hook_theme_registry_alter()
+ */
+function xdruple_commerce_theme_registry_alter(&$theme_registry) {
+  $module = drupal_get_path('module', 'xdruple_commerce');
+  $theme_registry['commerce_checkout_review']['file'] = 'xdruple_commerce.module';
+  $theme_registry['commerce_checkout_review']['theme path'] = $module;
+  $theme_registry['commerce_checkout_review']['includes'][0] = "$module/xdruple_commerce.module";
+  $theme_registry['commerce_checkout_review']['function'] = 'xdruple_commerce_checkout_review';
+}
+
+function xdruple_commerce_checkout_review($variables) {
+  $rows = array();
+  foreach ($variables['form']['#data'] as $pane_id => $pane) {
+    $fieldset = theme('fieldset', array(
+      'element' => array(
+        '#title' => $pane['title'],
+        '#value' => $pane['data'],
+        '#children' => '',
+        '#attributes' => array(
+          'class' => array(
+            'checkout-review-fieldset',
+            'checkout-review-fieldset--' . drupal_clean_css_identifier($pane_id)
+          ),
+        ),
+      ),
+    ));
+
+    $rows[] = theme('html_tag', array(
+      'element' => array(
+        '#tag' => 'div',
+        '#value' => $fieldset,
+        '#attributes' => array(
+          'class' => array(
+            'checkout-review-pane',
+            'checkout-review-pane--' . drupal_clean_css_identifier($pane_id),
+          ),
+        ),
+      )
+    ));
+  }
+
+  return implode('', $rows);
+}
