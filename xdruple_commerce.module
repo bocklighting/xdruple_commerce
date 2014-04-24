@@ -1681,7 +1681,7 @@ function xdruple_commerce_xtuple_xdruplecommercecontact_view_alter(&$build, $ent
   }
   $build['firstName']['#label_display'] = 'hidden';
   $build['lastName']['#access']         = FALSE;
-  $build['firstName'][0]['#markup']     = implode($name);
+  $build['firstName'][0]['#markup']     = implode(' ', $name);
   if (empty($build['firstName'][0]['#markup'])) {
     $build['firstName']['#access'] = FALSE;
   }
