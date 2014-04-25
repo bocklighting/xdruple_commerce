@@ -78,6 +78,20 @@ function xdruple_save_cart_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
+    'xd_order_po_number' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'xd_order_notes' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
   );
   /* No results behavior: Global: Text area */
   $handler->display->display_options['empty']['text']['id'] = 'text';
@@ -89,38 +103,12 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['fields']['order_number']['id'] = 'order_number';
   $handler->display->display_options['fields']['order_number']['table'] = 'commerce_order';
   $handler->display->display_options['fields']['order_number']['field'] = 'order_number';
+  $handler->display->display_options['fields']['order_number']['label'] = 'Cart number';
   $handler->display->display_options['fields']['order_number']['link_to_order'] = 'customer';
-
-  if (field_info_field('xd_order_po_number')) {
-    $handler->display->display_options['style_options']['info']['xd_order_po_number'] = array(
-      'sortable' => 1,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    );
-
-    /* Field: Commerce Order: Cart Notes */
-    $handler->display->display_options['fields']['xd_order_po_number']['id'] = 'xd_order_po_number';
-    $handler->display->display_options['fields']['xd_order_po_number']['table'] = 'field_data_xd_order_po_number';
-    $handler->display->display_options['fields']['xd_order_po_number']['field'] = 'xd_order_po_number';
-  }
-
-  if (field_info_field('xd_order_notes')) {
-    $handler->display->display_options['style_options']['info']['xd_order_notes'] = array(
-      'sortable' => 1,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    );
-
-    /* Field: Commerce Order: Cart Notes */
-    $handler->display->display_options['fields']['xd_order_notes']['id'] = 'xd_order_notes';
-    $handler->display->display_options['fields']['xd_order_notes']['table'] = 'field_data_xd_order_notes';
-    $handler->display->display_options['fields']['xd_order_notes']['field'] = 'xd_order_notes';
-  }
-
+  /* Field: Commerce Order: PO Number */
+  $handler->display->display_options['fields']['xd_order_po_number']['id'] = 'xd_order_po_number';
+  $handler->display->display_options['fields']['xd_order_po_number']['table'] = 'field_data_xd_order_po_number';
+  $handler->display->display_options['fields']['xd_order_po_number']['field'] = 'xd_order_po_number';
   /* Field: Commerce Order: Created date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'commerce_order';
@@ -179,6 +167,136 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['tab_options']['description'] = 'User orders in the store.';
   $handler->display->display_options['tab_options']['weight'] = '';
   $handler->display->display_options['tab_options']['name'] = 'user-menu';
+
+  $views[$view->name] = $view;
+
+  $view = new view();
+  $view->name = 'xd_user_saved_carts_block';
+  $view->description = 'Display a list of Saved Cart orders for a user.';
+  $view->tag = 'commerce';
+  $view->base_table = 'commerce_order';
+  $view->human_name = 'User Saved Carts (block)';
+  $view->core = 7;
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+  /* Display: Defaults */
+  $handler = $view->new_display('default', 'Defaults', 'default');
+  $handler->display->display_options['title'] = 'Saved Carts';
+  $handler->display->display_options['use_more_always'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'perm';
+  $handler->display->display_options['access']['perm'] = 'view own commerce_order entities';
+  $handler->display->display_options['cache']['type'] = 'none';
+  $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
+  $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['pager']['type'] = 'none';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['style_plugin'] = 'default';
+  $handler->display->display_options['row_plugin'] = 'fields';
+  /* No results behavior: Global: Text area */
+  $handler->display->display_options['empty']['text']['id'] = 'text';
+  $handler->display->display_options['empty']['text']['table'] = 'views';
+  $handler->display->display_options['empty']['text']['field'] = 'area';
+  $handler->display->display_options['empty']['text']['content'] = 'You have not placed any orders with us yet.';
+  $handler->display->display_options['empty']['text']['format'] = 'plain_text';
+  /* Field: Commerce Order: Order number */
+  $handler->display->display_options['fields']['order_number']['id'] = 'order_number';
+  $handler->display->display_options['fields']['order_number']['table'] = 'commerce_order';
+  $handler->display->display_options['fields']['order_number']['field'] = 'order_number';
+  $handler->display->display_options['fields']['order_number']['label'] = 'Cart number';
+  $handler->display->display_options['fields']['order_number']['hide_empty'] = TRUE;
+  $handler->display->display_options['fields']['order_number']['link_to_order'] = 'customer';
+  /* Field: Commerce Order: PO Number */
+  $handler->display->display_options['fields']['xd_order_po_number']['id'] = 'xd_order_po_number';
+  $handler->display->display_options['fields']['xd_order_po_number']['table'] = 'field_data_xd_order_po_number';
+  $handler->display->display_options['fields']['xd_order_po_number']['field'] = 'xd_order_po_number';
+  $handler->display->display_options['fields']['xd_order_po_number']['hide_empty'] = TRUE;
+  /* Field: Commerce Order: Created date */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'commerce_order';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'Created';
+  $handler->display->display_options['fields']['created']['hide_empty'] = TRUE;
+  $handler->display->display_options['fields']['created']['date_format'] = 'short';
+  /* Field: Commerce Order: Updated date */
+  $handler->display->display_options['fields']['changed']['id'] = 'changed';
+  $handler->display->display_options['fields']['changed']['table'] = 'commerce_order';
+  $handler->display->display_options['fields']['changed']['field'] = 'changed';
+  $handler->display->display_options['fields']['changed']['label'] = 'Updated';
+  $handler->display->display_options['fields']['changed']['hide_empty'] = TRUE;
+  $handler->display->display_options['fields']['changed']['date_format'] = 'short';
+  /* Field: Commerce Order: Order total */
+  $handler->display->display_options['fields']['commerce_order_total']['id'] = 'commerce_order_total';
+  $handler->display->display_options['fields']['commerce_order_total']['table'] = 'field_data_commerce_order_total';
+  $handler->display->display_options['fields']['commerce_order_total']['field'] = 'commerce_order_total';
+  $handler->display->display_options['fields']['commerce_order_total']['label'] = 'Total';
+  $handler->display->display_options['fields']['commerce_order_total']['element_type'] = 'span';
+  $handler->display->display_options['fields']['commerce_order_total']['hide_empty'] = TRUE;
+  $handler->display->display_options['fields']['commerce_order_total']['click_sort_column'] = 'amount';
+  $handler->display->display_options['fields']['commerce_order_total']['settings'] = array(
+    'calculation' => FALSE,
+  );
+  /* Field: Commerce Order: Operations */
+  $handler->display->display_options['fields']['move_order']['id'] = 'move_order';
+  $handler->display->display_options['fields']['move_order']['table'] = 'commerce_order';
+  $handler->display->display_options['fields']['move_order']['field'] = 'move_order';
+  $handler->display->display_options['fields']['move_order']['label'] = '';
+  $handler->display->display_options['fields']['move_order']['element_label_colon'] = FALSE;
+  /* Sort criterion: Commerce Order: Updated date */
+  $handler->display->display_options['sorts']['changed']['id'] = 'changed';
+  $handler->display->display_options['sorts']['changed']['table'] = 'commerce_order';
+  $handler->display->display_options['sorts']['changed']['field'] = 'changed';
+  $handler->display->display_options['sorts']['changed']['order'] = 'DESC';
+  /* Sort criterion: Commerce Order: Created date */
+  $handler->display->display_options['sorts']['created']['id'] = 'created';
+  $handler->display->display_options['sorts']['created']['table'] = 'commerce_order';
+  $handler->display->display_options['sorts']['created']['field'] = 'created';
+  $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+  /* Contextual filter: Commerce Order: Uid */
+  $handler->display->display_options['arguments']['uid_1']['id'] = 'uid_1';
+  $handler->display->display_options['arguments']['uid_1']['table'] = 'commerce_order';
+  $handler->display->display_options['arguments']['uid_1']['field'] = 'uid';
+  $handler->display->display_options['arguments']['uid_1']['default_action'] = 'not found';
+  $handler->display->display_options['arguments']['uid_1']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['uid_1']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['uid_1']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['uid_1']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['uid_1']['specify_validation'] = TRUE;
+  $handler->display->display_options['arguments']['uid_1']['validate']['type'] = 'current_user_or_role';
+  $handler->display->display_options['arguments']['uid_1']['validate_options']['restrict_roles'] = TRUE;
+  $handler->display->display_options['arguments']['uid_1']['validate_options']['roles'] = array(
+    3 => '3',
+  );
+  /* Filter criterion: Commerce Order: Order state */
+  $handler->display->display_options['filters']['state']['id'] = 'state';
+  $handler->display->display_options['filters']['state']['table'] = 'commerce_order';
+  $handler->display->display_options['filters']['state']['field'] = 'state';
+  $handler->display->display_options['filters']['state']['value'] = array(
+    'saved_cart' => 'saved_cart',
+  );
+
+  /* Display: Default pane */
+  $handler = $view->new_display('panel_pane', 'Default pane', 'pane_block_default');
+  $handler->display->display_options['allow']['use_pager'] = 0;
+  $handler->display->display_options['allow']['items_per_page'] = 0;
+  $handler->display->display_options['allow']['offset'] = 0;
+  $handler->display->display_options['allow']['link_to_view'] = 0;
+  $handler->display->display_options['allow']['more_link'] = 0;
+  $handler->display->display_options['allow']['path_override'] = 0;
+  $handler->display->display_options['allow']['title_override'] = 'title_override';
+  $handler->display->display_options['allow']['exposed_form'] = 0;
+  $handler->display->display_options['allow']['fields_override'] = 0;
+  $handler->display->display_options['argument_input'] = array(
+    'uid_1' => array(
+      'type' => 'context',
+      'context' => 'token.current-user:uid',
+      'context_optional' => 0,
+      'panel' => '0',
+      'fixed' => '',
+      'label' => 'Commerce Order: Uid',
+    ),
+  );
 
   $views[$view->name] = $view;
 
