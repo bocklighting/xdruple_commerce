@@ -1782,73 +1782,6 @@ function xdruple_commerce_checkout_review($variables) {
   return implode('', $rows);
 }
 
-/**
- * Implements hook_commerce_checkout_pane_info_alter()
- */
-function xdruple_commerce_commerce_checkout_pane_info_alter(&$checkout_panes) {
-  $checkout_panes['customer_profile_shipping']['callbacks']['review'] = 'xdruple_commerce_customer_profile_pane_review';
-}
-
-function xdruple_commerce_customer_profile_pane_review($form, $form_state, $checkout_pane, $order) {
-  if ($field_name = variable_get('commerce_' . $checkout_pane['pane_id'] . '_field', '')) {
-    $profile = entity_metadata_wrapper('commerce_order', $order)->{$field_name}->value();
-  }
-  else {
-    // Or use the association stored in the order's data array if no field is set.
-    $profile = commerce_customer_profile_load($order->data['profiles'][$checkout_pane['pane_id']]);
-  }
-  if ($profile) {
-    if (!empty($profile->xd_ship_to['und'][0]['target_id'])) {
-      $ship_to = entity_load_single('xtuple_xdruplecommerceshipto', $profile->xd_ship_to['und'][0]['target_id']);
-      if (empty($profile->xd_ship_to_address)) {
-        $contact = entity_load_single('xtuple_xdruplecommerceaddress', $ship_to->erp_xdruplecommerceshiptoaddress['und'][0]['target_id']);
-        $profile->xd_ship_to_address['und'][0]['target_id'] = $contact->number;
-      }
-      if (empty($profile->xd_ship_to_contact)) {
-        $address = entity_load_single('xtuple_xdruplecommercecontact', $ship_to->erp_xdruplecommerceshiptocontact['und'][0]['target_id']);
-        $profile->xd_ship_to_contact['und'][0]['target_id'] = $address->number;
-      }
-    }
-
-    $content = entity_view('commerce_customer_profile', array($profile->profile_id => $profile), 'customer');
-
-    $output = &$content['commerce_customer_profile'][$profile->profile_id];
-
-    $ship_to_id = $output['xd_ship_to']['#items'][0]['target_id'];
-    $output['xd_ship_to'][0]['xtuple_xdruplecommerceshipto'][$ship_to_id]['erp_xdruplecommerceshiptoaddress']['#access'] = FALSE;
-    $output['xd_ship_to'][0]['xtuple_xdruplecommerceshipto'][$ship_to_id]['erp_xdruplecommerceshiptocontact']['#access'] = FALSE;
-
-    if (empty($profile->xd_ship_to['und'][0]['target_id'])) {
-
-      $name = '';
-      if (!empty($output['xd_ship_to_contact']['#items'][0]['target_id'])) {
-        $id = $output['xd_ship_to_contact']['#items'][0]['target_id'];
-        if (!empty($output['xd_ship_to_contact'][0]['xtuple_xdruplecommercecontact'][$id]['firstName'][0]['#markup'])) {
-          $name = $output['xd_ship_to_contact'][0]['xtuple_xdruplecommercecontact'][$id]['firstName'][0]['#markup'];
-        }
-      }
-
-      $markup = '';
-      $markup .= '<div class="field field-name-xd-ship-to field-type-entityreference field-label-above">';
-      if ($name) {
-        $markup .= '<div class="field-label">'. t('Ship to') .':&nbsp;</div>';
-        $markup .= '<div class="field-items"><div class="field-item even">'. $name . '</div></div>';
-      }
-      $markup .= '</div>';
-
-      $output['xd_ship_to'] = array(
-        '#weight' => -30,
-        '#markup' => $markup,
-      );
-    }
-
-    return drupal_render($content);
-  }
-  else {
-    return t('No information');
-  }
-}
-
 function xdruple_commerce_field_display_alter(&$display, $context) {
   if ($context['entity_type'] == 'xtuple_xdruplecommerceshipto') {
     if ($context['field']['field_name'] == 'xd_ship_to') {
@@ -1861,6 +1794,52 @@ function xdruple_commerce_field_display_alter(&$display, $context) {
     }
     if ($context['field']['field_name'] == 'erp_xdruplecommerceshiptocontact') {
       $display['weight'] = 19;
+    }
+  }
+}
+
+function xdruple_commerce_entity_view_alter(&$build, $type) {
+  if ($type == 'commerce_customer_profile') {
+    if ($build['#bundle'] == 'shipping') {
+      if (!empty($build['xd_ship_to']['#items'][0]['target_id'])) {
+        $target_id = $build['xd_ship_to']['#items'][0]['target_id'];
+        $ship_to = &$build['xd_ship_to'][0]['xtuple_xdruplecommerceshipto'][$target_id];
+        if (!empty($ship_to['erp_xdruplecommerceshiptoaddress'])) {
+          $field = $ship_to['erp_xdruplecommerceshiptoaddress'];
+          $field['#field_name'] = 'xd_ship_to_address';
+          $field['#field_type'] = 'entityreference';
+          $field['#title'] = t('Ship To Address');
+          $build['xd_ship_to_address'] = $field;
+          $ship_to['erp_xdruplecommerceshiptoaddress']['#access'] = FALSE;
+        }
+        if (!empty($ship_to['erp_xdruplecommerceshiptocontact'])) {
+          $field = $ship_to['erp_xdruplecommerceshiptocontact'];
+          $field['#field_name'] = 'xd_ship_to_contact';
+          $field['#field_type'] = 'entityreference';
+          $field['#title'] = t('Ship To Contact');
+          $build['xd_ship_to_contact'] = $field;
+          $ship_to['erp_xdruplecommerceshiptocontact']['#access'] = FALSE;
+        }
+      }
+      else {
+        $name = '';
+        if (!empty($build['xd_ship_to_contact']['#items'][0]['target_id'])) {
+          $tid = $build['xd_ship_to_contact']['#items'][0]['target_id'];
+          $name = $build['xd_ship_to_contact'][0]['xtuple_xdruplecommercecontact'][$tid]['firstName'][0]['#markup'];
+        }
+
+        $markup = '';
+        $markup .= '<div class="field field-name-xd-ship-to field-type-entityreference field-label-above">';
+        if ($name) {
+          $markup .= '<div class="field-label">'. t('Ship to') .':&nbsp;</div>';
+          $markup .= '<div class="field-items"><div class="field-item even">'. $name . '</div></div>';
+        }
+        $markup .= '</div>';
+        $build['xd_ship_to'] = array(
+          '#markup' => $markup,
+          '#weight' => -30,
+        );
+      }
     }
   }
 }
