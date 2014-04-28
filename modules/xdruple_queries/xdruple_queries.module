@@ -32,7 +32,8 @@ function xdruple_queries_menu() {
     'title'            => 'Products',
     'page callback'    => 'xdruple_queries_products_page',
     'page arguments'   => array(1),
-    'access arguments' => array('access content'),
+    'access callback'  => 'xdruple_queries_access_product_lists',
+    'access arguments' => array('xtuple: access product lists'),
     'file'             => 'pages/products.inc',
     'type'             => MENU_NORMAL_ITEM,
   );
@@ -47,7 +48,8 @@ function xdruple_queries_menu() {
     'title'            => 'Product',
     'page callback'    => 'xdruple_queries_product_page',
     'page arguments'   => array(1),
-    'access arguments' => array('access content'),
+    'access callback'  => 'xdruple_queries_access_product_lists',
+    'access arguments' => array('xtuple: access product lists'),
     'file'             => 'pages/product.inc',
     'type'             => MENU_CALLBACK,
   );
@@ -55,7 +57,8 @@ function xdruple_queries_menu() {
   $items['products/categories'] = array(
     'title'            => 'Categories',
     'page callback'    => 'xdruple_queries_categories_page',
-    'access arguments' => array('access content'),
+    'access callback'  => 'xdruple_queries_access_product_lists',
+    'access arguments' => array('xtuple: access product lists'),
     'file'             => 'pages/categories.inc',
     'type'             => MENU_LOCAL_TASK,
   );
@@ -64,7 +67,8 @@ function xdruple_queries_menu() {
     'title'            => 'Products by category',
     'page callback'    => 'xdruple_queries_products_by_category_page',
     'page arguments'   => array(2),
-    'access arguments' => array('access content'),
+    'access callback'  => 'xdruple_queries_access_product_lists',
+    'access arguments' => array('xtuple: access product lists'),
     'file'             => 'pages/products_by_category.inc',
     'type'             => MENU_CALLBACK,
   );
@@ -73,7 +77,8 @@ function xdruple_queries_menu() {
     $items['products/recent'] = array(
       'title'            => 'Recently ordered',
       'page callback'    => 'xdruple_queries_products_recent_page',
-      'access arguments' => array('access content'),
+      'access callback'  => 'xdruple_queries_access_product_lists',
+      'access arguments' => array('xtuple: access product lists'),
       'file'             => 'pages/products_recent.inc',
       'type'             => MENU_LOCAL_TASK,
     );
@@ -83,13 +88,43 @@ function xdruple_queries_menu() {
     $items['products/standard'] = array(
       'title'            => 'Standard order',
       'page callback'    => 'xdruple_queries_products_standard_page',
-      'access arguments' => array('access content'),
+      'access callback'  => 'xdruple_queries_access_product_lists',
+      'access arguments' => array('xtuple: access product lists'),
       'file'             => 'pages/products_standard.inc',
       'type'             => MENU_LOCAL_TASK,
     );
   }
 
   return $items;
+}
+
+/**
+ * Implements hook_user_access_extend().
+ *
+ * Grant all users 'xtuple: access product lists' by default.
+ *
+ * @param $user_id Drupal uid of the user.
+ *
+ * @return array of permissions names for the user.
+ */
+function xdruple_queries_user_access_extend($user_id) {
+  $permissions = array(
+    'xtuple: access product lists',
+  );
+
+  return $permissions;
+}
+
+function xdruple_queries_access_product_lists($permission) {
+  global $user;
+
+  if ($access = user_access($permission, $user)) {
+    drupal_alter('xdruple_queries_access_product_lists', $access, $user, $permission);
+
+    return $access;
+  } else {
+    return $access;
+  }
 }
 
 /**
