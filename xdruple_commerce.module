@@ -480,6 +480,7 @@ function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langco
   }
 
   if ($entity_type === 'xtuple_xdruplecommerceshipto') {
+    $entity->content['erp_xdruplecommerceshiptocontact']['#formatter'] = 'entityreference_entity_view';
     // Reset the weights to the correct order.
     $entity->content['number']['#weight'] = -4;
     $entity->content['name']['#weight'] = -3;
@@ -1624,12 +1625,7 @@ function _xdruple_commerce_product_format($item) {
 
 function xdruple_commerce_xtuple_xdruplecommerceshipto_view_alter(&$build, $entity_type) {
   $build['#page'] = TRUE;
-  if (empty($build['erp_xdruplecommerceshiptoaddress'][0]['#markup'])) {
-    $build['erp_xdruplecommerceshiptoaddress']['#access'] = FALSE;
-  }
-  if (empty($build['erp_xdruplecommerceshiptocontact'][0]['#markup'])) {
-    $build['erp_xdruplecommerceshiptocontact']['#access'] = FALSE;
-  }
+
   if (!empty($build['isDefault']['#access'])) {
     $build['isDefault']['#access'] = FALSE;
   }
@@ -1816,8 +1812,13 @@ function xdruple_commerce_customer_profile_pane_review($form, $form_state, $chec
 
     $content = entity_view('commerce_customer_profile', array($profile->profile_id => $profile), 'customer');
 
+    $output = &$content['commerce_customer_profile'][$profile->profile_id];
+
+    $ship_to_id = $output['xd_ship_to']['#items'][0]['target_id'];
+    $output['xd_ship_to'][0]['xtuple_xdruplecommerceshipto'][$ship_to_id]['erp_xdruplecommerceshiptoaddress']['#access'] = FALSE;
+    $output['xd_ship_to'][0]['xtuple_xdruplecommerceshipto'][$ship_to_id]['erp_xdruplecommerceshiptocontact']['#access'] = FALSE;
+
     if (empty($profile->xd_ship_to['und'][0]['target_id'])) {
-      $output = &$content['commerce_customer_profile'][$profile->profile_id];
 
       $name = '';
       if (!empty($output['xd_ship_to_contact']['#items'][0]['target_id'])) {
@@ -1840,10 +1841,26 @@ function xdruple_commerce_customer_profile_pane_review($form, $form_state, $chec
         '#markup' => $markup,
       );
     }
+
     return drupal_render($content);
   }
   else {
     return t('No information');
   }
+}
 
+function xdruple_commerce_field_display_alter(&$display, $context) {
+  if ($context['entity_type'] == 'xtuple_xdruplecommerceshipto') {
+    if ($context['field']['field_name'] == 'xd_ship_to') {
+      $display['label'] = 'hidden';
+    }
+    if ($display['module'] == 'entityreference') {
+      $display['type'] = 'entityreference_entity_view';
+      $display['settings']['view_mode'] = 'default';
+      $display['settings']['links'] = TRUE;
+    }
+    if ($context['field']['field_name'] == 'erp_xdruplecommerceshiptocontact') {
+      $display['weight'] = 19;
+    }
+  }
 }
