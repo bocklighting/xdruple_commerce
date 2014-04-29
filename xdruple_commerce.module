@@ -72,6 +72,66 @@ function xdruple_commerce_entity_operation_info_alter(&$operation_info) {
 }
 
 /**
+ * Implements hook_menu_alter().
+ *
+ * Wrap any 'access checkout' or 'access content' items in our custom callback
+ * so we can dynamically grant it.
+ */
+function xdruple_commerce_menu_alter(&$items) {
+  if (!empty($items['checkout'])) {
+    $items['checkout']['access arguments'] = array('access xtuple checkout');
+  }
+  if (!empty($items['checkout/%commerce_order'])) {
+    $items['checkout/%commerce_order']['access callback'] = 'xdruple_commerce_access_checkout';
+  }
+  if (!empty($items['checkout/%commerce_order/%commerce_checkout_page'])) {
+    $items['checkout/%commerce_order/%commerce_checkout_page']['access callback'] = 'xdruple_commerce_access_checkout';
+  }
+  if (!empty($items['cart'])) {
+    $items['cart']['access callback'] = 'xdruple_commerce_access_cart';
+  }
+  if (!empty($items['cart/my'])) {
+    $items['cart/my']['access callback'] = 'xdruple_commerce_access_cart';
+  }
+}
+
+/**
+ * Implements hook_commerce_line_item_summary_link_info_alter().
+ *
+ * Wrap any 'access checkout' items in 'access xtuple checkout' so we can
+ * dynamically grant it.
+ */
+function xdruple_commerce_commerce_line_item_summary_link_info_alter(&$links) {
+  if (!empty($links['checkout'])) {
+    $links['checkout']['access'] = xdruple_commerce_access_checkout('access checkout');
+  }
+}
+
+function xdruple_commerce_access_checkout($permission) {
+  global $user;
+
+  if ($access = user_access($permission, $user)) {
+    drupal_alter('xdruple_commerce_access_checkout', $access, $user, $permission);
+
+    return $access;
+  } else {
+    return $access;
+  }
+}
+
+function xdruple_commerce_access_cart($permission) {
+  global $user;
+
+  if ($access = user_access($permission, $user)) {
+    drupal_alter('xdruple_commerce_access_cart', $access, $user, $permission);
+
+    return $access;
+  } else {
+    return $access;
+  }
+}
+
+/**
  * Implements hook_rescued_register_clients_resources_alter().
  */
 function xdruple_commerce_rescued_register_clients_resources_alter(&$rescued_clients_url_resources) {
@@ -857,6 +917,20 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
       // Hide the primaryEmail field since we get this from the Drupal User's mail field.
       $contact_form['primaryEmail']['#type'] = 'hidden';
       $contact_form['primaryEmail']['#attributes']['disabled'] = TRUE;
+    }
+  }
+
+  // Wrap any 'access checkout' items in 'access xtuple checkout' so we can
+  // dynamically grant it.
+  // @See: commerce_checkout_form_alter()
+  if (strpos($form_id, 'views_form_commerce_cart_form_') === 0 ||
+      strpos($form_id, 'views_form_ft_commerce_cart_form_') === 0) {
+
+    // Only add the Checkout button if the cart form View shows line items.
+    $view = reset($form_state['build_info']['args']);
+
+    if (!empty($view->result)) {
+      $form['actions']['checkout']['#access'] = xdruple_commerce_access_checkout('access checkout');
     }
   }
 }
