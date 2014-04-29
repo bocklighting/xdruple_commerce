@@ -79,19 +79,44 @@ function xdruple_commerce_entity_operation_info_alter(&$operation_info) {
  */
 function xdruple_commerce_menu_alter(&$items) {
   if (!empty($items['checkout'])) {
-    $items['checkout']['access arguments'] = array('access xtuple checkout');
+    array_unshift(
+      $items['checkout']['access arguments'],
+      'checkout',
+      'create'
+    );
+    $items['checkout']['access callback'] = 'xdruple_access';
   }
   if (!empty($items['checkout/%commerce_order'])) {
-    $items['checkout/%commerce_order']['access callback'] = 'xdruple_commerce_access_checkout';
+    array_unshift(
+      $items['checkout/%commerce_order']['access arguments'],
+      'checkout/%commerce_order',
+      'update'
+    );
+    $items['checkout/%commerce_order']['access callback'] = 'xdruple_access';
   }
   if (!empty($items['checkout/%commerce_order/%commerce_checkout_page'])) {
-    $items['checkout/%commerce_order/%commerce_checkout_page']['access callback'] = 'xdruple_commerce_access_checkout';
+    array_unshift(
+      $items['checkout/%commerce_order/%commerce_checkout_page']['access arguments'],
+      'checkout/%commerce_order/%commerce_checkout_page',
+      'update'
+    );
+    $items['checkout/%commerce_order/%commerce_checkout_page']['access callback'] = 'xdruple_access';
   }
   if (!empty($items['cart'])) {
-    $items['cart']['access callback'] = 'xdruple_commerce_access_cart';
+    array_unshift(
+      $items['cart']['access arguments'],
+      'cart',
+      'update'
+    );
+    $items['cart']['access callback'] = 'xdruple_access';
   }
   if (!empty($items['cart/my'])) {
-    $items['cart/my']['access callback'] = 'xdruple_commerce_access_cart';
+    array_unshift(
+      $items['cart/my']['access arguments'],
+      'cart/my',
+      'update'
+    );
+    $items['cart/my']['access callback'] = 'xdruple_access';
   }
 }
 
@@ -103,31 +128,11 @@ function xdruple_commerce_menu_alter(&$items) {
  */
 function xdruple_commerce_commerce_line_item_summary_link_info_alter(&$links) {
   if (!empty($links['checkout'])) {
-    $links['checkout']['access'] = xdruple_commerce_access_checkout('access checkout');
-  }
-}
-
-function xdruple_commerce_access_checkout($permission) {
-  global $user;
-
-  if ($access = user_access($permission, $user)) {
-    drupal_alter('xdruple_commerce_access_checkout', $access, $user, $permission);
-
-    return $access;
-  } else {
-    return $access;
-  }
-}
-
-function xdruple_commerce_access_cart($permission) {
-  global $user;
-
-  if ($access = user_access($permission, $user)) {
-    drupal_alter('xdruple_commerce_access_cart', $access, $user, $permission);
-
-    return $access;
-  } else {
-    return $access;
+    $links['checkout']['access'] = xdruple_access(
+      'commerce_line_item_summary_link_info',
+      'view',
+      'access checkout'
+    );
   }
 }
 
@@ -930,7 +935,11 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
     $view = reset($form_state['build_info']['args']);
 
     if (!empty($view->result)) {
-      $form['actions']['checkout']['#access'] = xdruple_commerce_access_checkout('access checkout');
+      $form['actions']['checkout']['#access'] = xdruple_access(
+        'views_form_commerce_cart_form',
+        'view',
+        'access checkout'
+      );
     }
   }
 }
