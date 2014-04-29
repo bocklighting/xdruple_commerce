@@ -1010,9 +1010,17 @@ function xtuple_order_defaults_form_submit($form, &$form_state) {
     if (!empty($form_state['values']['customer'])) {
       // When there is a real value, store it in $_SESSION['rescued'].
       $_SESSION['rescued']['customer'] = $form_state['values']['customer'];
+
+      $customer = entity_load_single('xtuple_xdruplecustomer', $form_state['values']['customer']);
+      if ($customer) {
+        $_SESSION['rescued']['customer_terms'] = $customer->terms;
+        $_SESSION['rescued']['customer_credit'] = $customer->creditStatus;
+      }
     } else {
       // When the value is null, unset() $_SESSION['rescued'].
       unset($_SESSION['rescued']['customer']);
+      unset($_SESSION['rescued']['customer_terms']);
+      unset($_SESSION['rescued']['customer_credit']);
     }
   }
 
