@@ -17,8 +17,11 @@ $plugin = extensions_content_type_plugin('xdruple_fields', 'order_defaults_form'
 function xdruple_fields_order_defaults_form_content_type_plugin_render($subtype, $conf, $panel_args) {
   $output = '';
 
-  $form = drupal_get_form('xtuple_order_defaults_form');
-  $output .= drupal_render($form);
+  global $user;
+  if (xdruple_fields_user_preferences_access($user)) {
+    $form = drupal_get_form('xtuple_order_defaults_form');
+    $output .= drupal_render($form);
+  }
 
   return $output;
 }
