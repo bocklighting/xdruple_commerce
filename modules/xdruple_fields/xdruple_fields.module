@@ -1420,3 +1420,38 @@ function xdruple_fields_get_bill_to_addr_default($cust_id) {
     return $default_bill_to->data;
   }
 }
+
+/**
+ * Implements hook_theme_registry_alter()
+ */
+function xdruple_fields_theme_registry_alter(&$theme_registry) {
+  $module = drupal_get_path('module', 'xdruple_fields');
+  $theme_registry['date_popup']['theme path'] = $module;
+  $theme_registry['date_popup']['function'] = 'xdruple_fields_date_popup';
+}
+
+/**
+ * Overrides theme_date_popup()
+ *
+ * @see xdruple_fields_theme_registry_alter()
+ */
+function xdruple_fields_date_popup($vars) {
+  $element = $vars['element'];
+  $attributes = !empty($element['#wrapper_attributes']) ? $element['#wrapper_attributes'] : array('class' => array());
+  if (!in_array('xtuple_order_defaults_form', $element['#array_parents'])) {
+    $attributes['class'][] = 'container-inline-date';
+  }
+  else {
+    $attributes['class'][] = 'container-date-popup';
+  }
+  // If there is no description, the floating date elements need some extra padding below them.
+  $wrapper_attributes = array('class' => array('date-padding'));
+  if (empty($element['date']['#description'])) {
+    $wrapper_attributes['class'][] = 'clearfix';
+  }
+  // Add an wrapper to mimic the way a single value field works, for ease in using #states.
+  if (isset($element['#children'])) {
+    $element['#children'] = '<div id="' . $element['#id'] . '" ' . drupal_attributes($wrapper_attributes) .'>' . $element['#children'] . '</div>';
+  }
+  return '<div ' . drupal_attributes($attributes) .'>' . theme('form_element', $element) . '</div>';
+}
