@@ -949,9 +949,7 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
   // Put ship_to and site in a fieldset so changing customer can do an ajax
   // replace to update those fields to the defaults.
   $form[$form_id]['defaults_wrapper'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Customer Defaults'),
-    '#title_display' => 'attribute',
+    '#type' => 'markup',
     '#prefix' => '<div id="xtuple-defaults-wrapper">',
     '#suffix' => '</div>',
   );
