@@ -1357,13 +1357,13 @@ function xdruple_commerce_api_customer_item_price($discovery_client = 'xtuple', 
 }
 
 function xdruple_commerce_get_customer_line_item_price($line_item) {
-  if (!isset($_SESSION['rescued']['customer'], $_SESSION['rescued']['scheduled_date'], $_SESSION['rescued']['ship_to'], $_SESSION['rescued']['site'])) {
+  if (!isset($_SESSION['rescued']['customer'], $_SESSION['rescued']['ship_to'], $_SESSION['rescued']['site'])) {
     // We cannot get a price quote without all of these set.
     return;
   }
 
   $customer = $_SESSION['rescued']['customer'];
-  $date = $_SESSION['rescued']['scheduled_date'];
+  $date = xdruple_rescued_scheduled_date('tomorrow');
   $shipto = $_SESSION['rescued']['ship_to'];
   $site = $_SESSION['rescued']['site'];
 
@@ -1594,7 +1594,7 @@ function xdruple_commerce_commerce_checkout_complete($order) {
     // Handle normal "product" lines.
     if (array_key_exists('commerce_product', $line->getPropertyInfo())) {
       // Set the line defaults.
-      $sales_order->lineItems[$delta]['scheduleDate'] = isset($_SESSION['rescued']['scheduled_date']) ? $_SESSION['rescued']['scheduled_date'] : date("Y-m-d");
+      $sales_order->lineItems[$delta]['scheduleDate'] = xdruple_rescued_scheduled_date('tomorrow');
       $sales_order->lineItems[$delta]['firm'] = false;
       $sales_order->lineItems[$delta]['site'] = isset($_SESSION['rescued']['site']) ? $_SESSION['rescued']['site'] : $customer->preferredSite;
       $sales_order->lineItems[$delta]['taxType'] = 'Taxable';
