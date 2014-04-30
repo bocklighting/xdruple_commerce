@@ -1,6 +1,11 @@
 <?php
 
-require_once __DIR__ . '/pages/user_preferences.inc';
+/**
+ * Implements hook_ctools_plugin_directory()
+ */
+function xdruple_fields_ctools_plugin_directory($module, $plugin) {
+  return "plugins/$plugin";
+}
 
 /**
  * Implements hook_views_api().
@@ -17,15 +22,6 @@ function xdruple_fields_views_api() {
  */
 function xdruple_fields_menu() {
   $items = array();
-
-  $items['user/%user/preferences'] = array(
-    'title'            => 'Preferences',
-    'page callback'    => 'xdruple_fields_user_preferences_page',
-    'page arguments'   => array(1),
-    'access callback'  => 'xdruple_fields_user_preferences_access',
-    'access arguments' => array(1),
-    'type'             => MENU_LOCAL_TASK,
-  );
 
   $items['user/%user/preferences/customer/autocomplete'] = array(
     'title'            => 'Customer Autocomplete',
@@ -942,9 +938,7 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
   // Put ship_to and site in a fieldset so changing customer can do an ajax
   // replace to update those fields to the defaults.
   $form[$form_id]['defaults_wrapper'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Customer Defaults'),
-    '#title_display' => 'attribute',
+    '#type' => 'markup',
     '#prefix' => '<div id="xtuple-defaults-wrapper">',
     '#suffix' => '</div>',
   );
@@ -1414,4 +1408,56 @@ function xdruple_fields_get_bill_to_addr_default($cust_id) {
   } else {
     return $default_bill_to->data;
   }
+}
+
+/**
+ * Implements hook_theme_registry_alter()
+ */
+function xdruple_fields_theme_registry_alter(&$theme_registry) {
+  $module = drupal_get_path('module', 'xdruple_fields');
+  $theme_registry['date_popup']['theme path'] = $module;
+  $theme_registry['date_popup']['function'] = 'xdruple_fields_date_popup';
+}
+
+/**
+ * Overrides theme_date_popup()
+ *
+ * @see xdruple_fields_theme_registry_alter()
+ */
+function xdruple_fields_date_popup($vars) {
+  $element = $vars['element'];
+  $attributes = !empty($element['#wrapper_attributes']) ? $element['#wrapper_attributes'] : array('class' => array());
+  if (!in_array('xtuple_order_defaults_form', $element['#array_parents'])) {
+    $attributes['class'][] = 'container-inline-date';
+  }
+  else {
+    $attributes['class'][] = 'container-date-popup';
+  }
+  // If there is no description, the floating date elements need some extra padding below them.
+  $wrapper_attributes = array('class' => array('date-padding'));
+  if (empty($element['date']['#description'])) {
+    $wrapper_attributes['class'][] = 'clearfix';
+  }
+  // Add an wrapper to mimic the way a single value field works, for ease in using #states.
+  if (isset($element['#children'])) {
+    $element['#children'] = '<div id="' . $element['#id'] . '" ' . drupal_attributes($wrapper_attributes) .'>' . $element['#children'] . '</div>';
+  }
+  return '<div ' . drupal_attributes($attributes) .'>' . theme('form_element', $element) . '</div>';
+}
+
+/**
+ * Access callback
+ *
+ * @param $account
+ * @return bool
+ */
+function xdruple_fields_user_preferences_access($account) {
+  $access = FALSE;
+
+  global $user;
+  if (user_access('edit personal rescued entities') && $user->uid == $account->uid) {
+    $access = TRUE;
+  }
+
+  return $access;
 }
