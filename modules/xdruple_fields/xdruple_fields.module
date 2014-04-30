@@ -981,6 +981,9 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
     '#date_format' => 'Y-m-d',
     '#date_year_range' => '-0:+1',
     '#attributes' => array('title' => t('Select the Scheduled Date to use when placing an order.')),
+    '#datepicker_options' => array(
+      'minDate' => 'today',
+    )
   );
 
   $form[$form_id]['actions'] = array('#type' => 'actions');
