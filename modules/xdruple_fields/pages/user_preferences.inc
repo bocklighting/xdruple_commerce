@@ -5,21 +5,6 @@
  */
 
 /**
- * Page callback
- *
- * @param $account
- * @return string
- */
-function xdruple_fields_user_preferences_page($account) {
-  $output = '';
-
-  $form = drupal_get_form('xtuple_order_defaults_form');
-  $output .= drupal_render($form);
-
-  return $output;
-}
-
-/**
  * Access callback
  *
  * @param $account

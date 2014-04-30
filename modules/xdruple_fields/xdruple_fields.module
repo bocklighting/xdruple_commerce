@@ -25,15 +25,6 @@ function xdruple_fields_views_api() {
 function xdruple_fields_menu() {
   $items = array();
 
-  $items['user/%user/preferences'] = array(
-    'title'            => 'Preferences',
-    'page callback'    => 'xdruple_fields_user_preferences_page',
-    'page arguments'   => array(1),
-    'access callback'  => 'xdruple_fields_user_preferences_access',
-    'access arguments' => array(1),
-    'type'             => MENU_LOCAL_TASK,
-  );
-
   $items['user/%user/preferences/customer/autocomplete'] = array(
     'title'            => 'Customer Autocomplete',
     'page callback'    => 'xdruple_fields_get_customer_callback',
