@@ -746,9 +746,19 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'description' => t('Product module product category form element'),
         'weight' => -4,
       ),
+      'inventoryUnit' => array(
+        'label' => t('Inventory Unit'),
+        'description' => t('Product module inventory unit form element'),
+        'weight' => -4,
+      ),
       'priceUnit' => array(
         'label' => t('Price Unit'),
         'description' => t('Product module price unit form element'),
+        'weight' => -4,
+      ),
+      'weightUnit' => array(
+        'label' => t('Weight Unit'),
+        'description' => t('Product module weight unit form element'),
         'weight' => -4,
       ),
       'notes' => array(
@@ -799,10 +809,22 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'theme' => 'xdruple_commerce_product_category',
         'weight' => -4,
       ),
+      'inventoryUnit' => array(
+        'label' => t('Inventory Unit'),
+        'description' => t('Unit of measure used for inventory'),
+        'theme' => 'xdruple_commerce_inventory_unit',
+        'weight' => -4,
+      ),
       'priceUnit' => array(
         'label' => t('Price Unit'),
         'description' => t('Unit of measure used for the price calculation'),
         'theme' => 'xdruple_commerce_price_unit',
+        'weight' => -4,
+      ),
+      'weightUnit' => array(
+        'label' => t('Weight Unit'),
+        'description' => t('Unit of measure used for the weight calculation'),
+        'theme' => 'xdruple_commerce_weight_unit',
         'weight' => -4,
       ),
       'notes' => array(
@@ -1124,10 +1146,20 @@ function xdruple_commerce_theme() {
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
       'template' => 'xdruple-commerce-product-category',
     ),
+    'xdruple_commerce_inventory_unit' => array(
+      'variables' => array('inventoryUnit' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-inventory-unit',
+    ),
     'xdruple_commerce_price_unit' => array(
       'variables' => array('priceUnit' => NULL, 'label' => NULL, 'product' => NULL),
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
       'template' => 'xdruple-commerce-price-unit',
+    ),
+    'xdruple_commerce_weight_unit' => array(
+      'variables' => array('weightUnit' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-weight-unit',
     ),
     'xdruple_commerce_notes' => array(
       'variables' => array('notes' => NULL, 'label' => NULL, 'product' => NULL),
@@ -1270,6 +1302,8 @@ function xdruple_commerce_field_attach_submit($entity_type, $entity, $form, $for
     $entity->classCode = $form_state['values']['classCode'];
     $entity->productCategory = $form_state['values']['productCategory'];
     $entity->priceUnit = $form_state['values']['priceUnit'];
+    $entity->inventoryUnit = $form_state['values']['inventoryUnit'];
+    $entity->weightUnit = $form_state['values']['weightUnit'];
   }
 }
 
