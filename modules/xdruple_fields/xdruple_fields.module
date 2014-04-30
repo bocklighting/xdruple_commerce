@@ -967,17 +967,13 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
     );
   }
 
-  // Is the $_SESSION is stale, it could have an older date. Set it to today.
-  if (isset($_SESSION['rescued']['scheduled_date']) && strtotime($_SESSION['rescued']['scheduled_date']) < strtotime(format_date(REQUEST_TIME, 'custom', 'Y-m-d'))) {
-    $_SESSION['rescued']['scheduled_date'] = format_date(REQUEST_TIME, 'custom', 'Y-m-d');
-  }
   $form[$form_id]['scheduled_date'] = array(
     '#type' => 'date_popup',
     '#title' => t('Scheduled Date'),
     '#date_label_position' => 'hidden',
     //'#title_display' => 'invisible',
     '#size' => 15,
-    '#default_value' => isset($_SESSION['rescued']['scheduled_date']) ? $_SESSION['rescued']['scheduled_date'] : format_date(REQUEST_TIME, 'custom', 'Y-m-d'),
+    '#default_value' => xdruple_rescued_scheduled_date('tomorrow'),
     '#date_format' => 'Y-m-d',
     '#date_year_range' => '-0:+1',
     '#attributes' => array('title' => t('Select the Scheduled Date to use when placing an order.')),
@@ -1038,8 +1034,8 @@ function xtuple_order_defaults_form_submit($form, &$form_state) {
     }
   }
 
-  // Default to today.
-  $_SESSION['rescued']['scheduled_date'] = !empty($form_state['values']['scheduled_date']) ? $form_state['values']['scheduled_date'] : format_date(REQUEST_TIME, 'custom', 'Y-m-d');
+  $scheduled_date = !empty($form_state['values']['scheduled_date']) ? $form_state['values']['scheduled_date'] : 'tomorrow';
+  xdruple_rescued_scheduled_date($scheduled_date, TRUE);
 
   // TODO: set a message.
 }
