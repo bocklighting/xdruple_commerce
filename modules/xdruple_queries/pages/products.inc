@@ -20,7 +20,7 @@ function xdruple_queries_products_page() {
   drupal_alter(array('product_page_item', 'products_by_category_page_item'), $params);
 
   $output .= theme('products_page', array(
-    'products' => _xdruple_prepare_products_list(array(), $params),
+    'products' => _xdruple_prepare_products_list(NULL, $params),
   ));
 
   $output .= theme('pager');

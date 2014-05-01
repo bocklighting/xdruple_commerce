@@ -19,11 +19,8 @@ function xdruple_queries_products_recent_page() {
   );
   drupal_alter(array('product_page_item', 'products_recent_page_item'), $params);
 
-  $list   = array();
-  $orders = _xdruple_queries_load_orders('xdcatalogrecentord');
-  foreach ($orders as $order) {
-    $list = _xdruple_prepare_products_list($order->products, $params, 'products_page_item');
-  }
+  $products_ids = _xdruple_queries_load_products_by_order_type('xdcatalogrecentord');
+  $list = _xdruple_prepare_products_list($products_ids, $params, 'products_page_item');
 
   $output .= theme('products_page', array(
     'products' => $list,
