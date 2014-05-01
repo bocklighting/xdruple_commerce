@@ -214,6 +214,22 @@ function _xdruple_queries_load_orders($entity_type) {
 }
 
 /**
+ * @param $order_type string - e.g. xdcatalogrecentord
+ *
+ * @return array
+ */
+function _xdruple_queries_load_products_by_order_type($order_type) {
+  $products = array();
+
+  $orders = _xdruple_queries_load_orders($order_type);
+  foreach ($orders as $order) {
+    $products = array_merge($products, $order->products);
+  }
+
+  return $products;
+}
+
+/**
  * @param $product_ids
  * @param $params
  * @param $product_item_theme
