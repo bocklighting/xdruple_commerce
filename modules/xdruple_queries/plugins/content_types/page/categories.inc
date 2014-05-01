@@ -17,8 +17,10 @@ $plugin = extensions_content_type_plugin('xdruple_queries', 'categories', 'Categ
 function xdruple_queries_categories_content_type_plugin_render($subtype, $conf, $panel_args) {
   $output = '';
 
-  $cats = _xdruple_queries_categories_tree();
-  $output .= _core_categories_build_list_group_items($cats['tree'], $cats['catalog']);
+  if (xdruple_access('products', 'view', 'xtuple: access product lists')) {
+    $cats = _xdruple_queries_categories_tree();
+    $output .= _core_categories_build_list_group_items($cats['tree'], $cats['catalog']);
+  }
 
   return $output;
 }
