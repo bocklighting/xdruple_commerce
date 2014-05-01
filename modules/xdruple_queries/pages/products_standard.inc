@@ -17,7 +17,7 @@ function xdruple_queries_products_standard_page() {
       ),
     ),
   );
-  drupal_alter(array('product_page_item', 'products_by_category_page_item'), $params);
+  drupal_alter(array('product_page_item', 'products_standard_page_item'), $params);
 
   $list       = array();
   $conditions = array();
@@ -34,6 +34,7 @@ function xdruple_queries_products_standard_page() {
   if (empty($cache)) {
     $orders = entity_load('xtuple_xdcatalogshiptostdord', FALSE, $conditions);
     if (!empty($_SESSION['rescued']['ship_to'])) {
+      $cid = 'xdruple_xdcatalogshiptostdord-' . $_SESSION['rescued']['ship_to'];
       cache_set($cid, $orders, 'cache', CACHE_TEMPORARY);
     }
   } else {

@@ -17,7 +17,7 @@ function xdruple_queries_products_recent_page() {
       ),
     ),
   );
-  drupal_alter(array('product_page_item', 'products_by_category_page_item'), $params);
+  drupal_alter(array('product_page_item', 'products_recent_page_item'), $params);
 
   $list       = array();
   $conditions = array();
