@@ -57,7 +57,11 @@ function xdruple_queries_remove_from_standard_order_form_submit($form, &$form_st
       $cid = 'xtuple_xdcatalogshiptostdord-' . $values['ship_to'];
       cache_clear_all($cid, 'cache');
     }
-    drupal_set_message(t("Product removed from the Standard order"));
+
+    $product = entity_load_single('commerce_product', $values['product_id']);
+    drupal_set_message(t("Product !title removed from the Standard order", array(
+      '!title' => l($product->title, "products/{$product->product_id}"),
+    )), 'warning');
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
     watchdog('xdruple_queries', $e->getMessage(), array(), WATCHDOG_ERROR);

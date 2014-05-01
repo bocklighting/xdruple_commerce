@@ -55,7 +55,10 @@ function xdruple_queries_add_to_standard_order_form_submit($form, &$form_state) 
     $cid = 'xtuple_xdcatalogshiptostdord-' . $values['ship_to'];
     cache_clear_all($cid, 'cache');
 
-    drupal_set_message(t("Product added to the Standard order"));
+    $product = entity_load_single('commerce_product', $values['product_id']);
+    drupal_set_message(t("Product !title added to the Standard order", array(
+      '!title' => l($product->title, "products/{$product->product_id}"),
+    )));
   } catch (Google_ServiceException $e) {
     $errors = $e->getErrors();
     if ($errors[0]['message'] == 'Error: duplicate key value violates unique constraint "xd_stdorditem_unique"') {
@@ -63,8 +66,8 @@ function xdruple_queries_add_to_standard_order_form_submit($form, &$form_state) 
     }
     else {
       drupal_set_message($e->getMessage(), 'error');
-      watchdog('xdruple_queries', $e->getMessage(), array(), WATCHDOG_ERROR);
     }
+    watchdog('xdruple_queries', $e->getMessage(), array(), WATCHDOG_ERROR);
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
     watchdog('xdruple_queries', $e->getMessage(), array(), WATCHDOG_ERROR);
