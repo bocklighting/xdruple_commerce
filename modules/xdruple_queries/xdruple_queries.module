@@ -104,7 +104,7 @@ function xdruple_queries_menu() {
 function xdruple_queries_permission() {
   return array(
     'xtuple: access product lists' => array(
-      'title' => t('Access xTuple Product Lists'),
+      'title'       => t('Access xTuple Product Lists'),
       'description' => t('Allow users to view lists of products.'),
     ),
   );
@@ -183,4 +183,71 @@ function xdruple_queries_theme() {
   );
 
   return $items;
+}
+
+/**
+ * @param $entity_type string - e.g. xdcatalogrecentord
+ *
+ * @return array
+ */
+function _xdruple_queries_load_orders($entity_type) {
+  $orders = array();
+
+  if ($ship_to = xdruple_rescued_session_get('ship_to')) {
+    $cid   = "xtuple_{$entity_type}-$ship_to";
+    $cache = cache_get($cid, 'cache');
+
+    if (empty($cache)) {
+      $conditions = array(
+        'shipTo' => $ship_to,
+      );
+
+      $orders = entity_load("xtuple_{$entity_type}", FALSE, $conditions);
+      cache_set($cid, $orders, 'cache', CACHE_TEMPORARY);
+    }
+    else {
+      $orders = $cache->data;
+    }
+  }
+
+  return $orders;
+}
+
+/**
+ * @param $product_ids
+ * @param $params
+ * @param $product_item_theme
+ *
+ * @return array
+ */
+function _xdruple_prepare_products_list(array $product_ids = array(), array $params = array(), $product_item_theme = 'products_page_item') {
+  $list = array();
+
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'commerce_product');
+  $query->pager(20);
+
+  if (!empty($product_ids)) {
+    // TODO: nginx seems to max out around 180 products. Then it returns a
+    // 414 Request-URI Too Large. Using 50 as a default for now until this
+    // is fixed by dev ops.
+    $query->propertyCondition('product_id', array_slice($product_ids, 0, 50), 'ANY');
+  }
+
+  $products = $query->execute();
+
+  // TODO: The rescued_entity_field_query_builder(EntityFieldQuery $query)
+  // function runs through entity_load to do the actual query. In theory,
+  // an EntityFieldQuery() could go directly to the API and then you would
+  // call entity_load() for the returned ids which will attach fields, etc.
+  // We can skip this call for now. This is one reason why the entity cache
+  // and EntityFieldQuery cache need to work together.
+  foreach ($products['commerce_product'] as $product) {
+    $list[] = theme($product_item_theme, array(
+      'product' => $product,
+      'params'  => $params,
+    ));
+  }
+
+  return $list;
 }
