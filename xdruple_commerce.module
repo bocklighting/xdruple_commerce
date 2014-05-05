@@ -756,6 +756,11 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'description' => t('Product module price unit form element'),
         'weight' => -4,
       ),
+      'uomRatio' => array(
+        'label' => t('UOM Ratio'),
+        'description' => t('Product module UOM ratio form element'),
+        'weight' => -4,
+      ),
       'weightUnit' => array(
         'label' => t('Weight Unit'),
         'description' => t('Product module weight unit form element'),
@@ -819,6 +824,12 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'label' => t('Price Unit'),
         'description' => t('Unit of measure used for the price calculation'),
         'theme' => 'xdruple_commerce_price_unit',
+        'weight' => -4,
+      ),
+      'uomRatio' => array(
+        'label' => t('UOM Ratio'),
+        'description' => t('Unit of measure ratio between price and inventory'),
+        'theme' => 'xdruple_commerce_uom_ratio',
         'weight' => -4,
       ),
       'weightUnit' => array(
@@ -1156,6 +1167,11 @@ function xdruple_commerce_theme() {
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
       'template' => 'xdruple-commerce-price-unit',
     ),
+    'xdruple_commerce_uom_ratio' => array(
+      'variables' => array('uomRatio' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-uom-ratio',
+    ),
     'xdruple_commerce_weight_unit' => array(
       'variables' => array('weightUnit' => NULL, 'label' => NULL, 'product' => NULL),
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
@@ -1302,6 +1318,7 @@ function xdruple_commerce_field_attach_submit($entity_type, $entity, $form, $for
     $entity->classCode = $form_state['values']['classCode'];
     $entity->productCategory = $form_state['values']['productCategory'];
     $entity->priceUnit = $form_state['values']['priceUnit'];
+    $entity->uomRatio = $form_state['values']['uomRatio'];
     $entity->inventoryUnit = $form_state['values']['inventoryUnit'];
     $entity->weightUnit = $form_state['values']['weightUnit'];
   }
