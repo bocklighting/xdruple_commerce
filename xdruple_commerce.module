@@ -2084,7 +2084,7 @@ function xdruple_commerce_checkout_completion_message_default() {
   if (filter_format_load($format)) {
     $value .= '<p>Your order number is <a href="[commerce-order:view-url]">[commerce-order:order-number]</a>.</p>';
     $value .= '<p>You can <a href="[commerce-order:url]">view your order</a> on your <a href="user/[user:uid]/orders">pending orders page</a> when logged in.</p>';
-    $value .= '<p>We sent confirmation e-mail on you on <strong>[user:mail]</strong>.</p>';
+    $value .= '<p>We sent confirmation e-mail to you on <strong>[user:mail]</strong>.</p>';
     $value .= '<p><a href="[site:url]">Return to the front page.</a></p>';
   }
   else {
