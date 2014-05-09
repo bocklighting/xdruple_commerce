@@ -496,17 +496,13 @@ function xdruple_fields_views_default_views() {
       'empty_column' => 0,
     ),
   );
-  /* Header: Add New Link */
+  /* Header: «Add New» link */
   $handler->display->display_options['header']['area']['id'] = 'area';
   $handler->display->display_options['header']['area']['table'] = 'views';
   $handler->display->display_options['header']['area']['field'] = 'area';
-  $handler->display->display_options['header']['area']['ui_name'] = 'Add New Link';
-  $handler->display->display_options['header']['area']['content'] = '<a href=\'/xtuple/xdruplecommerceaddress/add\'>+ Add New Address</a>';
-  if (module_exists('htmlpurifier')) {
-    $handler->display->display_options['header']['area']['format'] = 'html_purifier_full';
-  } else {
-    $handler->display->display_options['header']['area']['format'] = 'filtered_html';
-  }
+  $handler->display->display_options['header']['area']['ui_name'] = '«Add New» link';
+  $handler->display->display_options['header']['area']['content'] = '<a href="/xtuple/xdruplecommerceaddress/add">+ Add New Address</a>';
+  $handler->display->display_options['header']['area']['format'] = variable_get('cpanel_textarea_format', variable_get('filter_fallback_format'));
   /* Field: XdrupleCommerceAddress: Line1 */
   $handler->display->display_options['fields']['line1']['id'] = 'line1';
   $handler->display->display_options['fields']['line1']['table'] = 'efq_xtuple_xdruplecommerceaddress';
@@ -620,17 +616,13 @@ function xdruple_fields_views_default_views() {
       'empty_column' => 0,
     ),
   );
-  /* Header: Add New Link */
+  /* Header: «Add New» link */
   $handler->display->display_options['header']['area']['id'] = 'area';
   $handler->display->display_options['header']['area']['table'] = 'views';
   $handler->display->display_options['header']['area']['field'] = 'area';
-  $handler->display->display_options['header']['area']['ui_name'] = 'Add New Link';
-  $handler->display->display_options['header']['area']['content'] = '<a href=\'/xtuple/xdruplecommercecontact/add\'>+ Add New Contact</a>';
-  if (module_exists('htmlpurifier')) {
-    $handler->display->display_options['header']['area']['format'] = 'html_purifier_full';
-  } else {
-    $handler->display->display_options['header']['area']['format'] = 'filtered_html';
-  }
+  $handler->display->display_options['header']['area']['ui_name'] = '«Add New» link';
+  $handler->display->display_options['header']['area']['content'] = '<a href="/xtuple/xdruplecommercecontact/add">+ Add New Contact</a>';
+  $handler->display->display_options['header']['area']['format'] = variable_get('cpanel_textarea_format', variable_get('filter_fallback_format'));
   /* Field: XdrupleCommerceContact: First Name */
   $handler->display->display_options['fields']['firstName']['id'] = 'firstName';
   $handler->display->display_options['fields']['firstName']['table'] = 'efq_xtuple_xdruplecommercecontact';
@@ -729,17 +721,13 @@ function xdruple_fields_views_default_views() {
       'empty_column' => 0,
     ),
   );
-  /* Header: Add New Link */
+  /* Header: «Add New» link */
   $handler->display->display_options['header']['area']['id'] = 'area';
   $handler->display->display_options['header']['area']['table'] = 'views';
   $handler->display->display_options['header']['area']['field'] = 'area';
-  $handler->display->display_options['header']['area']['ui_name'] = 'Add New Link';
-  $handler->display->display_options['header']['area']['content'] = '<a href=\'/xtuple/xdruplecommerceshipto/add\'>+ Add New Ship To</a>';
-  if (module_exists('htmlpurifier')) {
-    $handler->display->display_options['header']['area']['format'] = 'html_purifier_full';
-  } else {
-    $handler->display->display_options['header']['area']['format'] = 'filtered_html';
-  }
+  $handler->display->display_options['header']['area']['ui_name'] = '«Add New» link';
+  $handler->display->display_options['header']['area']['content'] = '<a href="/xtuple/xdruplecommerceshipto/add">+ Add New Ship To</a>';
+  $handler->display->display_options['header']['area']['format'] = variable_get('cpanel_textarea_format', variable_get('filter_fallback_format'));
   /* Field: XdrupleCommerceContact: Number */
   $handler->display->display_options['fields']['number']['id'] = 'number';
   $handler->display->display_options['fields']['number']['table'] = 'efq_xtuple_xdruplecommerceshipto';

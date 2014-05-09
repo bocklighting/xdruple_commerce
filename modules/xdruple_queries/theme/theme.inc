@@ -64,12 +64,19 @@ function template_preprocess_products_page_item(&$variables) {
 /**
  * Helper function to show correct Product price
  */
-function _xdruple_queries_price($product) {
-  $line_item = commerce_product_line_item_new($product, 1, 0, array(), NULL);
+function _xdruple_queries_price($product, $qty = 1, $order_id = 0, $format = TRUE) {
+  $line_item = commerce_product_line_item_new($product, $qty, $order_id, array(), NULL);
   xdruple_commerce_get_customer_line_item_price($line_item);
   $unit_price = $line_item->commerce_unit_price[LANGUAGE_NONE]['0'];
 
-  return commerce_currency_format($unit_price['amount'], $unit_price['currency_code']);
+  if ($format) {
+    $price = commerce_currency_format($unit_price['amount'], $unit_price['currency_code']);
+  }
+  else {
+    $price = $unit_price['amount'];
+  }
+
+  return $price;
 }
 
 /**

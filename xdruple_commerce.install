@@ -7,3 +7,12 @@ function xdruple_commerce_enable() {
   // Clear caches so xdruple_commerce module can override commerce module.
   cache_clear_all();
 }
+
+/**
+ * Delete current Complete message (reset to new defaults)
+ */
+function xdruple_commerce_update_7001() {
+  variable_del('commerce_checkout_completion_message');
+
+  return t('commerce_checkout_completion_message variable deleted');
+}
