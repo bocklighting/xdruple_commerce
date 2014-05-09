@@ -51,8 +51,8 @@ function xdruple_invoice_rescued_register_clients_resources_alter(&$rescued_clie
   if (!in_array('InvoiceListItem', $rescued_clients_url_resources['xtuple'])) {
     $rescued_clients_url_resources['xtuple'][] = 'InvoiceListItem';
   }
-  if (!in_array('Shipment', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'Shipment';
+  if (!in_array('XdShipment', $rescued_clients_url_resources['xtuple'])) {
+    $rescued_clients_url_resources['xtuple'][] = 'XdShipment';
   }
   if (!in_array('RemitTo', $rescued_clients_url_resources['xtuple'])) {
     $rescued_clients_url_resources['xtuple'][] = 'RemitTo';
