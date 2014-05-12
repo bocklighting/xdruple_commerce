@@ -49,7 +49,7 @@ function xdruple_invoice_page($invc_num) {
                     ->execute();
 
       $query_shipment = new EntityFieldQuery();
-      $shipment = $query_shipment->entityCondition('entity_type', 'xtuple_shipment')
+      $shipment = $query_shipment->entityCondition('entity_type', 'xtuple_xdshipment')
                     ->propertyCondition('order', $invoice->orderNumber, '=')
                     ->execute();
 
@@ -64,7 +64,7 @@ function xdruple_invoice_page($invc_num) {
       }
 
       if (count($shipment) > 0) {
-        $params['shipments'] = $shipment['xtuple_shipment'];
+        $params['shipments'] = $shipment['xtuple_xdshipment'];
       }
 
       $output = theme('invoice_page', $params);

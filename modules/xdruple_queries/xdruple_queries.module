@@ -245,10 +245,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     $query->pager(20);
 
     if (!empty($product_ids)) {
-      // TODO: nginx seems to max out around 180 products. Then it returns a
-      // 414 Request-URI Too Large. Using 50 as a default for now until this
-      // is fixed by dev ops.
-      $query->propertyCondition('product_id', array_slice($product_ids, 0, 50), 'ANY');
+      $query->propertyCondition('product_id', $product_ids, 'ANY');
     }
 
     $products = $query->execute();
