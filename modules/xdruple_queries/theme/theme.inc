@@ -43,13 +43,15 @@ function template_preprocess_products_page_item(&$variables) {
     if (!empty($params['fields']['add_to_cart']['show_quantity'])) {
       $show_qty = $params['fields']['add_to_cart']['show_quantity'];
     }
+    
     $qty = 1;
     if (isset($params['fields']['add_to_cart']['qty'])) {
       $qty = $params['fields']['add_to_cart']['qty'];
     }
-    $order_id = 1;
+
+    $order_id = 0;
     if (isset($params['fields']['add_to_cart']['order_id'])) {
-      $qty = $params['fields']['add_to_cart']['order_id'];
+      $order_id = $params['fields']['add_to_cart']['order_id'];
     }
     $variables['add_to_cart'] = _xdruple_queries_add_to_cart_button($product, $show_qty, array(), $qty, $order_id);
   }
@@ -86,7 +88,7 @@ function _xdruple_queries_add_to_cart_button($product, $show_qty = FALSE, $conte
   $product_ids = array($product->product_id);
   $form_id     = commerce_cart_add_to_cart_form_id($product_ids);
 
-  $line_item = commerce_product_line_item_new($product, $qty, $order_id, array());
+  $line_item                                         = commerce_product_line_item_new($product, $qty, $order_id, array());
   $line_item->data['context']['product_ids']         = $product_ids;
   $line_item->data['context']['add_to_cart_combine'] = TRUE;
 
