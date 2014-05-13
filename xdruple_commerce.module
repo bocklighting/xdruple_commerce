@@ -161,8 +161,35 @@ function xdruple_commerce_rescued_register_clients_resources_alter(&$rescued_cli
   if (!in_array('SalesOrder', $rescued_clients_url_resources['xtuple'])) {
     $rescued_clients_url_resources['xtuple'][] = 'SalesOrder';
   }
+  if (!in_array('ItemSiteListItem', $rescued_clients_url_resources['xtuple'])) {
+    $rescued_clients_url_resources['xtuple'][] = 'ItemSiteListItem';
+  }
 
   return $rescued_clients_url_resources;
+}
+
+/**
+ * Implements hook_cpanel_alter()
+ */
+function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
+  $form['xdruple_commerce_exclusive_items'] = array(
+    '#type'  => 'fieldset',
+    '#title' => t('Exclusive Items settings'),
+    '#group' => 'system_settings',
+  );
+
+  $form['xdruple_commerce_exclusive_items']['xdruple_commerce_filter_exclusive_items'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Filter Product Lists against Customer Exclusive Items'),
+    '#description'   => t('When checked, all product lists are ran through the ' .
+                          'Customer Exclusive Items filter. This will restrict ' .
+                          'Product Lists to only those products a Customer is ' .
+                          'allowed to see based on their Pricing Schedules and ' .
+                          'the Exclusive Item flag set on an Item master. If ' .
+                          'you want to hide Exclusive Items from some Customers ' .
+                          ', you will need to check this box. '),
+    '#default_value' => variable_get('xdruple_commerce_filter_exclusive_items', FALSE),
+  );
 }
 
 /**
@@ -1359,6 +1386,98 @@ function xdruple_commerce_entity_query_alter(&$query) {
   }
 }
 
+/**
+ * Helper function to request a list of filtered product_ids a Customer is
+ * allowed to purchase based on the Customer, Ship To and Effective Date. This
+ * runs the list through xTuple's filter to show/hide exclusive items based on
+ * Pricing Schdules.
+ *
+ * @return array The allowed product_ids
+ */
+function xdruple_commerce_get_exclusive_item_list() {
+  $filtered_product_ids =  array();
+
+  $cid = 'xdruple_commerce_customer_exclusive_item_list-' .
+         xdruple_rescued_session_get('customer') . '-' .
+         xdruple_rescued_session_get('ship_to') . '-' .
+         xdruple_rescued_scheduled_date();
+
+  $cache = cache_get($cid, 'cache');
+
+  if (empty($cache)) {
+    $optParams = array(
+      'query' => array(
+        'customer' => array(
+          'EQUALS' => xdruple_rescued_session_get('customer'),
+        ),
+        'shipto' => array(
+          'EQUALS' => xdruple_rescued_session_get('ship_to'),
+        ),
+        'effectiveDate' => array(
+          'EQUALS' => xdruple_rescued_scheduled_date(),
+        ),
+      )
+    );
+
+    // Fetch a customer's list of exclusive items.
+    $exclusive = xdruple_commerce_api_customer_exclusive_item_list('xtuple', 'ItemSiteListItem', $optParams);
+
+    foreach ($exclusive as $itemsite) {
+      $filtered_product_ids[] = intval($itemsite['item']['id']);
+    }
+
+    cache_set($cid, $filtered_product_ids, 'cache', CACHE_TEMPORARY);
+  } else {
+    $filtered_product_ids = $cache->data;
+  }
+
+  return $filtered_product_ids;
+}
+
+/**
+ * XM.ItemSiteListItem.restFetch POST query.
+ *
+ * Query the dispatch function XM.ItemSiteListItem.restFetch to get a filtered
+ * list of items that a Customer is allowed to see.
+ *
+ * @param string $discovery_client The API client name. e.g. 'xtuple'
+ * @param string $resource The API resource name. e.g. 'ItemSiteListItem'
+ * @param array $optParams The structured query to perform.
+ *
+ * @return array The query result response.
+ */
+function xdruple_commerce_api_customer_exclusive_item_list($discovery_client = 'xtuple', $resource = 'ItemSiteListItem', $optParams = array()) {
+  $service = wsclient_service_load($discovery_client);
+  $endpoint = $service->endpoint();
+  $client = $endpoint->client();
+
+  $postBody = array(
+    'attributes' => array(
+      rescued_format_post_query_options($optParams),
+    ),
+  );
+
+  $params = array('postBody' => $postBody);
+
+  // POST the service request.
+  $result = $client->$resource->restFetch($params);
+
+  return $result;
+}
+
+
+/**
+ * XM.Customer.itemPrice POST query.
+ *
+ * Query the dispatch function XM.Customer.itemPrice to get a item price quote.
+ *
+ * @param string $discovery_client The API client name. e.g. 'xtuple'
+ * @param string $resource The API resource name. e.g. 'Customer'
+ * @param array $postBody The structured query to perform.
+ * @param array $optParams Additional option parameters.
+ *
+ * @return array The query result response.
+ */
 function xdruple_commerce_api_customer_item_price($discovery_client = 'xtuple', $resource = 'Customer', $postBody, $optParams = array()) {
   $service = wsclient_service_load($discovery_client);
   $endpoint = $service->endpoint();
