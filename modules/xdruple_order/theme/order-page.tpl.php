@@ -1,39 +1,39 @@
-<!-- RemitTo Table -->
-<?php if (!empty($remitto_table)): ?>
-  <?php print $remitto_table ?>
+<?php if (!empty($logo)): ?>
+  <?php print $logo; ?>
 <?php endif; ?>
 
-<!-- Header Message -->
-<?php if (!empty($header_msg)): ?>
-  <?php print $header_msg ?>
+<?php if (!empty($remit_to_address)): ?>
+  <?php print $remit_to_address ?>
 <?php endif; ?>
 
-<!-- Header Table -->
+<?php if (!empty($header_message)): ?>
+  <?php print $header_message ?>
+<?php endif; ?>
+
 <?php if (!empty($header_table)): ?>
   <?php print $header_table ?>
 <?php endif; ?>
 
-<!-- Address Table -->
-<?php if (!empty($addr_table)): ?>
-  <?php print $addr_table ?>
+<?php if (!empty($billing_info)): ?>
+  <?php print $billing_info ?>
 <?php endif; ?>
 
-<!-- Line Items Table -->
-<?php if (!empty($lines_table)): ?>
-  <?php print $lines_table ?>
+<?php if (!empty($shipping_info)): ?>
+  <?php print $shipping_info ?>
 <?php endif; ?>
 
-<!-- Total Table -->
-<?php if (!empty($total_table)): ?>
-  <?php print $total_table ?>
+<?php if (!empty($line_items_table)): ?>
+  <?php print $line_items_table ?>
 <?php endif; ?>
 
-<!-- Footer Message -->
-<?php if (!empty($footer_msg)): ?>
-  <?php print $footer_msg ?>
+<?php if (!empty($order_total)): ?>
+  <?php print $order_total ?>
 <?php endif; ?>
 
-<!-- Notes -->
+<?php if (!empty($footer_message)): ?>
+  <?php print $footer_message ?>
+<?php endif; ?>
+
 <?php if (!empty($notes)): ?>
   <?php print $notes ?>
 <?php endif; ?>
