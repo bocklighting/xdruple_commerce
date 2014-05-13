@@ -1821,7 +1821,17 @@ function xdruple_commerce_xtuple_xdruplecommercecontact_view_alter(&$build, $ent
 
   $build['phone']['#label_display']        = 'hidden';
   $build['primaryEmail']['#label_display'] = 'hidden';
-  $build['erp_xdruplecommercecontactaddress']['#access'] = FALSE;
+
+  $active_menu_item = menu_get_item();
+  if ($active_menu_item['path'] == 'checkout/%/%'
+    && !empty($active_menu_item['page_arguments'][1]['page_id'])
+    && $active_menu_item['page_arguments'][1]['page_id'] == 'review'
+  ) {
+    $build['erp_xdruplecommercecontactaddress']['#access'] = FALSE;
+  }
+  else {
+    $build['erp_xdruplecommercecontactaddress']['#label_display'] = 'above';
+  }
 }
 
 function xdruple_commerce_xtuple_xdruplecommerceaddress_view_alter(&$build, $entity_type) {
@@ -1870,6 +1880,16 @@ function xdruple_commerce_xtuple_xdruplecommerceaddress_view_alter(&$build, $ent
   }
 }
 
+function xdruple_commerce_xtuple_xdrupleusercontact_view_alter(&$build, $entity_type) {
+  $build['#page'] = TRUE;
+
+  $build['uuid']['#access'] = FALSE;
+  $build['xdruple_site']['#access'] = FALSE;
+  $build['drupalUserUuid']['#access'] = FALSE;
+  $build['create_new_customer']['#access'] = FALSE;
+  $build['contact']['#access'] = FALSE;
+}
+
 /**
  * Implements hook_theme_registry_alter()
  */
@@ -1879,6 +1899,13 @@ function xdruple_commerce_theme_registry_alter(&$theme_registry) {
   $theme_registry['commerce_checkout_review']['theme path'] = $module;
   $theme_registry['commerce_checkout_review']['includes'][0] = "$module/xdruple_commerce.module";
   $theme_registry['commerce_checkout_review']['function'] = 'xdruple_commerce_checkout_review';
+}
+
+/**
+ * Implements hook_user_view_alter()
+ */
+function xdruple_commerce_user_view_alter(&$build) {
+  $build['summary']['#access'] = FALSE;
 }
 
 function xdruple_commerce_checkout_review($variables) {
@@ -2148,4 +2175,15 @@ function xdruple_commerce_commerce_authnet_billing_address_from_customer_alter(&
     drupal_set_message($e->getMessage(), 'error');
     watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter for entity_operations_operation_form_xtuple_xdruplecommerceshipto
+ */
+function xdruple_commerce_form_entity_operations_operation_form_xtuple_xdruplecommerceshipto_edit_alter(&$form, $form_state) {
+  $form['actions']['#weight'] = 100;
+}
+
+function xdruple_commerce_form_entity_operations_operation_form_alter(&$form, $form_state) {
+  $form['actions']['#weight'] = 100;
 }
