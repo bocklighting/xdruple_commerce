@@ -10,180 +10,124 @@
 function template_preprocess_order_page(&$variables) {
   $order    = $variables['order'];
   $currency = $variables['currency'];
-  $remitto  = $variables['remitto'];
-  $logo     = theme_get_setting('logo_path') ? theme_get_setting('logo_path') : theme_get_setting('logo');
+  $remit_to = $variables['remitto'];
 
-  // Build header_msg.
-  $header_cust             = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'h1',
-      '#attributes' => array(
-        'class' => 'order-header-cust',
-      ),
-      '#value'      => $order->customer['name'] . ',',
-    ),
+  $output = '';
+  $output .= '<div class="order-logo">';
+  $output .= theme('image', array(
+    'path' => theme_get_setting('logo_path') ? theme_get_setting('logo_path') : theme_get_setting('logo'),
   ));
-  $header_msg              = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'p',
-      '#attributes' => array(
-        'class' => 'order-header-msg-txt',
-      ),
-      '#value'      => t('Thank you for ordering from @cust.', array(
-        '@cust' => $order->customer['name']
-      )),
-    ),
-  ));
-  $header_msg_wrapper      = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'div',
-      '#attributes' => array(
-        'class' => 'order-header-msg-wrapper',
-      ),
-      '#value'      => $header_cust . $header_msg,
-    ),
-  ));
-  $variables['header_msg'] = $header_msg_wrapper;
+  $output .= '</div>';
+  $variables['logo'] = $output;
 
-  // Build remitto_table.
-  $remitto_img  = array(
-    'path' => $logo,
-  );
-  $remitto_addr = array(
-    'items' => explode("\n", $remitto->address),
-    'type'  => 'ul',
-  );
-  array_unshift($remitto_addr['items'], $remitto->name);
-  $remitto_table              = array(
+  $output = '';
+  $output .= '<div class="order-remit-to-address-wrapper">';
+  $output .= '<div class="order-remit-to-address">' . str_replace("\n", "<br />", $remit_to->address) . '</div>';
+  $output .= '</div>';
+  $variables['remit_to_address'] = $output;
+
+  $output = '';
+  $output .= '<div class="order-header-message-wrapper">';
+  $output .= '<div class="order-header-customer">' . $order->customer['name'] . '</div>';
+  $output .= '<div class="order-header-message">' . t('Thank you for ordering from @site.', array(
+      '@site' => variable_get('site_name'),
+    )) . '</div>';
+  $output .= '</div>';
+  $variables['header_message'] = $output;
+
+  $order_date             = new DateTime($order->orderDate);
+  $schedule_date          = new DateTime($order->scheduleDate);
+  $header_table           = array(
     'rows' => array(),
   );
-  $remitto_table['rows'][]    = array(theme('image', $remitto_img), theme('item_list', $remitto_addr));
-  $remitto_wrapper            = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'div',
-      '#attributes' => array(
-        'class' => 'order-remitto-wrapper',
-      ),
-      '#value'      => theme('table', $remitto_table),
-    ),
-  ));
-  $variables['remitto_table'] = $remitto_wrapper;
-
-  // Build header_table.
-  $header_table              = array(
-    'rows' => array(),
+  $header_table['rows'][] = array(t('Sales Order #'), $order->number);
+  $header_table['rows'][] = array(t('Order Date'), $order_date->format('Y-m-d'));
+  $header_table['rows'][] = array(t('Account #'), $order->customer['number']);
+  $header_table['rows'][] = array(t('PO #'), $order->customerPurchaseOrderNumber);
+  $header_table['rows'][] = array(
+    'data'  => array(t('Scheduled Date'), $schedule_date->format('Y-m-d')),
+    'class' => 'order-due-date',
   );
-  $header_table['rows'][]    = array('Sales Order #:', $order->number);
-  $order_date                = new DateTime($order->orderDate);
-  $header_table['rows'][]    = array('Order Date:', $order_date->format('Y-m-d'));
-  $header_table['rows'][]    = array('Account #:', $order->customer['number']);
-  $header_table['rows'][]    = array('PO #:', $order->customerPurchaseOrderNumber);
-  $sched_date                = new DateTime($order->scheduleDate);
-  $header_table['rows'][]    = array('Scheduled Date:', $sched_date->format('Y-m-d'));
-  $header_table['rows'][]    = array('', '');
-  $header_table['rows'][]    = array('Total Due:', _xdruple_commerce_currency_format($order->balance, $currency));
-  $header_wrapper            = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'div',
-      '#attributes' => array(
-        'class' => 'order-header-wrapper',
-      ),
-      '#value'      => theme('table', $header_table),
-    ),
-  ));
-  $variables['header_table'] = $header_wrapper;
-
-
-  // Build addr_table.
-  $addr_table           = array(
-    'header' => array(),
-    'rows'   => array(),
-  );
-  $addr_table['header'] = array(
-    'Billing Information',
-    'Shipping Information',
+  $header_table['rows'][] = array(
+    'data'  => array(t('Total Due'), _xdruple_commerce_currency_format($order->balance, $currency)),
+    'class' => 'order-header-total-due',
   );
 
-  // Format Billing Info.
-  $billing_addr = array();
+  $output = '';
+  $output .= '<div class="order-header-wrapper">';
+  $output .= theme('table', $header_table);
+  $output .= '</div>';
+  $variables['header_table'] = $output;
+
+  $billing_address = array();
   if (!empty($order->billtoName)) {
-    $billing_addr[] = $order->billtoName;
+    $billing_address[] = $order->billtoName;
   }
   if (!empty($order->billtoAddress1)) {
-    $billing_addr[] = $order->billtoAddress1;
+    $billing_address[] = $order->billtoAddress1;
   }
   if (!empty($order->billtoAddress2)) {
-    $billing_addr[] = $order->billtoAddress2;
+    $billing_address[] = $order->billtoAddress2;
   }
   if (!empty($order->billtoAddress3)) {
-    $billing_addr[] = $order->billtoAddress3;
+    $billing_address[] = $order->billtoAddress3;
   }
-  $billing_addr[] = $order->billtoCity . ', ' . $order->billtoState . ' ' . $order->billtoPostalCode;
+  $billing_address[] = $order->billtoCity . ', ' . $order->billtoState . ' ' . $order->billtoPostalCode;
   if (!empty($order->billtoCountry)) {
-    $billing_addr[] = $order->billtoCountry;
+    $billing_address[] = $order->billtoCountry;
   }
   if (!empty($order->billtoPhone)) {
-    $billing_addr[] = $order->billtoPhone;
+    $billing_address[] = $order->billtoPhone;
   }
 
-  // Format Shipping Info.
-  $shipping_addr = array();
+  $output = '';
+  $output .= '<div class="order-bill-to-address-wrapper">';
+  $output .= '<div class="order-bill-to-address-title">' . t('Billing information') . '</div>';
+  $output .= '<address>' . implode('<br />', $billing_address) . '</address>';
+  $output .= '</div>';
+  $variables['billing_info'] = $output;
+
+  $shipping_address = array();
   if (!empty($order->shiptoName)) {
-    $shipping_addr[] = $order->shiptoName;
+    $shipping_address[] = $order->shiptoName;
   }
   if (!empty($order->shiptoAddress1)) {
-    $shipping_addr[] = $order->shiptoAddress1;
+    $shipping_address[] = $order->shiptoAddress1;
   }
   if (!empty($order->shiptoAddress2)) {
-    $shipping_addr[] = $order->shiptoAddress2;
+    $shipping_address[] = $order->shiptoAddress2;
   }
   if (!empty($order->shiptoAddress3)) {
-    $shipping_addr[] = $order->shiptoAddress3;
+    $shipping_address[] = $order->shiptoAddress3;
   }
-  $shipping_addr[] = $order->shiptoCity . ', ' . $order->shiptoState . ' ' . $order->shiptoPostalCode;
+  $shipping_address[] = $order->shiptoCity . ', ' . $order->shiptoState . ' ' . $order->shiptoPostalCode;
   if (!empty($order->shiptoCountry)) {
-    $shipping_addr[] = $order->shiptoCountry;
+    $shipping_address[] = $order->shiptoCountry;
   }
   if (!empty($order->shiptoContactPhone)) {
-    $shipping_addr[] = $order->shiptoContactPhone;
+    $shipping_address[] = $order->shiptoContactPhone;
   }
 
-  $billing_list            = array(
-    'items' => $billing_addr,
-    'type'  => 'ul',
-  );
-  $shipping_list           = array(
-    'items' => $shipping_addr,
-    'type'  => 'ul',
-  );
-  $addr_table['rows'][]    = array(theme('item_list', $billing_list), theme('item_list', $shipping_list));
-  $addr_wrapper            = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'div',
-      '#attributes' => array(
-        'class' => 'order-addr-wrapper',
-      ),
-      '#value'      => theme('table', $addr_table),
+  $output = '';
+  $output .= '<div class="order-ship-to-address-wrapper">';
+  $output .= '<div class="order-ship-to-address-title">' . t('Shipping information') . '</div>';
+  $output .= '<address>' . implode('<br />', $shipping_address) . '</address>';
+  $output .= '</div>';
+  $variables['shipping_info'] = $output;
+
+  $line_items_table = array(
+    'header' => array(
+      t('SKU #'),
+      t('Description'),
+      t('Quantity'),
+      t('UOM'),
+      t('Unit Price'),
+      t('Ext. Price'),
     ),
-  ));
-  $variables['addr_table'] = $addr_wrapper;
-
-
-  // Build lines_table.
-  $lines_table           = array(
-    'header' => array(),
     'rows'   => array(),
   );
-  $lines_table['header'] = array(
-    'SKU#',
-    'Description',
-    'Quantity',
-    'UOM',
-    'Unit Price',
-    'Ext. Price',
-  );
   foreach ($order->lineItems as $line) {
-    $lines_table['rows'][] = array(
+    $line_items_table['rows'][] = array(
       _xdruple_commerce_product_format($line['item']),
       $line['item']['description1'],
       number_format(round($line['quantity'], 2), 2),
@@ -192,89 +136,43 @@ function template_preprocess_order_page(&$variables) {
       _xdruple_commerce_currency_format($line['extendedPrice'], $currency),
     );
   }
-  $lines_wrapper            = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'div',
-      '#attributes' => array(
-        'class' => 'order-line-items-wrapper',
-      ),
-      '#value'      => theme('table', $lines_table),
-    ),
-  ));
-  $variables['lines_table'] = $lines_wrapper;
+  $output = '';
+  $output .= '<div class="order-line-items-wrapper">';
+  $output .= theme('table', $line_items_table);
+  $output .= '</div>';
+  $variables['line_items_table'] = $output;
 
-
-  // Build total_table.
+  $credits                  = $order->allocatedCredit + $order->authorizedCredit + $order->outstandingCredit;
   $total_table              = array(
     'rows' => array(),
   );
-  $total_table['rows'][]    = array('Subtotal:', _xdruple_commerce_currency_format($order->subtotal, $currency));
-  $total_table['rows'][]    = array('Freight:', _xdruple_commerce_currency_format($order->freight, $currency));
-  $total_table['rows'][]    = array('Misc Charge:', _xdruple_commerce_currency_format($order->miscCharge, $currency));
-  $total_table['rows'][]    = array('Tax:', _xdruple_commerce_currency_format($order->taxTotal, $currency));
-  $credits                  = $order->allocatedCredit + $order->authorizedCredit + $order->outstandingCredit;
-  $total_table['rows'][]    = array('Less Credits:', _xdruple_commerce_currency_format($credits * -1, $currency));
-  $total_table['rows'][]    = array('Total Due:', _xdruple_commerce_currency_format($order->balance, $currency));
-  $total_table['rows'][]    = array('Payment Terms:', $order->terms);
-  $total_wrapper            = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'div',
-      '#attributes' => array(
-        'class' => 'order-total-wrapper',
-      ),
-      '#value'      => theme('table', $total_table),
-    ),
-  ));
-  $variables['total_table'] = $total_wrapper;
+  $total_table['rows'][]    = array(t('Subtotal'), _xdruple_commerce_currency_format($order->subtotal, $currency));
+  $total_table['rows'][]    = array(t('Freight'), _xdruple_commerce_currency_format($order->freight, $currency));
+  $total_table['rows'][]    = array(t('Misc Charge'), _xdruple_commerce_currency_format($order->miscCharge, $currency));
+  $total_table['rows'][]    = array(t('Tax'), _xdruple_commerce_currency_format($order->taxTotal, $currency));
+  $total_table['rows'][]    = array(t('Less Credits'), _xdruple_commerce_currency_format($credits * -1, $currency));
+  $total_table['rows'][]    = array(t('Total Due'), _xdruple_commerce_currency_format($order->balance, $currency));
+  $total_table['rows'][]    = array(t('Payment Terms'), $order->terms);
+  $output = '';
+  $output .= '<div class="order-total-wrapper">';
+  $output .= theme('table', $total_table);
+  $output .= '</div>';
+  $variables['order_total'] = $output;
 
-  // Build footer_msg.
-  $footer_msg              = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'p',
-      '#attributes' => array(
-        'class' => 'order-footer-msg-txt',
-      ),
-      '#value'      => 'Thank you,' . '<br />' . t('The @cust Team', array('@cust' => $order->customer['name'])),
-    ),
-  ));
-  $footer_msg_wrapper      = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'div',
-      '#attributes' => array(
-        'class' => 'order-footer-msg-wrapper',
-      ),
-      '#value'      => $footer_msg,
-    ),
-  ));
-  $variables['footer_msg'] = $footer_msg_wrapper;
+  $output = '';
+  $output .= '<div class="order-footer-message-wrapper">';
+  $output .= '<div class="order-footer-message">' . t('Thank you, <br /> The @site Team', array(
+      '@site' => variable_get('site_name'),
+    )) . '</div>';
+  $output .= '</div>';
+  $variable['footer_message'] = $output;
 
-  // Build notes.
-  $notes_header       = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'h2',
-      '#attributes' => array(
-        'class' => 'order-notes-header',
-      ),
-      '#value'      => 'Notes:',
-    ),
-  ));
-  $notes              = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'p',
-      '#attributes' => array(
-        'class' => 'order-notes-txt',
-      ),
-      '#value'      => $order->orderNotes,
-    ),
-  ));
-  $notes_wrapper      = theme('html_tag', array(
-    'element' => array(
-      '#tag'        => 'div',
-      '#attributes' => array(
-        'class' => 'order-notes-wrapper',
-      ),
-      '#value'      => $notes_header . $notes,
-    ),
-  ));
-  $variables['notes'] = $notes_wrapper;
+  if (!empty($order->orderNotes)) {
+    $output = '';
+    $output .= '<div class="order-notes-wrapper">';
+    $output .= '<div class="order-notes-title">' . t('Notes') . '</div>';
+    $output .= '<div class="order-notes-content">' . $order->orderNotes . '</div>';
+    $output .= '</div>';
+    $variables['notes'] = $output;
+  }
 }
