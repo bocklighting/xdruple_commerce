@@ -2176,3 +2176,14 @@ function xdruple_commerce_commerce_authnet_billing_address_from_customer_alter(&
     watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter for entity_operations_operation_form_xtuple_xdruplecommerceshipto
+ */
+function xdruple_commerce_form_entity_operations_operation_form_xtuple_xdruplecommerceshipto_edit_alter(&$form, $form_state) {
+  $form['actions']['#weight'] = 100;
+}
+
+function xdruple_commerce_form_entity_operations_operation_form_alter(&$form, $form_state) {
+  $form['actions']['#weight'] = 100;
+}
