@@ -15,5 +15,6 @@ function xdruple_invoice_views_data_alter(&$data) {
     // Set custom handler to dynamically adds currency symbol to the rendered
     // amount based on the currency column.
     $data['efq_xtuple_invoicelistitem']['total']['field']['handler'] = 'xdruple_commerce_handler_currency_formatter';
+    $data['efq_xtuple_invoicelistitem']['number']['field']['handler'] = 'xdruple_invoice_handler_invoice_number_formatter';
   }
 }

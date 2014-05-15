@@ -1,24 +1,20 @@
 <?php
 
 /**
- * @file keeps callbacks for /order/% page
+ * @file keeps callbacks for user/%user/pending-orders/% page
  */
 
 /**
  * Page callback
- *
- * @param $order_num
- *
- * @return string
  */
-function xdruple_order_page($order_num) {
+function xdruple_order_page($order_number) {
   $output = '';
   $orders = array();
 
-  if (!empty($order_num)) {
+  if (!empty($order_number) && is_numeric($order_number)) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'xtuple_salesorder')
-      ->propertyCondition('number', $order_num, '=');
+      ->propertyCondition('number', $order_number, '=');
 
     if (user_access('administer rescued entities')) {
       $orders = $query->execute();
@@ -29,11 +25,10 @@ function xdruple_order_page($order_num) {
         $orders = $query->execute();
       }
     }
-    // TODO: Add Sales Rep, Emplyee and Owner query filters.
+    // TODO: Add Sales Rep, Employee and Owner query filters.
 
     $query_remitto = new EntityFieldQuery();
-    $remitto       = $query_remitto->entityCondition('entity_type', 'xtuple_remitto')
-      ->execute();
+    $remitto       = $query_remitto->entityCondition('entity_type', 'xtuple_remitto')->execute();
 
     // TODO: The rescued_entity_field_query_builder(EntityFieldQuery $query)
     // function runs through entity_load to do the actual query. In theory,
@@ -57,4 +52,18 @@ function xdruple_order_page($order_num) {
   }
 
   return $output;
+}
+
+/**
+ * Title callback
+ */
+function xdruple_order_page_title($order_number) {
+  $title = t('Order');
+  if (!empty($order_number) && is_numeric($order_number)) {
+    $title = t('Order #!number', array(
+      '!number' => $order_number,
+    ));
+  }
+
+  return $title;
 }

@@ -5,3 +5,6 @@ package = xDruple
 
 dependencies[] = rescued
 dependencies[] = xdruple
+
+; Views handlers
+files[] = includes/views/handlers/xdruple_order_handler_order_number_formatter.inc
