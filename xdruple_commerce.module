@@ -1397,27 +1397,33 @@ function xdruple_commerce_entity_query_alter(&$query) {
 function xdruple_commerce_get_exclusive_item_list() {
   $filtered_product_ids =  array();
 
+  $customer = xdruple_rescued_session_get('customer');
+  $shipto = xdruple_rescued_session_get('ship_to');
+  $scheduled_date = xdruple_rescued_scheduled_date();
+
   $cid = 'xdruple_commerce_customer_exclusive_item_list-' .
-         xdruple_rescued_session_get('customer') . '-' .
-         xdruple_rescued_session_get('ship_to') . '-' .
-         xdruple_rescued_scheduled_date();
+         $customer . '-' .
+         $shipto . '-' .
+         $scheduled_date;
 
   $cache = cache_get($cid, 'cache');
 
   if (empty($cache)) {
-    $optParams = array(
-      'query' => array(
-        'customer' => array(
-          'EQUALS' => xdruple_rescued_session_get('customer'),
-        ),
-        'shipto' => array(
-          'EQUALS' => xdruple_rescued_session_get('ship_to'),
-        ),
-        'effectiveDate' => array(
-          'EQUALS' => xdruple_rescued_scheduled_date(),
-        ),
-      )
-    );
+    if (!empty($customer)) {
+      $optParams['query']['customer'] = array(
+        'EQUALS' => $customer,
+      );
+    }
+    if (!empty($shipto)) {
+      $optParams['query']['shipto'] = array(
+        'EQUALS' => $shipto,
+      );
+    }
+    if (!empty($scheduled_date)) {
+      $optParams['query']['effectiveDate'] = array(
+        'EQUALS' => $scheduled_date,
+      );
+    }
 
     // Fetch a customer's list of exclusive items.
     $exclusive = xdruple_commerce_api_customer_exclusive_item_list('xtuple', 'ItemSiteListItem', $optParams);
