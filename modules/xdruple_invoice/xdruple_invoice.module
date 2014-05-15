@@ -1,11 +1,13 @@
 <?php
 
+include_once __DIR__ . '/pages/invoice.inc';
+
 /**
  * Implements hook_views_api().
  */
 function xdruple_invoice_views_api() {
   return array(
-    'api' => 3,
+    'api'  => 3,
     'path' => drupal_get_path('module', 'xdruple_invoice') . '/includes/views',
   );
 }
@@ -14,7 +16,6 @@ function xdruple_invoice_views_api() {
  * Implements hook_init()
  */
 function xdruple_invoice_init() {
-  module_load_include('inc', 'xdruple_invoice', 'pages/invoice');
 }
 
 /**
@@ -23,16 +24,29 @@ function xdruple_invoice_init() {
 function xdruple_invoice_menu() {
   $items = array();
 
-  $items['invoice/%'] = array(
+  $items['user/%user/invoices/%'] = array(
     'title'            => 'Invoice',
+    'title callback'   => 'xdruple_invoice_page_title',
+    'title arguments'  => array(3),
     'page callback'    => 'xdruple_invoice_page',
-    'page arguments'   => array(1),
+    'page arguments'   => array(3),
     'access arguments' => array('access content'),
     'file'             => 'pages/invoice.inc',
-    'type'             => MENU_CALLBACK,
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_menu_get_item_alter()
+ */
+function xdruple_invoice_menu_get_item_alter(&$router_item) {
+  if ($router_item['path'] == 'user/%/invoices/%') {
+    $router_item['tab_parent'] = 'user/%';
+    $router_item['tab_root']   = 'user/%';
+    $router_item['type']       = "132";
+    $router_item['context']    = 1;
+  }
 }
 
 /**
@@ -68,14 +82,14 @@ function xdruple_invoice_views_pre_execute($view) {
   if ($view->name === 'xd_invoices') {
     // Query on Customer.
     if (isset($_SESSION['rescued']['customer'])) {
-      $view->query->query->propertyConditions[] = array(
-        'column' => 'customer',
-        'value' => $_SESSION['rescued']['customer'],
+      $view->query->query->propertyConditions[]              = array(
+        'column'   => 'customer',
+        'value'    => $_SESSION['rescued']['customer'],
         'operator' => '=',
       );
       $view->build_info['count_query']->propertyConditions[] = array(
-        'column' => 'customer',
-        'value' => $_SESSION['rescued']['customer'],
+        'column'   => 'customer',
+        'value'    => $_SESSION['rescued']['customer'],
         'operator' => '=',
       );
     }

@@ -1,36 +1,38 @@
 <?php
 
 /**
- * @file keeps callbacks for /invoice/% page
+ * @file keeps callbacks for /user/%/invoices/% page
  */
 
 /**
  * Page callback
  *
- * @param $invc_num The Invoice number.
+ * @param $invoice_number The Invoice number.
  *
  * @return string Themed output.
  */
-function xdruple_invoice_page($invc_num) {
-  $output = '';
+function xdruple_invoice_page($invoice_number) {
+  $output   = '';
   $invoices = array();
 
-  if (!empty($invc_num)) {
+  if (!empty($invoice_number) && is_numeric($invoice_number)) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'xtuple_invoice')
-      ->propertyCondition('number', $invc_num, '=');
+      ->propertyCondition('number', $invoice_number, '=');
 
     if (user_access('administer rescued entities')) {
       $invoices = $query->execute();
-    } else if (isset($_SESSION['rescued']['customer'])) {
-      $query->propertyCondition('customer', $_SESSION['rescued']['customer'], '=');
-      $invoices = $query->execute();
     }
-    // TODO: Add Sales Rep, Emplyee and Owner query filters.
+    else {
+      if (isset($_SESSION['rescued']['customer'])) {
+        $query->propertyCondition('customer', $_SESSION['rescued']['customer'], '=');
+        $invoices = $query->execute();
+      }
+    }
+    // TODO: Add Sales Rep, Empolyee and Owner query filters.
 
     $query_remitto = new EntityFieldQuery();
-    $remitto = $query_remitto->entityCondition('entity_type', 'xtuple_remitto')
-                 ->execute();
+    $remitto       = $query_remitto->entityCondition('entity_type', 'xtuple_remitto')->execute();
 
     // TODO: The rescued_entity_field_query_builder(EntityFieldQuery $query)
     // function runs through entity_load to do the actual query. In theory,
@@ -44,14 +46,14 @@ function xdruple_invoice_page($invc_num) {
       $currency = entity_load_single('xtuple_currency', $invoice->currency);
 
       $query_order = new EntityFieldQuery();
-      $order = $query_order->entityCondition('entity_type', 'xtuple_salesorder')
-                    ->propertyCondition('number', $invoice->orderNumber, '=')
-                    ->execute();
+      $order       = $query_order->entityCondition('entity_type', 'xtuple_salesorder')
+        ->propertyCondition('number', $invoice->orderNumber, '=')
+        ->execute();
 
       $query_shipment = new EntityFieldQuery();
-      $shipment = $query_shipment->entityCondition('entity_type', 'xtuple_xdshipment')
-                    ->propertyCondition('order', $invoice->orderNumber, '=')
-                    ->execute();
+      $shipment       = $query_shipment->entityCondition('entity_type', 'xtuple_xdshipment')
+        ->propertyCondition('order', $invoice->orderNumber, '=')
+        ->execute();
 
       $params = array(
         'invoice'  => $invoice,
@@ -59,17 +61,26 @@ function xdruple_invoice_page($invc_num) {
         'currency' => $currency,
       );
 
-      if (count($order) > 0) {
-        $params['order'] = $order['xtuple_salesorder'][$invoice->orderNumber];
-      }
-
-      if (count($shipment) > 0) {
-        $params['shipments'] = $shipment['xtuple_xdshipment'];
-      }
+      $params['order']     = count($order) > 0 ? $order['xtuple_salesorder'][$invoice->orderNumber] : array();
+      $params['shipments'] = count($shipment) > 0 ? $shipment['xtuple_xdshipment'] : array();
 
       $output = theme('invoice_page', $params);
     }
   }
 
   return $output;
+}
+
+/**
+ * Title callback
+ */
+function xdruple_invoice_page_title($invoice_number) {
+  $title = t('Invoice');
+  if (!empty($invoice_number) && is_numeric($invoice_number)) {
+    $title = t('Invoice #!number', array(
+      '!number' => $invoice_number,
+    ));
+  }
+
+  return $title;
 }

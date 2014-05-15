@@ -15,5 +15,6 @@ function xdruple_order_views_data_alter(&$data) {
     // Set custom handler to dynamically adds currency symbol to the rendered
     // amount based on the currency column.
     $data['efq_xtuple_salesorderlistitem']['total']['field']['handler'] = 'xdruple_commerce_handler_currency_formatter';
+    $data['efq_xtuple_salesorderlistitem']['number']['field']['handler'] = 'xdruple_order_handler_order_number_formatter';
   }
 }

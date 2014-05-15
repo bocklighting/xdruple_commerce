@@ -1,5 +1,7 @@
 <?php
 
+include_once __DIR__ . '/pages/order.inc';
+
 /**
  * Implements hook_views_api().
  */
@@ -14,7 +16,6 @@ function xdruple_order_views_api() {
  * Implements hook_init()
  */
 function xdruple_order_init() {
-  module_load_include('inc', 'xdruple_order', 'pages/invoice');
 }
 
 /**
@@ -23,16 +24,29 @@ function xdruple_order_init() {
 function xdruple_order_menu() {
   $items = array();
 
-  $items['order/%'] = array(
+  $items['user/%user/pending-orders/%'] = array(
     'title'            => 'Order',
+    'title callback'   => 'xdruple_order_page_title',
+    'title arguments'  => array(3),
     'page callback'    => 'xdruple_order_page',
-    'page arguments'   => array(1),
+    'page arguments'   => array(3),
     'access arguments' => array('access content'),
     'file'             => 'pages/order.inc',
-    'type'             => MENU_CALLBACK,
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_menu_get_item_alter()
+ */
+function xdruple_order_menu_get_item_alter(&$router_item) {
+  if ($router_item['path'] == 'user/%/pending-orders/%') {
+    $router_item['tab_parent'] = 'user/%';
+    $router_item['tab_root']   = 'user/%';
+    $router_item['type']       = "132";
+    $router_item['context']    = 1;
+  }
 }
 
 /**
