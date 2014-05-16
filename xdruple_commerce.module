@@ -159,13 +159,13 @@ function xdruple_commerce_rescued_register_clients_resources_alter(&$rescued_cli
  * Implements hook_cpanel_alter()
  */
 function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
-  $form['xdruple_commerce_exclusive_items'] = array(
+  $form['xdruple_commerce_store_settings'] = array(
     '#type'  => 'fieldset',
-    '#title' => t('Exclusive Items settings'),
+    '#title' => t('Store settings'),
     '#group' => 'system_settings',
   );
 
-  $form['xdruple_commerce_exclusive_items']['xdruple_commerce_filter_exclusive_items'] = array(
+  $form['xdruple_commerce_store_settings']['xdruple_commerce_filter_exclusive_items'] = array(
     '#type'          => 'checkbox',
     '#title'         => t('Filter Product Lists against Customer Exclusive Items'),
     '#description'   => t('When checked, all product lists are ran through the ' .
@@ -176,6 +176,35 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
                           'you want to hide Exclusive Items from some Customers ' .
                           ', you will need to check this box. '),
     '#default_value' => variable_get('xdruple_commerce_filter_exclusive_items', FALSE),
+  );
+
+  $sites = xdruple_fields_get_site_list();
+  if (count($sites) === 1) {
+    variable_set('xdruple_commerce_default_warehouse', array_shift(array_keys($sites)));
+  } else if (count($sites) > 1) {
+    $form['xdruple_commerce_store_settings']['xdruple_commerce_default_warehouse'] = array(
+      '#type'          => 'select',
+      '#options'       => $sites,
+      '#default_value' => variable_get('xdruple_commerce_default_warehouse', '- None -'),
+      '#empty_option'  => '- None -',
+      '#title'         => t('Default Warehouse/Site'),
+      '#description'   => t("The default Warehouse/Site to use when none is set on a Customer's master in xTuple"),
+      '#required'      => true,
+    );
+  } else {
+    drupal_set_message(t('Cannot find any Warehouse/Sites to set as default. Please contact the website administrator.'), 'error');
+  }
+
+  $form['xdruple_commerce_store_settings']['xdruple_commerce_default_warehouse_access'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Restrict users from changing the Warehouse/Site orders are submitted for.'),
+    '#description'   => t('When checked, users will not be able to change the ' .
+                          "Warehouse/Site orders are submitted for. The Customer's" .
+                          'default warehouse will be used. If no Customer default ' .
+                          'is set, the defualt you set here will be used if you ' .
+                          'have more than one Warehouse/Site. If you only have one, ' .
+                          'it will be the default.'),
+    '#default_value' => variable_get('xdruple_commerce_default_warehouse_access', FALSE),
   );
 }
 

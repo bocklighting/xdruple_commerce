@@ -956,22 +956,41 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
 
   $sites = xdruple_fields_get_site_list();
   if (count($sites) > 0) {
+    $session_site = xdruple_rescued_session_get('site');
+
+    if (!empty($session_site)) {
+      $default_site = $session_site;
+    } else {
+      $default_site = xdruple_fields_get_site_default($customer);
+
+      if (empty($default_site)) {
+        $default_site = variable_get('xdruple_commerce_default_warehouse', false);
+
+        if (!$default_site) {
+          drupal_set_message(t('Cannot find any Warehouse/Sites to set as default. Please contact the website administrator.'), 'error');
+          $default_site = '- None -';
+        }
+      }
+    }
+
     $form[$form_id]['defaults_wrapper']['site'] = array(
       '#type' => 'select',
       '#title' => t('Warehouse/Site'),
-      //'#title_display' => 'invisible',
       '#options' => $sites,
       '#empty_option' => '- None -',
-      '#default_value' => isset($_SESSION['rescued']['site']) ? $_SESSION['rescued']['site'] : xdruple_fields_get_site_default($customer),
+      '#default_value' => $default_site,
       '#attributes' => array('title' => t('Select the Warehouse to use when placing an order.')),
     );
+
+    if (variable_get('xdruple_commerce_default_warehouse_access', FALSE)) {
+      $form[$form_id]['defaults_wrapper']['site']['#attributes']['disabled'] = TRUE;
+    }
   }
 
   $form[$form_id]['scheduled_date'] = array(
     '#type' => 'date_popup',
     '#title' => t('Scheduled Date'),
     '#date_label_position' => 'hidden',
-    //'#title_display' => 'invisible',
     '#size' => 15,
     '#default_value' => xdruple_rescued_scheduled_date('tomorrow'),
     '#date_format' => 'Y-m-d',
@@ -1030,7 +1049,15 @@ function xtuple_order_defaults_form_submit($form, &$form_state) {
     if (!empty($form_state['values']['site'])) {
       $_SESSION['rescued']['site'] = $form_state['values']['site'];
     } else {
-      unset($_SESSION['rescued']['site']);
+      $default_site = variable_get('xdruple_commerce_default_warehouse', false);
+      if (!empty($default_site)) {
+        $_SESSION['rescued']['site'] = $default_site;
+      }
+    }
+  } else {
+    $default_site = variable_get('xdruple_commerce_default_warehouse', false);
+    if (!empty($default_site)) {
+      $_SESSION['rescued']['site'] = $default_site;
     }
   }
 
