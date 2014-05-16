@@ -151,9 +151,6 @@ function xdruple_commerce_rescued_register_clients_resources_alter(&$rescued_cli
   if (!in_array('SalesOrder', $rescued_clients_url_resources['xtuple'])) {
     $rescued_clients_url_resources['xtuple'][] = 'SalesOrder';
   }
-  if (!in_array('ItemSiteListItem', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'ItemSiteListItem';
-  }
 
   return $rescued_clients_url_resources;
 }
