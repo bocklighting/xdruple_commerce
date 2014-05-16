@@ -239,18 +239,6 @@ function _xdruple_queries_load_products_by_order_type($order_type) {
 function _xdruple_prepare_products_list($product_ids = NULL, array $params = array(), $product_item_theme = 'products_page_item') {
   $list = array();
 
-  // Get varible from control panel setting to restrict product lists to exclusive items.
-  if (variable_get('xdruple_commerce_filter_exclusive_items', FALSE)) {
-    $filtered_product_ids = xdruple_commerce_get_exclusive_item_list();
-
-    // Add the list as a query param filter when requesting products and lists.
-    if (!empty($product_ids)) {
-      $product_ids = array_values(array_unique(array_intersect($filtered_product_ids, $product_ids), SORT_REGULAR));
-    } else {
-      $product_ids = $filtered_product_ids;
-    }
-  }
-
   if ($product_ids === NULL || !empty($product_ids)) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'commerce_product');

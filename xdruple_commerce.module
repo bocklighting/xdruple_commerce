@@ -16,7 +16,12 @@ function xdruple_commerce_entity_info_alter(&$info) {
   // TODO: Get wsclient name. Assuming 'xtuple_' here.
 
   if (isset($info['xtuple_xdruplecommerceproduct'], $info['commerce_product']) && true) {
+    // Cache original to reset some key settings.
     $original = $info['commerce_product'];
+
+    // Override 'api-list-callback' to support exclusive items.
+    $info['xtuple_xdruplecommerceproduct']['api-list-callback'] = 'xdruple_commerce_api_customer_exclusive_item_list';
+
     // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdruplecommerceproduct']
     $info['commerce_product'] = $info['xtuple_xdruplecommerceproduct'];
     $info['commerce_product']['entity keys']['bundle'] = 'type';
@@ -29,21 +34,6 @@ function xdruple_commerce_entity_info_alter(&$info) {
     $info['commerce_product']['uri callback'] = $original['uri callback'];
     $info['commerce_product']['access callback'] = $original['access callback'];
   }
-
-//   if (isset($info['xtuple_xdruplecommercecustomerprofile'], $info['commerce_customer_profile']) && true) {
-//     $original = $info['commerce_customer_profile'];
-//     // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdruplecommercecustomerprofile']
-//     $info['commerce_customer_profile'] = $info['xtuple_xdruplecommercecustomerprofile'];
-//     $info['commerce_customer_profile']['entity keys']['bundle'] = 'type';
-//     $info['commerce_customer_profile']['entity keys']['name'] = 'profile_id';
-
-//     // Preserve some of the original entity_info settings.
-//     $info['commerce_customer_profile']['label'] = $original['label'];
-//     $info['commerce_customer_profile']['bundles']['billing'] = $original['bundles']['billing'];
-//     $info['commerce_customer_profile']['view modes'] = $original['view modes'];
-//     $info['commerce_customer_profile']['uri callback'] = $original['uri callback'];
-//     $info['commerce_customer_profile']['access callback'] = $original['access callback'];
-//   }
 }
 
 /**
@@ -1387,28 +1377,30 @@ function xdruple_commerce_entity_query_alter(&$query) {
 }
 
 /**
- * Helper function to request a list of filtered product_ids a Customer is
- * allowed to purchase based on the Customer, Ship To and Effective Date. This
- * runs the list through xTuple's filter to show/hide exclusive items based on
- * Pricing Schdules.
+ * XM.ItemSiteListItem.xdCommerceProductFetch POST query.
  *
- * @return array The allowed product_ids
+ * Query the dispatch function XM.ItemSiteListItem.xdCommerceProductFetch to
+ * get a filtered list of items that a Customer is allowed to see.
+ *
+ * @param string $discovery_client The API client name. e.g. 'xtuple'
+ * @param string $resource The API resource name. e.g. 'ItemSiteListItem'
+ * @param array $optParams The structured query to perform.
+ *
+ * @return array The query result response.
  */
-function xdruple_commerce_get_exclusive_item_list() {
-  $filtered_product_ids =  array();
+function xdruple_commerce_api_customer_exclusive_item_list($discovery_client = 'xtuple', $resource = 'XdrupleCommerceProduct', $optParams = array(), $data_only = true) {
+  // When exclusive_items setting is off, just query rescued_api_resource_list().
+  if (!variable_get('xdruple_commerce_filter_exclusive_items', FALSE)) {
+    $result = rescued_api_resource_list($discovery_client, $resource, $optParams, false);
+  } else {
+    $service = wsclient_service_load($discovery_client);
+    $endpoint = $service->endpoint();
+    $client = $endpoint->client();
 
-  $customer = xdruple_rescued_session_get('customer');
-  $shipto = xdruple_rescued_session_get('ship_to');
-  $scheduled_date = xdruple_rescued_scheduled_date();
+    $customer = xdruple_rescued_session_get('customer');
+    $shipto = xdruple_rescued_session_get('ship_to');
+    $scheduled_date = xdruple_rescued_scheduled_date();
 
-  $cid = 'xdruple_commerce_customer_exclusive_item_list-' .
-         $customer . '-' .
-         $shipto . '-' .
-         $scheduled_date;
-
-  $cache = cache_get($cid, 'cache');
-
-  if (empty($cache)) {
     if (!empty($customer)) {
       $optParams['query']['customer'] = array(
         'EQUALS' => $customer,
@@ -1425,52 +1417,24 @@ function xdruple_commerce_get_exclusive_item_list() {
       );
     }
 
-    // Fetch a customer's list of exclusive items.
-    $exclusive = xdruple_commerce_api_customer_exclusive_item_list('xtuple', 'ItemSiteListItem', $optParams);
+    $postBody = array(
+      'attributes' => array(
+        rescued_format_post_query_options($optParams),
+      ),
+    );
 
-    foreach ($exclusive as $itemsite) {
-      $filtered_product_ids[] = intval($itemsite['item']['id']);
-    }
+    $params = array('postBody' => $postBody);
 
-    cache_set($cid, $filtered_product_ids, 'cache', CACHE_TEMPORARY);
-  } else {
-    $filtered_product_ids = $cache->data;
+    // POST the service request.
+    $result = $client->$resource->xdCommerceProductFetch($params);
   }
 
-  return $filtered_product_ids;
+  if ($data_only) {
+    return isset($result['data']) ? $result['data'] : array();
+  } else {
+    return isset($result) ? $result : array();
+  }
 }
-
-/**
- * XM.ItemSiteListItem.restFetch POST query.
- *
- * Query the dispatch function XM.ItemSiteListItem.restFetch to get a filtered
- * list of items that a Customer is allowed to see.
- *
- * @param string $discovery_client The API client name. e.g. 'xtuple'
- * @param string $resource The API resource name. e.g. 'ItemSiteListItem'
- * @param array $optParams The structured query to perform.
- *
- * @return array The query result response.
- */
-function xdruple_commerce_api_customer_exclusive_item_list($discovery_client = 'xtuple', $resource = 'ItemSiteListItem', $optParams = array()) {
-  $service = wsclient_service_load($discovery_client);
-  $endpoint = $service->endpoint();
-  $client = $endpoint->client();
-
-  $postBody = array(
-    'attributes' => array(
-      rescued_format_post_query_options($optParams),
-    ),
-  );
-
-  $params = array('postBody' => $postBody);
-
-  // POST the service request.
-  $result = $client->$resource->restFetch($params);
-
-  return $result;
-}
-
 
 /**
  * XM.Customer.itemPrice POST query.
