@@ -211,7 +211,19 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['fields']['xd_order_po_number']['id'] = 'xd_order_po_number';
   $handler->display->display_options['fields']['xd_order_po_number']['table'] = 'field_data_xd_order_po_number';
   $handler->display->display_options['fields']['xd_order_po_number']['field'] = 'xd_order_po_number';
+  $handler->display->display_options['fields']['xd_order_po_number']['label'] = 'PO';
+  $handler->display->display_options['fields']['xd_order_po_number']['element_type'] = 'span';
   $handler->display->display_options['fields']['xd_order_po_number']['hide_empty'] = TRUE;
+  /* Field: Commerce Order: Order Notes */
+  $handler->display->display_options['fields']['xd_order_notes']['id'] = 'xd_order_notes';
+  $handler->display->display_options['fields']['xd_order_notes']['table'] = 'field_data_xd_order_notes';
+  $handler->display->display_options['fields']['xd_order_notes']['field'] = 'xd_order_notes';
+  $handler->display->display_options['fields']['xd_order_notes']['label'] = 'Notes';
+  $handler->display->display_options['fields']['xd_order_notes']['hide_empty'] = TRUE;
+  $handler->display->display_options['fields']['xd_order_notes']['type'] = 'text_summary_or_trimmed';
+  $handler->display->display_options['fields']['xd_order_notes']['settings'] = array(
+    'trim_length' => '100',
+  );
   /* Field: Commerce Order: Created date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'commerce_order';
