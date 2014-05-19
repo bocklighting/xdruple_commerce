@@ -38,6 +38,15 @@ function xdruple_order_menu() {
 }
 
 /**
+ * Implements hook_xcommerce_body_classes_alter()
+ */
+function xdruple_order_xcommerce_body_classes_alter(&$classes, $path) {
+  if ($path == 'user/%/pending-orders/%') {
+    $classes[] = 'page-user-pending-order';
+  }
+}
+
+/**
  * Implements hook_menu_get_item_alter()
  */
 function xdruple_order_menu_get_item_alter(&$router_item) {
