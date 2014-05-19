@@ -38,6 +38,15 @@ function xdruple_invoice_menu() {
 }
 
 /**
+ * Implements hook_xcommerce_body_classes_alter()
+ */
+function xdruple_invoice_xcommerce_body_classes_alter(&$classes, $path) {
+  if ($path == 'user/%/invoices/%') {
+    $classes[] = 'page-user-invoice';
+  }
+}
+
+/**
  * Implements hook_menu_get_item_alter()
  */
 function xdruple_invoice_menu_get_item_alter(&$router_item) {
