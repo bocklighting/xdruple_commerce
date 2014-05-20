@@ -304,9 +304,10 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
           } else {
             $url_values = array(
               'uuid' => $file->uuid,
-              'name' => isset($file->title) ? $file->title : $file->filename,
+              'name' => !empty($file->title) ? $file->title : $file->filename,
               'path' => file_create_url($file->uri),
             );
+            // TODO: file_create_url() isn't returning Andrey's upload path: /files/public/xtuple/files/public
             $new_url = entity_create('xtuple_url', $url_values);
             entity_save('xtuple_url', $new_url);
 
