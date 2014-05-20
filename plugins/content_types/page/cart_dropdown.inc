@@ -17,26 +17,16 @@ $plugin = extensions_content_type_plugin('xdruple_commerce', 'cart_dropdown', 'C
 function xdruple_commerce_cart_dropdown_content_type_plugin_render($subtype, $conf, $panel_args) {
   $output = '';
 
-  global $user;
-  $order = commerce_cart_order_load($user->uid);
-  $count = 0;
-  if ($order) {
-    $wrapper = entity_metadata_wrapper('commerce_order', $order);
-    $count   = commerce_line_items_quantity($wrapper->commerce_line_items, commerce_product_line_item_types());
-    if ($count > 0) {
-      $total    = $order->commerce_order_total['und'][0]['amount'];
-      $currency = $order->commerce_order_total['und'][0]['currency_code'];
-
-      $output = theme('xdruple_commerce_cart_dropdown', array(
-        'title'  => t('My cart'),
-        'count'  => format_plural($count, '1 item', '@count items'),
-        'amount' => commerce_currency_format($total, $currency),
-      ));
-    }
+  $summary = _xdruple_commerce_get_cart_summary();
+  if (!empty($summary['count']) && $summary['count'] > 0) {
+    $output .= theme('xdruple_commerce_cart_dropdown', array(
+      'title'  => t('My cart'),
+      'count'  => format_plural($summary['count'], '1 item', '@count items'),
+      'amount' => commerce_currency_format($summary['total'], $summary['currency']),
+    ));
   }
-
-  if ($count == 0) {
-    $output = theme('xdruple_commerce_cart_dropdown', array(
+  else {
+    $output .= theme('xdruple_commerce_cart_dropdown', array(
       'title' => t('My cart is empty'),
     ));
   }

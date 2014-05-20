@@ -2291,3 +2291,24 @@ function xdruple_commerce_form_entity_operations_operation_form_xtuple_xdrupleco
 function xdruple_commerce_form_entity_operations_operation_form_alter(&$form, $form_state) {
   $form['actions']['#weight'] = 100;
 }
+
+
+function _xdruple_commerce_get_cart_summary() {
+  $summary = array();
+
+  global $user;
+
+  $order = commerce_cart_order_load($user->uid);
+  if ($order) {
+    $wrapper = entity_metadata_wrapper('commerce_order', $order);
+    $count   = commerce_line_items_quantity($wrapper->commerce_line_items, commerce_product_line_item_types());
+
+    $summary = array(
+      'count'    => $count,
+      'total'    => $order->commerce_order_total['und'][0]['amount'],
+      'currency' => $order->commerce_order_total['und'][0]['currency_code'],
+    );
+  }
+
+  return $summary;
+}
