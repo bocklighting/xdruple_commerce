@@ -268,19 +268,28 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
 
         if (!empty($entity->urls)) {
           foreach ($entity->urls as $url_key => $url) {
-            $remote_url = parse_url($url['url']['path']);
-            $parts = explode('/', $remote_url['path']);
-            $file_name = array_pop($parts);
-            $file_parts = explode('.', $file_name);
-            $file_type = array_pop($file_parts);
+            // Because filefield_paths_entity_update() calls field_attach_update(),
+            // this function is called twice on entity save. Skip any partial
+            // saved urls where $url['url'] is just a uuid, not an array.
+            if (is_array($url['url'])) {
+              $remote_url = parse_url($url['url']['path']);
+              $parts = explode('/', $remote_url['path']);
+              $file_name = array_pop($parts);
+              $file_parts = explode('.', $file_name);
+              $file_type = array_pop($file_parts);
 
-            // Handle images with the image field and pdfs with the file field.
-            $allowed_ext = explode(' ', $instance['settings']['file_extensions']);
-            if (!in_array($file_type, $allowed_ext)) {
-              continue;
+              // Handle images with the image field and pdfs with the file field.
+              $allowed_ext = explode(' ', $instance['settings']['file_extensions']);
+              if (!in_array($file_type, $allowed_ext)) {
+                continue;
+              }
+
+              $field_type_urls[$url_key] = $url;
+            } else {
+              // Set values for half saved urls so they don't get unset on the entity.
+              $field_type_urls[$url_key] = $url;
+              $associated_urls[] = $url['uuid'];
             }
-
-            $field_type_urls[$url_key] = $url;
           }
         }
 
@@ -291,7 +300,14 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
 
           $url_url_uuids = array();
           foreach ($field_type_urls as $url_key => $url) {
-            $url_url_uuids[$url['uuid']] = $url['url']['uuid'];
+            // Because filefield_paths_entity_update() calls field_attach_update(),
+            // this function is called twice on entity save. Skip any partial
+            // saved urls where $url['url'] is just a uuid, not an array.
+            if (is_array($url['url'])) {
+              $url_url_uuids[$url['uuid']] = $url['url']['uuid'];
+            } else {
+              $url_url_uuids[$url['uuid']] = $url['url'];
+            }
           }
 
           if ($matching_uuid = array_search($file->uuid, $url_url_uuids)) {
@@ -302,12 +318,33 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
             // don't allow you to change a file, just remove it, which we
             // handle below.
           } else {
+            // The filefield_paths module can change a uploaded file's path.
+            // It does it after this is called. Figure out what the path will
+            // be changed to and save that back to xTuple.
+            if (module_exists('filefield_paths')) {
+              $filefield_data = array(
+                'file' => $file,
+                $entity_type => $entity,
+              );
+
+              $filefield_path_value = $instance['settings']['filefield_paths']['file_path']['value'];
+              $filefield_path_settings = $instance['settings']['filefield_paths']['file_path']['options'];
+              $filefield_path = filefield_paths_process_string($filefield_path_value, $filefield_data, $filefield_path_settings);
+
+              $filefield_name_value = $instance['settings']['filefield_paths']['file_name']['value'];
+              $filefield_name_settings = $instance['settings']['filefield_paths']['file_name']['options'];
+              $filefield_name = filefield_paths_process_string($filefield_name_value, $filefield_data, $filefield_name_settings);
+
+              $upload_path = file_create_url($field_info['settings']['uri_scheme'] . '://' . $filefield_path . '/' . $filefield_name);
+            } else {
+              $upload_path = file_create_url($file->uri);
+            }
+
             $url_values = array(
               'uuid' => $file->uuid,
               'name' => !empty($file->title) ? $file->title : $file->filename,
-              'path' => file_create_url($file->uri),
+              'path' => $upload_path,
             );
-            // TODO: file_create_url() isn't returning Andrey's upload path: /files/public/xtuple/files/public
             $new_url = entity_create('xtuple_url', $url_values);
             entity_save('xtuple_url', $new_url);
 
