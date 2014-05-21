@@ -1041,7 +1041,7 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
 
   $form[$form_id]['actions'] = array('#type' => 'actions');
   $form[$form_id]['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
-  $form[$form_id]['#submit'][] = 'xtuple_order_defaults_form_submit';
+  $form[$form_id]['#submit'][] = 'xdruple_fields_order_defaults_form_submit';
 
   return $form;
 }
@@ -1049,7 +1049,7 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
 /**
  * Process a block search form submission.
  */
-function xtuple_order_defaults_form_submit($form, &$form_state) {
+function xdruple_fields_order_defaults_form_submit($form, &$form_state) {
   // TODO: validation.
 
   $form_id = $form['form_id']['#value'];
