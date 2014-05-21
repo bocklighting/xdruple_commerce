@@ -248,6 +248,10 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
       $query->propertyCondition('product_id', $product_ids, 'ANY');
     }
 
+    if (isset($_GET['search'])) {
+      $query->propertyCondition('q', $_GET['search'], 'CONTAINS');
+    }
+
     $products = $query->execute();
 
     // TODO: The rescued_entity_field_query_builder(EntityFieldQuery $query)
