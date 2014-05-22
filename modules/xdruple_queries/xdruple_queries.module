@@ -249,7 +249,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     }
 
     if (isset($_GET['search'])) {
-      $query->propertyCondition('q', $_GET['search'], 'CONTAINS');
+      $query->propertyCondition('q', urldecode($_GET['search']), 'CONTAINS');
     }
 
     $products = $query->execute();
