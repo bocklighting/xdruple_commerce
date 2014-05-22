@@ -1102,6 +1102,10 @@ function xtuple_order_defaults_form_submit($form, &$form_state) {
   $scheduled_date = !empty($form_state['values']['scheduled_date']) ? $form_state['values']['scheduled_date'] : 'tomorrow';
   xdruple_rescued_scheduled_date($scheduled_date, TRUE);
 
+  // Prevent the page for having to load twice. This is old, but explains the problem:
+  // @See: https://drupal.org/node/162054
+  $form_state['redirect'] = false;
+
   // TODO: set a message.
 }
 
