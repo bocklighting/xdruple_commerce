@@ -8,6 +8,13 @@ function xdruple_commerce_ctools_plugin_directory($module, $plugin) {
 }
 
 /**
+ * Implements hook_compass_module()
+ */
+function xdruple_commerce_compass_module() {
+  return new \CDD\Compass\DrupalModule('xdruple_commerce');
+}
+
+/**
  * Implements hook_user_login().
  */
 function xdruple_commerce_user_login(&$edit, $account) {
