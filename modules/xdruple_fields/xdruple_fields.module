@@ -35,6 +35,19 @@ function xdruple_fields_menu() {
 }
 
 /**
+ * Implements hook_init()
+ */
+function xdruple_fields_init() {
+  $order_defaults = xdruple_fields_order_defaults_form_default_values(array());
+  drupal_add_js(array(
+    'xdruple_fields' => array(
+      'order_defaults' => $order_defaults,
+    ),
+  ), 'setting');
+}
+
+
+/**
  * Implements hook_user_access_extend().
  *
  * Determine what type of xTuple user this is and grant them the correct
@@ -983,7 +996,7 @@ function xdruple_fields_order_defaults_form_default_values($form_state) {
         $default_site = variable_get('xdruple_commerce_default_warehouse', FALSE);
 
         if (!$default_site) {
-          drupal_set_message(t('Cannot find any Warehouse/Sites to set as default. Please contact the website administrator.'), 'error');
+          drupal_set_message(t('Cannot find any Warehouse/Sites to set as default. Please contact the website administrator.'), 'error', FALSE);
           $default_site = '';
         }
       }
