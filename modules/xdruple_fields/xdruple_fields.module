@@ -1014,6 +1014,12 @@ function xdruple_fields_order_defaults_form_default_values($form_state) {
 function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
   global $user;
 
+  if (empty($form_state['build_info']['wrapper_id'])) {
+    $form_state['build_info']['wrapper_id'] = md5(rand());
+  }
+
+  $wrapper_id = isset($form_state['build_info']['wrapper_id']) ? $form_state['build_info']['wrapper_id'] : md5(rand());
+
   $defaults = xdruple_fields_order_defaults_form_default_values($form_state);
 
   $form[$form_id] = array(
@@ -1031,7 +1037,7 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
     ),
     '#ajax'              => array(
       'callback' => 'xdruple_fields_customer_ajax_callback',
-      'wrapper'  => 'xtuple-defaults-wrapper',
+      'wrapper'  => 'xtuple-defaults-wrapper-' . $wrapper_id,
       'method'   => 'replace',
       'effect'   => 'fade',
     ),
@@ -1039,7 +1045,7 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
 
   $form[$form_id]['defaults_wrapper'] = array(
     '#type'   => 'markup',
-    '#prefix' => '<div id="xtuple-defaults-wrapper">',
+    '#prefix' => '<div id="xtuple-defaults-wrapper-' . $wrapper_id . '">',
     '#suffix' => '</div>',
   );
 
