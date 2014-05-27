@@ -35,7 +35,7 @@ function _xdruple_queries_categories_tree() {
                         ->execute();
 
     if (empty($root_group['xtuple_xdruplecatalog'])) {
-      drupal_set_message('Catalog structure not set. Contact the site administrator.', 'error');
+      drupal_set_message(t('Catalog structure not set. Contact the site administrator.'), 'error');
       return array('tree' => array(), 'catalog' => array());
     }
 
