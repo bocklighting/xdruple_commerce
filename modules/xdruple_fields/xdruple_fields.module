@@ -1018,7 +1018,7 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
     $form_state['build_info']['wrapper_id'] = md5(rand());
   }
 
-  $wrapper_id = isset($form_state['build_info']['wrapper_id']) ? $form_state['build_info']['wrapper_id'] : md5(rand());
+  $wrapper_id = $form_state['build_info']['wrapper_id'];
 
   $defaults = xdruple_fields_order_defaults_form_default_values($form_state);
 
