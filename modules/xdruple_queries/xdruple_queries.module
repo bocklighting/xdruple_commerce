@@ -266,11 +266,13 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     // call entity_load() for the returned ids which will attach fields, etc.
     // We can skip this call for now. This is one reason why the entity cache
     // and EntityFieldQuery cache need to work together.
-    foreach ($products['commerce_product'] as $product) {
-      $list[] = theme($product_item_theme, array(
-        'product' => $product,
-        'params'  => $params,
-      ));
+    if (isset($products['commerce_product'])) {
+      foreach ($products['commerce_product'] as $product) {
+        $list[] = theme($product_item_theme, array(
+          'product' => $product,
+          'params'  => $params,
+        ));
+      }
     }
   }
 
