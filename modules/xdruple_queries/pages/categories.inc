@@ -27,8 +27,9 @@ function xdruple_queries_categories_page() {
 function _xdruple_queries_categories_tree() {
   $cid = 'xtuple_xdruplecatalog-tree';
   $cache = cache_get($cid, 'cache');
+  $entity_info = entity_get_info('xtuple_xdruplecatalog');
 
-  if (empty($cache)) {
+  if (empty($cache) && !empty($entity_info)) {
     $query = new EntityFieldQuery();
     $root_group = $query->entityCondition('entity_type', 'xtuple_xdruplecatalog')
                         ->propertyCondition('catalog', true, '=')
@@ -57,7 +58,14 @@ function _xdruple_queries_categories_tree() {
 
     cache_set($cid, $cache_data, 'cache', CACHE_TEMPORARY);
   } else {
-    $cache_data = $cache->data;
+    if (!$cache || empty($cache->data)) {
+      $cache_data = array(
+        'tree'    => array(),
+        'catalog' => array()
+      );
+    } else {
+      $cache_data = $cache->data;
+    }
   }
 
   return $cache_data;
