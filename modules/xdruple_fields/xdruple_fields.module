@@ -1599,9 +1599,3 @@ function xdruple_fields_order_defaults_form_block() {
 
   return $output;
 }
-
-function xdruple_fields_preprocess_layout_header(&$variables) {
-  $variables['order_defaults_form'] = theme('block_order_defaults_form', array(
-    'name' => 'order-defaults_form',
-  ));
-}

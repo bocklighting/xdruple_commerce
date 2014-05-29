@@ -2347,9 +2347,3 @@ function xdruple_commerce_cart_dropdown_block() {
 
   return $output;
 }
-
-function xdruple_commerce_preprocess_layout_header(&$variables) {
-  $variables['cart_dropdown'] = theme('block_cart_dropdown', array(
-    'name' => 'cart-dropdown',
-  ));
-}
