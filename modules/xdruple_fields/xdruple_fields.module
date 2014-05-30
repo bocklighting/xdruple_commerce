@@ -1097,6 +1097,8 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
 
   $form[$form_id]['#submit'][] = 'xtuple_order_defaults_form_submit';
 
+  $form['#attributes']['class'][] = 'row';
+
   return $form;
 }
 
