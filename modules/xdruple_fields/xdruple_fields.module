@@ -1103,6 +1103,8 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
 
   $form[$form_id]['#submit'][] = 'xtuple_order_defaults_form_submit';
 
+  $form['#attributes']['class'][] = 'row';
+
   return $form;
 }
 
@@ -1206,13 +1208,21 @@ function xdruple_fields_field_widget_properties_alter(&$widget, $context) {
  * Implements hook_theme().
  */
 function xdruple_fields_theme() {
-  return array(
+  $items = array(
     'xtuple_order_defaults' => array(
       'render element' => 'form',
       'template' => 'xtuple-order-defaults',
       'path' => drupal_get_path('module', 'xdruple_fields') . '/theme',
     ),
   );
+
+  $items += \xTuple\xCommerce\Theme\Block::themeDefinition('order_defaults_form', array(
+    'hide_empty_title'   => TRUE,
+    'hide_empty_content' => TRUE,
+    'hide_empty_block'   => TRUE,
+  ));
+
+  return $items;
 }
 
 /**
@@ -1584,4 +1594,16 @@ function xdruple_fields_user_preferences_access($account) {
   }
 
   return $access;
+}
+
+function xdruple_fields_order_defaults_form_block() {
+  $output = '';
+
+  global $user;
+  if (xdruple_fields_user_preferences_access($user)) {
+    $form = drupal_get_form('xtuple_order_defaults_form');
+    $output .= drupal_render($form);
+  }
+
+  return $output;
 }

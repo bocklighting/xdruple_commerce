@@ -1204,7 +1204,7 @@ function xdruple_commerce_user_reg_form_validate(&$element_form, &$form_state, $
  * Implements hook_theme().
  */
 function xdruple_commerce_theme() {
-  return array(
+  $items = array(
     'xdruple_commerce_sub_title' => array(
       'variables' => array('subTitle' => NULL, 'label' => NULL, 'product' => NULL),
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
@@ -1272,6 +1272,14 @@ function xdruple_commerce_theme() {
       'template' => 'xdruple-commerce-cart-dropdown',
     ),
   );
+
+  $items += \xTuple\xCommerce\Theme\Block::themeDefinition('cart_dropdown', array(
+    'hide_empty_title'   => TRUE,
+    'hide_empty_content' => TRUE,
+    'hide_empty_block'   => TRUE,
+  ));
+
+  return $items;
 }
 
 /**
@@ -2318,4 +2326,24 @@ function _xdruple_commerce_get_cart_summary() {
   }
 
   return $summary;
+}
+
+function xdruple_commerce_cart_dropdown_block() {
+  $output = '';
+
+  $summary = _xdruple_commerce_get_cart_summary();
+  if (!empty($summary['count']) && $summary['count'] > 0) {
+    $output .= theme('xdruple_commerce_cart_dropdown', array(
+      'title'  => t('My cart'),
+      'count'  => format_plural($summary['count'], '1 item', '@count items'),
+      'amount' => commerce_currency_format($summary['total'], $summary['currency']),
+    ));
+  }
+  else {
+    $output .= theme('xdruple_commerce_cart_dropdown', array(
+      'title' => t('My cart is empty'),
+    ));
+  }
+
+  return $output;
 }
