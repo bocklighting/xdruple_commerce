@@ -1035,6 +1035,9 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
     '#attributes'        => array(
       'title' => t('Select the Customer to use when placing an order.'),
     ),
+    '#wrapper_classes'   => array(
+      'col-lg' => 'col-lg-3'
+    ),
     '#ajax'              => array(
       'callback' => 'xdruple_fields_customer_ajax_callback',
       'wrapper'  => 'xtuple-defaults-wrapper-' . $wrapper_id,
@@ -1058,6 +1061,9 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
     '#attributes'    => array(
       'title' => t('Select the Ship To to use when placing an order.')
     ),
+    '#wrapper_classes'   => array(
+      'col-lg' => 'col-lg-3'
+    )
   );
 
   if (count($defaults['options']['sites']) > 0) {
@@ -1070,6 +1076,9 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
       '#attributes'    => array(
         'title' => t('Select the Warehouse to use when placing an order.'),
       ),
+      '#wrapper_classes'   => array(
+        'col-lg' => 'col-lg-3'
+      )
     );
 
     if (variable_get('xdruple_commerce_default_warehouse_access', FALSE)) {
@@ -1087,6 +1096,9 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
     '#date_year_range'     => '-0:+1',
     '#attributes'          => array(
       'title' => t('Select the Scheduled Date to use when placing an order.'),
+    ),
+    '#wrapper_classes'   => array(
+      'col-lg' => 'col-lg-2'
     ),
     '#datepicker_options'  => array(
       'minDate' => 'today',
