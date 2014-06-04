@@ -35,6 +35,19 @@ function xdruple_fields_menu() {
 }
 
 /**
+ * Implements hook_init()
+ */
+function xdruple_fields_init() {
+  $order_defaults = xdruple_fields_order_defaults_form_default_values(array());
+  drupal_add_js(array(
+    'xdruple_fields' => array(
+      'order_defaults' => $order_defaults,
+    ),
+  ), 'setting');
+}
+
+
+/**
  * Implements hook_user_access_extend().
  *
  * Determine what type of xTuple user this is and grant them the correct
@@ -933,16 +946,19 @@ function xdruple_fields_forms() {
 }
 
 /**
- * Form builder; Output xTuple Default Order Settings form.
+ * Helper function to get form default values
+ *
+ * @param $form_state
+ *
+ * @return array
  */
-function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
-  global $user;
-
-  $customer = isset($form_state['values']['customer']) ? $form_state['values']['customer'] : null;
+function xdruple_fields_order_defaults_form_default_values($form_state) {
+  $customer = isset($form_state['values']['customer']) ? $form_state['values']['customer'] : NULL;
 
   if (empty($customer)) {
-    $customer = isset($_SESSION['rescued']['customer']) ? $_SESSION['rescued']['customer'] : null;
-  } else {
+    $customer = isset($_SESSION['rescued']['customer']) ? $_SESSION['rescued']['customer'] : NULL;
+  }
+  else {
     unset($form_state['input']['ship_to']);
     unset($form_state['input']['site']);
 
@@ -952,44 +968,18 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
     }
   }
 
-  $form[$form_id] = array(
-    '#type' => 'container',
-  );
-
   $default_customer = isset($_SESSION['rescued']['customer']) ? $_SESSION['rescued']['customer'] : '';
-  $form[$form_id]['customer'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Customer'),
-    '#autocomplete_path' => 'user/' . $user->uid . '/preferences/customer/autocomplete',
-    //'#title_display' => 'invisible',
-    '#empty_option' => '- None -',
-    '#default_value' => $default_customer,
-    '#attributes' => array('title' => t('Select the Customer to use when placing an order.')),
-    '#ajax' => array(
-      'callback' => 'xdruple_fields_customer_ajax_callback',
-      'wrapper' => 'xtuple-defaults-wrapper',
-      'method' => 'replace',
-      'effect' => 'fade',
+  $default_ship_to  = !empty($_SESSION['rescued']['ship_to']) ? $_SESSION['rescued']['ship_to'] : xdruple_fields_get_ship_to_default($customer);
+
+  $defaults = array(
+    'defaults' => array(
+      'customer' => $default_customer,
+      'ship_to'  => $default_ship_to,
+      'date'     => xdruple_rescued_scheduled_date('tomorrow'),
     ),
-  );
-
-  // Put ship_to and site in a fieldset so changing customer can do an ajax
-  // replace to update those fields to the defaults.
-  $form[$form_id]['defaults_wrapper'] = array(
-    '#type' => 'markup',
-    '#prefix' => '<div id="xtuple-defaults-wrapper">',
-    '#suffix' => '</div>',
-  );
-
-  $default_ship_to = isset($_SESSION['rescued']['ship_to']) && !empty($_SESSION['rescued']['ship_to']) ? $_SESSION['rescued']['ship_to'] : xdruple_fields_get_ship_to_default($customer);
-  $form[$form_id]['defaults_wrapper']['ship_to'] = array(
-    '#type' => 'select',
-    '#title' => t('Ship To'),
-    //'#title_display' => 'invisible',
-    '#options' => xdruple_fields_get_ship_to_list($customer),
-    '#empty_option' => '- None -',
-    '#default_value' => $default_ship_to,
-    '#attributes' => array('title' => t('Select the Ship To to use when placing an order.')),
+    'options'  => array(
+      'ship_to' => xdruple_fields_get_ship_to_list($customer),
+    ),
   );
 
   $sites = xdruple_fields_get_site_list();
@@ -998,26 +988,97 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
 
     if (!empty($session_site)) {
       $default_site = $session_site;
-    } else {
+    }
+    else {
       $default_site = xdruple_fields_get_site_default($customer);
 
       if (empty($default_site)) {
-        $default_site = variable_get('xdruple_commerce_default_warehouse', false);
+        $default_site = variable_get('xdruple_commerce_default_warehouse', FALSE);
 
         if (!$default_site) {
-          drupal_set_message(t('Cannot find any Warehouse/Sites to set as default. Please contact the website administrator.'), 'error');
-          $default_site = '- None -';
+          drupal_set_message(t('Cannot find any Warehouse/Sites to set as default. Please contact the website administrator.'), 'error', FALSE);
+          $default_site = '';
         }
       }
     }
+    $defaults['defaults']['site'] = $default_site;
+  }
+  $defaults['options']['sites'] = $sites;
 
+  return $defaults;
+}
+
+/**
+ * Form builder; Output xTuple Default Order Settings form.
+ */
+function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
+  global $user;
+
+  if (empty($form_state['build_info']['wrapper_id'])) {
+    $form_state['build_info']['wrapper_id'] = md5(rand());
+  }
+
+  $wrapper_id = $form_state['build_info']['wrapper_id'];
+
+  $defaults = xdruple_fields_order_defaults_form_default_values($form_state);
+
+  $form[$form_id] = array(
+    '#type' => 'container',
+  );
+
+  $form[$form_id]['customer'] = array(
+    '#type'              => 'textfield',
+    '#title'             => t('Customer'),
+    '#autocomplete_path' => 'user/' . $user->uid . '/preferences/customer/autocomplete',
+    '#empty_option'      => t('- None -'),
+    '#default_value'     => $defaults['defaults']['customer'],
+    '#attributes'        => array(
+      'title' => t('Select the Customer to use when placing an order.'),
+    ),
+    '#wrapper_classes'   => array(
+      'col-lg' => 'col-lg-3'
+    ),
+    '#ajax'              => array(
+      'callback' => 'xdruple_fields_customer_ajax_callback',
+      'wrapper'  => 'xtuple-defaults-wrapper-' . $wrapper_id,
+      'method'   => 'replace',
+      'effect'   => 'fade',
+    ),
+  );
+
+  $form[$form_id]['defaults_wrapper'] = array(
+    '#type'   => 'markup',
+    '#prefix' => '<div id="xtuple-defaults-wrapper-' . $wrapper_id . '">',
+    '#suffix' => '</div>',
+  );
+
+  $form[$form_id]['defaults_wrapper']['ship_to'] = array(
+    '#type'          => 'select',
+    '#title'         => t('Ship To'),
+    '#options'       => $defaults['options']['ship_to'],
+    '#empty_option'  => t('- None -'),
+    '#default_value' => $defaults['defaults']['ship_to'],
+    '#attributes'    => array(
+      'title' => t('Select the Ship To to use when placing an order.')
+    ),
+    '#wrapper_classes'   => array(
+      'col-lg' => 'col-lg-3'
+    )
+  );
+
+  if (count($defaults['options']['sites']) > 0) {
     $form[$form_id]['defaults_wrapper']['site'] = array(
-      '#type' => 'select',
-      '#title' => t('Warehouse/Site'),
-      '#options' => $sites,
-      '#empty_option' => '- None -',
-      '#default_value' => $default_site,
-      '#attributes' => array('title' => t('Select the Warehouse to use when placing an order.')),
+      '#type'          => 'select',
+      '#title'         => t('Warehouse/Site'),
+      '#options'       => $defaults['options']['sites'],
+      '#empty_option'  => t('- None -'),
+      '#default_value' => $defaults['defaults']['site'],
+      '#attributes'    => array(
+        'title' => t('Select the Warehouse to use when placing an order.'),
+      ),
+      '#wrapper_classes'   => array(
+        'col-lg' => 'col-lg-3'
+      )
     );
 
     if (variable_get('xdruple_commerce_default_warehouse_access', FALSE)) {
@@ -1026,22 +1087,35 @@ function xdruple_fields_order_defaults($form, &$form_state, $form_id) {
   }
 
   $form[$form_id]['scheduled_date'] = array(
-    '#type' => 'date_popup',
-    '#title' => t('Scheduled Date'),
+    '#type'                => 'date_popup',
+    '#title'               => t('Scheduled Date'),
     '#date_label_position' => 'hidden',
-    '#size' => 15,
-    '#default_value' => xdruple_rescued_scheduled_date('tomorrow'),
-    '#date_format' => 'Y-m-d',
-    '#date_year_range' => '-0:+1',
-    '#attributes' => array('title' => t('Select the Scheduled Date to use when placing an order.')),
-    '#datepicker_options' => array(
+    '#size'                => 15,
+    '#default_value'       => $defaults['defaults']['date'],
+    '#date_format'         => 'Y-m-d',
+    '#date_year_range'     => '-0:+1',
+    '#attributes'          => array(
+      'title' => t('Select the Scheduled Date to use when placing an order.'),
+    ),
+    '#wrapper_classes'   => array(
+      'col-lg' => 'col-lg-2'
+    ),
+    '#datepicker_options'  => array(
       'minDate' => 'today',
-    )
+    ),
   );
 
-  $form[$form_id]['actions'] = array('#type' => 'actions');
-  $form[$form_id]['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  $form[$form_id]['actions']           = array(
+    '#type' => 'actions'
+  );
+  $form[$form_id]['actions']['submit'] = array(
+    '#type'  => 'submit',
+    '#value' => t('Save'),
+  );
+
   $form[$form_id]['#submit'][] = 'xtuple_order_defaults_form_submit';
+
+  $form['#attributes']['class'][] = 'row';
 
   return $form;
 }
@@ -1146,13 +1220,21 @@ function xdruple_fields_field_widget_properties_alter(&$widget, $context) {
  * Implements hook_theme().
  */
 function xdruple_fields_theme() {
-  return array(
+  $items = array(
     'xtuple_order_defaults' => array(
       'render element' => 'form',
       'template' => 'xtuple-order-defaults',
       'path' => drupal_get_path('module', 'xdruple_fields') . '/theme',
     ),
   );
+
+  $items += \xTuple\xCommerce\Theme\Block::themeDefinition('order_defaults_form', array(
+    'hide_empty_title'   => TRUE,
+    'hide_empty_content' => TRUE,
+    'hide_empty_block'   => TRUE,
+  ));
+
+  return $items;
 }
 
 /**
@@ -1524,4 +1606,16 @@ function xdruple_fields_user_preferences_access($account) {
   }
 
   return $access;
+}
+
+function xdruple_fields_order_defaults_form_block() {
+  $output = '';
+
+  global $user;
+  if (xdruple_fields_user_preferences_access($user)) {
+    $form = drupal_get_form('xtuple_order_defaults_form');
+    $output .= drupal_render($form);
+  }
+
+  return $output;
 }

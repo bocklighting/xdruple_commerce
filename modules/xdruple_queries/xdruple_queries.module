@@ -182,6 +182,12 @@ function xdruple_queries_theme() {
     'file'      => 'theme/theme.inc',
   );
 
+  $items += \xTuple\xCommerce\Theme\Block::themeDefinition('categories_tree', array(
+    'hide_empty_title'   => TRUE,
+    'hide_empty_content' => TRUE,
+    'hide_empty_block'   => TRUE,
+  ));
+
   return $items;
 }
 
@@ -260,13 +266,22 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     // call entity_load() for the returned ids which will attach fields, etc.
     // We can skip this call for now. This is one reason why the entity cache
     // and EntityFieldQuery cache need to work together.
-    foreach ($products['commerce_product'] as $product) {
-      $list[] = theme($product_item_theme, array(
-        'product' => $product,
-        'params'  => $params,
-      ));
+    if (isset($products['commerce_product'])) {
+      foreach ($products['commerce_product'] as $product) {
+        $list[] = theme($product_item_theme, array(
+          'product' => $product,
+          'params'  => $params,
+        ));
+      }
     }
   }
 
   return $list;
+}
+
+function xdruple_queries_preprocess_layout_content_context(&$variables) {
+  $variables['blocks']['categories_tree'] = theme('block_categories_tree', array(
+    'name'   => 'categories_tree',
+    'title'  => t('Categories'),
+  ));
 }
