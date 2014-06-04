@@ -628,6 +628,9 @@ function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langco
     // Unset the address and contact. Use the 'erp_xdruplecommerceshiptoxxx' fields instead.
     unset($entity->content['address']);
     unset($entity->content['contact']);
+
+    // Unset the Ship To Email Addresses. It's for internal use only and doesn't need to be displayed.
+    unset($entity->content['erp_xdruplecommerceshiptoshiptoemails']);
   }
 
   if ($entity_type === 'xtuple_xdruplecommercecustomer') {
@@ -658,6 +661,13 @@ function xdruple_commerce_entity_property_info_alter(&$info) {
         // TODO: Break the reference: (array)clone(object)$prop_value
         $info['commerce_product']['properties'][$prop_name] = $prop_value;
       }
+    }
+  }
+
+  if (isset($info['commerce_order'], $info['commerce_order']['properties'])) {
+    if (isset($info['commerce_order']['properties']['mail']['validation callback'])) {
+      // Change this validation callback to our own that support mulitple emails on one line.
+      $info['commerce_order']['properties']['mail']['validation callback'] = 'xdruple_valid_multiple_email_address';
     }
   }
 
@@ -1624,7 +1634,6 @@ function xdruple_commerce_commerce_checkout_complete($order) {
   $customer = $customer[$cust_key];
 
   // Get the Bill To Contact details from checkout.
-  // TODO: Assuming 'xtuple' here. Get setting.
   $bill_to_contact = $order_wrapper->commerce_customer_billing->xd_bill_to_contact->value();
 
   // Get the Bill To Address details from checkout.
@@ -1637,6 +1646,11 @@ function xdruple_commerce_commerce_checkout_complete($order) {
   if (isset($ship_to)) {
     $ship_to_contact = json_decode(json_encode($ship_to->contact), FALSE);
     $ship_to_address = json_decode(json_encode($ship_to->address), FALSE);
+
+    // Set multiple ship to email addresses to send order confirmation to.
+    if (isset($ship_to->shipToEmails[0]['email']) && !empty($ship_to->shipToEmails[0]['email'])) {
+      $ship_to_emails = $ship_to->shipToEmails[0]['email'];
+    }
 
     // Load the full customer ship to so we get ShipCharge, shipZone, etc. we normally do not expose.
     foreach ($customer->shiptos as $cust_shipto) {
@@ -1811,6 +1825,12 @@ function xdruple_commerce_commerce_checkout_complete($order) {
     // Set the Drupal Commerce order_number to match the auto-number
     // returned from xTuple after saving the order.
     $order_wrapper->order_number->set($sales_order->number);
+
+    // Set email addresses to send order confirmation to.
+    if (!empty($ship_to_emails)) {
+      $order_wrapper->mail->set($ship_to_emails);
+    }
+
     $order_wrapper->save();
   } catch (Exception $e) {
     // Use try/catch to make sure and reset the user even if there is an error.
@@ -2230,7 +2250,7 @@ function xdruple_commerce_checkout_completion_message_default() {
   if (filter_format_load($format)) {
     $value .= '<p>Your order number is <a href="[commerce-order:view-url]">[commerce-order:order-number]</a>.</p>';
     $value .= '<p>You can <a href="[commerce-order:url]">view your order</a> on your <a href="user/[user:uid]/pending-orders">pending orders page</a> when logged in.</p>';
-    $value .= '<p>We sent confirmation e-mail to you on <strong>[user:mail]</strong>.</p>';
+    $value .= '<p>We sent an order confirmation e-mail to you at <strong>[user:mail]</strong>.</p>';
     $value .= '<p><a href="[site:url]">Return to the front page.</a></p>';
   }
   else {
