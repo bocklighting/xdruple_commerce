@@ -1,13 +1,6 @@
 <?php
 
 /**
- * Implements hook_ctools_plugin_directory()
- */
-function xdruple_commerce_ctools_plugin_directory($module, $plugin) {
-  return "plugins/$plugin";
-}
-
-/**
  * Implements hook_compass_module()
  */
 function xdruple_commerce_compass_module() {

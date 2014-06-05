@@ -5,13 +5,6 @@
  */
 
 /**
- * Implements hook_ctools_plugin_directory()
- */
-function xdruple_queries_ctools_plugin_directory($module, $plugin) {
-  return "plugins/$plugin";
-}
-
-/**
  * Implements hook_init()
  */
 function xdruple_queries_init() {
@@ -277,11 +270,4 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
   }
 
   return $list;
-}
-
-function xdruple_queries_preprocess_layout_content_context(&$variables) {
-  $variables['blocks']['categories_tree'] = theme('block_categories_tree', array(
-    'name'   => 'categories_tree',
-    'title'  => t('Categories'),
-  ));
 }
