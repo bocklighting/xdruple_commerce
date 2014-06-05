@@ -1,13 +1,6 @@
 <?php
 
 /**
- * Implements hook_ctools_plugin_directory()
- */
-function xdruple_fields_ctools_plugin_directory($module, $plugin) {
-  return "plugins/$plugin";
-}
-
-/**
  * Implements hook_views_api().
  */
 function xdruple_fields_views_api() {
