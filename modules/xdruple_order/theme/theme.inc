@@ -4,13 +4,13 @@
  * @keeps theme callback
  */
 
-use xTuple\xDruple\Theme\PrintAddressInfoHandler;
-use xTuple\xDruple\Theme\PrintLineItems;
-use xTuple\xDruple\Theme\PrintLogo;
-use xTuple\xDruple\Theme\PrintMessage;
-use xTuple\xDruple\Theme\PrintOrderInformation;
-use xTuple\xDruple\Theme\PrintOrderTotal;
-use xTuple\xDruple\Theme\PrintRemitToAddress;
+use Xtuple\Xdruple\Theme\PrintAddressInfoHandler;
+use Xtuple\Xdruple\Theme\PrintLineItems;
+use Xtuple\Xdruple\Theme\PrintLogo;
+use Xtuple\Xdruple\Theme\PrintMessage;
+use Xtuple\Xdruple\Theme\PrintOrderInformation;
+use Xtuple\Xdruple\Theme\PrintOrderTotal;
+use Xtuple\Xdruple\Theme\PrintRemitToAddress;
 
 /**
  * Preprocess variables for order-page.tpl.php

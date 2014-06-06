@@ -1221,7 +1221,7 @@ function xdruple_fields_theme() {
     ),
   );
 
-  $items += \xTuple\xCommerce\Theme\Block::themeDefinition('order_defaults_form', array(
+  $items += \Xtuple\Xcommerce\Theme\Block::themeDefinition('order_defaults_form', array(
     'hide_empty_title'   => TRUE,
     'hide_empty_content' => TRUE,
     'hide_empty_block'   => TRUE,

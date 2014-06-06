@@ -1276,7 +1276,7 @@ function xdruple_commerce_theme() {
     ),
   );
 
-  $items += \xTuple\xCommerce\Theme\Block::themeDefinition('cart_dropdown', array(
+  $items += \Xtuple\Xcommerce\Theme\Block::themeDefinition('cart_dropdown', array(
     'hide_empty_title'   => TRUE,
     'hide_empty_content' => TRUE,
     'hide_empty_block'   => TRUE,
