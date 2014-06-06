@@ -9,5 +9,10 @@
       "email": "ben@xtuple.com",
       "role": "Software Engineer"
     }
-  ]
+  ],
+  "autoload": {
+    "psr-0": {
+      "Xtuple\\XdrupleQueries\\": "src/"
+    }
+  }
 }
