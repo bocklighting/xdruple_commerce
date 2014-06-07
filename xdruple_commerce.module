@@ -205,7 +205,7 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
       '#required'      => true,
     );
   } else {
-    drupal_set_message(t('Cannot find any Warehouse/Sites to set as default. Please contact the website administrator.'), 'error');
+    drupal_set_message(t('Cannot find any Warehouse/Sites to set as default. Please contact the website administrator.'), 'warning');
   }
 
   $form['xdruple_commerce_store_settings']['xdruple_commerce_default_warehouse_access'] = array(
