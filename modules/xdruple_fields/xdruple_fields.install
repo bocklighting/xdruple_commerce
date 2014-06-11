@@ -5,6 +5,29 @@
  */
 
 /**
+ * Implements hook_enable().
+ */
+function xdruple_fields_enable() {
+  // Remove 'commerce_customer_address' fields on customer profiles. We use
+  // xTuple integrated custom fields for this.
+
+  $field_name = 'commerce_customer_address';
+
+  foreach (commerce_customer_profile_types() as $type => $profile_type) {
+    $instance = field_info_instance('commerce_customer_profile', $field_name, $profile_type['type']);
+
+    if (!empty($instance)) {
+      // Delete the instance and field.
+      // TODO: Do we really need to delete the field or just the instance?
+      // This shouldn't be ran on an existing site that could have data in this
+      // field, but that should never really happen. An existing site would
+      // need to be migrated to an xTuple enabled site.
+      field_delete_instance($instance, TRUE);
+    }
+  }
+}
+
+/**
  * Implements hook_install().
  */
 function xdruple_fields_install() {
