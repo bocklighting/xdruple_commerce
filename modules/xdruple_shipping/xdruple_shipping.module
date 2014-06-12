@@ -1,0 +1,146 @@
+<?php
+
+/**
+ * Implements hook_field_storage_pre_insert().
+ */
+function xdruple_shipping_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
+  // Wrap the update hook, which does everything we need.
+  xdruple_shipping_field_storage_pre_update($entity_type, $entity, $skip_fields);
+}
+
+/**
+ * Implements hook_field_storage_pre_update().
+ */
+function xdruple_shipping_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
+  // Check $entity_type and only act on ones we support.
+  $entity_info = entity_get_info($entity_type);
+
+  if (isset($entity_info['discovery-client']) && $entity_info['discovery-client'] === 'xtuple') {
+
+    // Get all the fields attached to this entity.
+    $bundle = $entity_type === 'commerce_product' ? 'product' : $entity_type;
+    $instances = field_info_instances($entity_type, $bundle);
+    foreach ($instances as $field_name => $instance) {
+      if ($field_name !== 'xt_physical_weight' && $field_name !== 'xt_physical_dimension') {
+        continue;
+      }
+
+      // TODO: Currently, these fields are read only. It is a calculated field
+      // that combines the product and package weights. Therefore, there is
+      // nothing to do on insert and updates.
+
+      // TODO: Add support for 'xt_physical_dimension' once there is something
+      // on the xTuple side to map it to.
+
+      // Add this field to $skip_fields.
+      $skip_fields[$field_info['id']] = $field_info;
+    }
+  }
+}
+
+/**
+ * Implements hook_field_storage_pre_load().
+ *
+ * Side loads weight from a xTuple entity's 'productWeight' and 'packageWeight'
+ * property into the 'xt_physical_weight' field.
+ */
+function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, &$skip_fields, $options) {
+  // Check $entity_type and only act on ones we support.
+  $entity_info = entity_get_info($entity_type);
+
+  if (isset($entity_info['discovery-client']) && $entity_info['discovery-client'] === 'xtuple') {
+
+    // Get all the fields attached to this entity.
+    $bundle = $entity_type === 'commerce_product' ? 'product' : $entity_type;
+    $instances = field_info_instances($entity_type, $bundle);
+    foreach ($instances as $field_name => $instance) {
+      // TODO: Add support for 'xt_physical_dimension' once there is something
+      // on the xTuple side to map it to.
+      //if ($field_name !== 'xt_physical_weight' && $field_name !== 'xt_physical_dimension') {
+      if ($field_name !== 'xt_physical_weight') {
+        continue;
+      }
+
+      $field_info = field_info_field($field_name);
+      $type = $field_info['type'];
+
+      $resource = $entity_info['resource'];
+      $entity_properties = $entity_info['json-schema'][$resource]['properties'];
+
+      // Check the entity for 'urls' property.
+      if (array_key_exists('productWeight', $entity_properties) || array_key_exists('packageWeight', $entity_properties)) {
+        foreach ($entities as $entity_id => $entity) {
+          if ($type === 'physical_weight') {
+            $weight = 0;
+            if (array_key_exists('weightUnit', $entity_properties) &&
+              property_exists($entity, 'weightUnit') &&
+              !empty($entity->weightUnit)) {
+              // Convert unit to commerce_physical.
+              $weightUnit = xdruple_shipping_map_physical_weight_units($entity->weightUnit);
+            } else {
+              // Get default UOM.
+              $weightUnit = $instances['widget']['settings']['default_unit'];
+            }
+
+            if (property_exists($entity, 'productWeight') && !empty($entity->productWeight)) {
+              $weight = $weight + $entity->productWeight;
+            }
+            if (property_exists($entity, 'packageWeight') && !empty($entity->packageWeight)) {
+              $weight = $weight + $entity->packageWeight;
+            }
+
+            if (!empty($weight)) {
+              // Associate that file with this product entity.
+              $entity->xt_physical_weight[LANGUAGE_NONE][0] = array(
+                'weight' => $weight,
+                'unit' => $weightUnit,
+              );
+            }
+          }
+        }
+      }
+
+      // Add this field to $skip_fields.
+      $skip_fields[$field_info['id']] = $field_info;
+    }
+  }
+}
+
+/**
+ * Converts an xTuple UOM to physical modules unit.
+ * @See: physical_weight_units()
+ *
+ * @param $unit
+ *   The type of weight unit whose name should be returned; by default this can
+ *   be lb, oz, kg, or g.
+ *
+ * @return
+ *   The valid unit of measurement or FALSE if not found.
+ */
+function xdruple_shipping_map_physical_weight_units($unit) {
+  $unit = strtolower($unit);
+
+  $valid_units = array_keys(physical_weight_units());
+
+  if (in_array($unit, $valid_units)) {
+    return $unit;
+  } else {
+    drupal_set_message(t('Weight unit of measure not valid.'), 'warning', false);
+    return false;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function xdruple_shipping_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['xt_physical_weight'])) {
+    // Make 'xt_physical_weight' read only. It's a calculated field and can not be editied.
+    $form['xt_physical_weight'][LANGUAGE_NONE][0]['weight']['#attributes']['disabled'] = TRUE;
+    $form['xt_physical_weight'][LANGUAGE_NONE][0]['unit']['#attributes']['disabled'] = TRUE;
+
+    // Add discription explaining this.
+    $description = t("This field is calculated based on the 'productWeight' + 'packageWeight'. It cannot be changed. To change the weight, edit those fields instead.");
+    $form['xt_physical_weight'][LANGUAGE_NONE][0]['weight']['#description'] = $description;
+  }
+}

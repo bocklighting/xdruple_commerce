@@ -1,0 +1,128 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function xdruple_shipping_install() {
+  // Add xt_physical_weight.
+  $field_name = 'xt_physical_weight';
+  if (!field_info_field($field_name)) {
+    $field = array(
+      'field_name' => $field_name,
+      'type' => 'physical_weight',
+      'cardinality' => 1,
+      'module' => 'physical',
+      'entity_types' => array(
+        'commerce_product',
+        'xtuple_xdruplecommerceproduct',
+      ),
+      'storage' => array(
+        'type' => 'xdfields_rest_storage',
+        'settings' => array(),
+        'module' => 'xdfields_rest_storage',
+        'active' => 1,
+      ),
+    );
+
+    field_create_field($field);
+  }
+
+  // Add field instances.
+  if (field_info_field($field_name)) {
+    // Get default weightUnit.
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'xtuple_unit');
+    $query->propertyCondition('isItemWeight', true, 'EQUALS');
+    $units = $query->execute();
+    $default_unit = xdruple_shipping_map_physical_weight_units(key($units['xtuple_unit']));
+    $default_unit = $default_unit ? $default_unit : 'oz';
+
+    // Add 'commerce_product' instance.
+    $instance = field_info_instance('commerce_product', $field_name, 'product');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => 'commerce_product',
+        'bundle' => 'product',
+        'label' => 'Product Physical Weight',
+      );
+      $instance['widget']['weight'] = -10;
+      $instance['widget']['settings']['default_unit'] = $default_unit;
+      $instance['widget']['settings']['unit_select_list'] = 0;
+      $instance['display']['default']['weight'] = -10;
+      field_create_instance($instance);
+    }
+
+    // Add 'xtuple_xdruplecommerceproduct' instance.
+    $entity_type = 'xtuple_xdruplecommerceproduct';
+    $instance = field_info_instance($entity_type, $field_name, $entity_type);
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => $entity_type,
+        'bundle' => $entity_type,
+        'label' => 'Product Physical Weight',
+      );
+      $instance['widget']['weight'] = -10;
+      $instance['widget']['settings']['default_unit'] = $default_unit;
+      $instance['widget']['settings']['unit_select_list'] = 0;
+      $instance['display']['default']['weight'] = -10;
+      field_create_instance($instance);
+    }
+  }
+
+  // Add xt_physical_dimension.
+  $field_name = 'xt_physical_dimension';
+  if (!field_info_field($field_name)) {
+    $field = array(
+      'field_name' => $field_name,
+      'type' => 'physical_dimensions',
+      'cardinality' => 1,
+      'module' => 'physical',
+      'entity_types' => array(
+        'commerce_product',
+        'xtuple_xdruplecommerceproduct',
+      ),
+      'storage' => array(
+        'type' => 'xdfields_rest_storage',
+        'settings' => array(),
+        'module' => 'xdfields_rest_storage',
+        'active' => 1,
+      ),
+    );
+
+    field_create_field($field);
+  }
+
+  // Add field instances.
+  if (field_info_field($field_name)) {
+    // Add 'commerce_product' instance.
+    $instance = field_info_instance('commerce_product', $field_name, 'product');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => 'commerce_product',
+        'bundle' => 'product',
+        'label' => 'Product Physical Dimensions',
+      );
+      $instance['widget']['weight'] = -10;
+      $instance['display']['default']['weight'] = -10;
+      field_create_instance($instance);
+    }
+
+    // Add 'xtuple_xdruplecommerceproduct' instance.
+    $entity_type = 'xtuple_xdruplecommerceproduct';
+    $instance = field_info_instance($entity_type, $field_name, $entity_type);
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => $field_name,
+        'entity_type' => $entity_type,
+        'bundle' => $entity_type,
+        'label' => 'Product Physical Dimensions',
+      );
+      $instance['widget']['weight'] = -10;
+      $instance['display']['default']['weight'] = -10;
+      field_create_instance($instance);
+    }
+  }
+}
