@@ -457,6 +457,19 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
     $form['number']['#weight'] = -42;
     $form['name']['#weight'] = -41;
   }
+
+  if (isset($context['entity_type']) &&
+    ($context['entity_type'] === 'commerce_product' || $context['entity_type'] === 'XdrupleCommerceProduct' || $context['entity_type'] === 'xtuple_xdruplecommerceproduct')) {
+
+    // Make 'weightUnit' read only.
+    $form['weightUnit']['#attributes']['disabled'] = TRUE;
+    $description = t("This field is derived from xTuple's Setup->Products->Units Of Measure with the 'Item Weight' flag set. It cannot be changed here.");
+    $form['weightUnit']['#description'] = $description;
+    // Make 'uomRatio' read only.
+    $form['uomRatio']['#attributes']['disabled'] = TRUE;
+    $description = t("This field is derived from xTuple's Units Of Measure Ratios. It cannot be changed here.");
+    $form['uomRatio']['#description'] = $description;
+  }
 }
 
 function xdruple_commerce_user_association_callback(&$form, &$form_state) {
@@ -517,7 +530,7 @@ function xdruple_commerce_rescued_entity_default_label_alter($entity, &$label, $
 function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$resource_schema, $context) {
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommercecontact') {
     // TODO: Convert this to a function call that has a hook to override.
-    // User that function in xdruple_commerce_rescued_operation_entityform_alter().
+    // Use that function in xdruple_commerce_rescued_operation_entityform_alter().
     $properity_white_list = array(
       'firstName' => true,
       'lastName' => true,
@@ -532,7 +545,7 @@ function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$res
 
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceaddress') {
     // TODO: Convert this to a function call that has a hook to override.
-    // User that function in xdruple_commerce_rescued_operation_entityform_alter().
+    // Use that function in xdruple_commerce_rescued_operation_entityform_alter().
     $properity_white_list = array(
       'line1' => true,
       'line2' => true,
@@ -549,7 +562,7 @@ function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$res
 
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommerceshipto') {
     // TODO: Convert this to a function call that has a hook to override.
-    // User that function in xdruple_commerce_rescued_operation_entityform_alter().
+    // Use that function in xdruple_commerce_rescued_operation_entityform_alter().
     $properity_white_list = array(
       'number' => true,
       'name' => true,
@@ -565,7 +578,7 @@ function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$res
 
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdruplecommercecustomer') {
     // TODO: Convert this to a function call that has a hook to override.
-    // User that function in xdruple_commerce_rescued_operation_entityform_alter().
+    // Use that function in xdruple_commerce_rescued_operation_entityform_alter().
     $properity_white_list = array(
       'number' => true,
       'name' => true,
