@@ -1,0 +1,10 @@
+name = xTuple's Drupal Commerce Shipping Integration Module
+description = Add custom xTuple shipping fields and other shipping integration
+core = 7.x
+package = xDruple
+
+dependencies[] = rescued
+dependencies[] = xdruple
+dependencies[] = xdruple_commerce
+dependencies[] = physical
+dependencies[] = commerce_physical
