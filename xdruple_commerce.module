@@ -1808,6 +1808,18 @@ function xdruple_commerce_commerce_checkout_complete($order) {
     }
   }
 
+  // Set flag to finalise payment.
+  if (module_exists('xdruple_authnet') &&
+    isset($order->data['xdruple_auth_aim_trans_id'], $order->data['xdruple_auth_aim_payment_id'], $order->data['xdruple_auth_aim_amount']) &&
+    !empty($order->data['xdruple_auth_aim_trans_id']) &&
+    !empty($order->data['xdruple_auth_aim_payment_id']) &&
+    !empty($order->data['xdruple_auth_aim_amount'])) {
+
+    $finalize_auth_aim_order_payment = TRUE;
+  } else {
+    $finalize_auth_aim_order_payment = FALSE;
+  }
+
   // Save the Sales Order.
   try {
     // We have to submit the order as the "admin" user because it has "MaintainSalesOrders" privs.
@@ -1820,12 +1832,24 @@ function xdruple_commerce_commerce_checkout_complete($order) {
       $_SESSION['rescued']['user'] = 'admin';
       $sales_order->save();
 
+      // Update the 'xtuple_creditcardpayment' with the final order number and
+      // insert the matching 'xtuple_salesorderpayment' as the 'admin' user.
+      if ($finalize_auth_aim_order_payment) {
+        _xdruple_authnet_finalize_auth_aim_order_payment($order, $sales_order);
+      }
+
       unset($_SESSION['access_token']);
       unset($_SESSION['oauth_user']);
       $_SESSION['rescued']['user'] = $cached_user;
     } else {
       // For admin users, we can save directly with their OAauth token.
       $sales_order->save();
+
+      // Update the 'xtuple_creditcardpayment' with the final order number and
+      // insert the matching 'xtuple_salesorderpayment' as the 'admin' user.
+      if ($finalize_auth_aim_order_payment) {
+        _xdruple_authnet_finalize_auth_aim_order_payment($order, $sales_order);
+      }
     }
 
     // Set the Drupal Commerce order_number to match the auto-number
