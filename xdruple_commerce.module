@@ -172,11 +172,13 @@ function xdruple_commerce_rescued_register_clients_resources_alter(&$rescued_cli
  * Implements hook_cpanel_alter()
  */
 function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
-  $form['xdruple_commerce_store_settings'] = array(
-    '#type'  => 'fieldset',
-    '#title' => t('Store settings'),
-    '#group' => 'system_settings',
-  );
+  if (empty($form['xdruple_commerce_store_settings'])) {
+    $form['xdruple_commerce_store_settings'] = array(
+      '#type'  => 'fieldset',
+      '#title' => t('Store settings'),
+      '#group' => 'system_settings',
+    );
+  }
 
   $form['xdruple_commerce_store_settings']['xdruple_commerce_filter_exclusive_items'] = array(
     '#type'          => 'checkbox',
@@ -1742,7 +1744,7 @@ function xdruple_commerce_commerce_checkout_complete($order) {
   // Set the Customer details on the Sales Order.
   $sales_order->site = $customer->preferredSite;
   $sales_order->customer = $customer->number;
-  $sales_order->terms = $customer->terms;
+  $sales_order->terms = !empty($order->data['xdruple_terms']) ? $order->data['xdruple_terms'] : null;
   $sales_order->salesRep = $full_ship_to ? $full_ship_to->salesRep : $customer->salesRep;
   $sales_order->taxZone = $full_ship_to ? $full_ship_to->taxZone : $customer->taxZone;
   $sales_order->billtoContact = $bill_to_contact->number;
