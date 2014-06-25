@@ -1803,9 +1803,12 @@ function xdruple_commerce_commerce_checkout_complete($order) {
       $sales_order->lineItems[$delta]['quantity'] = $line->quantity->value();
       $sales_order->lineItems[$delta]['customerPrice'] = ($line->commerce_unit_price->amount->value() / 100);
       $sales_order->lineItems[$delta]['price'] = ($line->commerce_unit_price->amount->value() / 100);
+    } elseif (array_key_exists('commerce_shipping_service', $line->getPropertyInfo())) {
+      $sales_order->freight = ($line->commerce_unit_price->amount->value() / 100);
+      $sales_order->calculateFreight = false;
+      $sales_order->shipVia = xdruple_shipping_map_ship_via($line->line_item_label->value());
     } else {
-      // TODO
-      // Handle shipping and tax lines.
+      // TODO - Handle tax lines.
       $foo = true;
     }
   }
@@ -2310,7 +2313,6 @@ function xdruple_commerce_checkout_purchased_items_pane_checkout_form($form, &$f
   return $pane_form;
 }
 
-
 /**
  * Implements hook_commerce_authnet_billing_address_from_customer_alter()
  */
@@ -2341,6 +2343,54 @@ function xdruple_commerce_commerce_authnet_billing_address_from_customer_alter(&
   try {
     if ($customer = $order_wrapper->commerce_customer_billing->xd_customer->value()) {
       $billing_address['organisation_name'] = $customer->name;
+    }
+  } catch (\Exception $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Implements hook_commerce_ups_shipping_address_from_order_alter()
+ */
+function xdruple_commerce_commerce_ups_shipping_address_from_order_alter(&$shipping_address, $order_wrapper) {
+  // Necessary for country_get_list().
+  require_once DRUPAL_ROOT . '/includes/locale.inc';
+
+  try {
+    if ($ship_to_address = $order_wrapper->commerce_customer_shipping->xd_ship_to_address->value()) {
+      $countries = country_get_list();
+      $country_match = array_keys($countries, $ship_to_address->country);
+      if (count($country_match) === 1) {
+        $country_code = $country_match[0];
+      } else {
+        $country_code = 'US';
+      }
+
+      $shipping_address['thoroughfare'] = $ship_to_address->line1;
+      $shipping_address['locality'] = $ship_to_address->city;
+      $shipping_address['administrative_area'] = $ship_to_address->state;
+      $shipping_address['postal_code'] = $ship_to_address->postalCode;
+      $shipping_address['country'] = $country_code;
+    }
+  } catch (\Exception $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
+  }
+
+  try {
+    if ($ship_to_contact = $order_wrapper->commerce_customer_shipping->xd_ship_to_contact->value()) {
+      $shipping_address['first_name'] = $ship_to_contact->firstName;
+      $shipping_address['last_name'] = $ship_to_contact->lastName;
+    }
+  } catch (\Exception $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
+  }
+
+  try {
+    if ($customer = $order_wrapper->commerce_customer_billing->xd_customer->value()) {
+      $shipping_address['organisation_name'] = $customer->name;
     }
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
