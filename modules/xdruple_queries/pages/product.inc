@@ -18,14 +18,16 @@ function xdruple_queries_product_page($product_id) {
 
   $output = '';
 
-  $output .= theme('bootstrap_pills', array(
-    'items' => array(
-      array(
-        'title' => t('Edit'),
-        'link'  => "admin/commerce/products/$product_id/edit",
+  if (user_access('administer rescued entities')) {
+    $output .= theme('bootstrap_pills', array(
+      'items' => array(
+        array(
+          'title' => t('Edit'),
+          'link'  => "admin/commerce/products/$product_id/edit",
+        ),
       ),
-    ),
-  ));
+    ));
+  }
 
   $view = views_get_view(variable_get('xdruple_queries_product_page_view_name', 'ft_commerce_product'));
   $view->execute_display('default', array($product_id));

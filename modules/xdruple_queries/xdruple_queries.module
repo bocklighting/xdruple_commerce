@@ -175,12 +175,6 @@ function xdruple_queries_theme() {
     'file'      => 'theme/theme.inc',
   );
 
-  $items += \Xtuple\Xcommerce\Theme\Block::themeDefinition('categories_tree', array(
-    'hide_empty_title'   => TRUE,
-    'hide_empty_content' => TRUE,
-    'hide_empty_block'   => TRUE,
-  ));
-
   return $items;
 }
 
