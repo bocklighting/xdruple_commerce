@@ -1,6 +1,17 @@
 <?php
 
 /**
+ * Implements hook_rescued_register_clients_resources_alter().
+ */
+function  xdruple_shipping_rescued_register_clients_resources_alter(&$rescued_clients_url_resources) {
+  if (!in_array('ShipVia', $rescued_clients_url_resources['xtuple'])) {
+    $rescued_clients_url_resources['xtuple'][] = 'ShipVia';
+  }
+
+  return $rescued_clients_url_resources;
+}
+
+/**
  * Implements hook_field_storage_pre_insert().
  */
 function xdruple_shipping_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
@@ -24,6 +35,8 @@ function xdruple_shipping_field_storage_pre_update($entity_type, $entity, &$skip
       if ($field_name !== 'xt_physical_weight' && $field_name !== 'xt_physical_dimension') {
         continue;
       }
+
+      $field_info = field_info_field($field_name);
 
       // TODO: Currently, these fields are read only. It is a calculated field
       // that combines the product and package weights. Therefore, there is
@@ -128,6 +141,40 @@ function xdruple_shipping_map_physical_weight_units($unit) {
     drupal_set_message(t('Weight unit of measure not valid.'), 'warning', false);
     return false;
   }
+}
+
+/**
+ * Converts a Commerce Shipping Service to xTuple's Ship Via code-description.
+ * @See: xdruple_commerce_commerce_checkout_complete()
+ * @See: _commerce_ups_service_list()
+ *
+ * @param $ship_label
+ *   The commerce line_item_label; by default this can be:
+ *    'UPS Ground',
+ *    'UPS Next Day Air',
+ *    'UPS 2nd Day Air',
+ *    etc.
+ *
+ * @return
+ *   The matching xTuple's Ship Via code or pass through $ship_label if not found.
+ */
+function xdruple_shipping_map_ship_via($ship_label) {
+  $entity_type = 'xtuple_shipvia';
+  $ship_vias = entity_load($entity_type);
+
+  foreach ($ship_vias as $code => $value) {
+    // Remove and space, dashes, underscores.
+    $stripped_label = str_replace(array(' ', '-', '_'), '', $ship_label);
+    $stripped_description = str_replace(array(' ', '-', '_'), '', $value->description);
+
+    // Compare the two and return the code-description if they match.
+    if ($stripped_label ===  $stripped_description) {
+      return $code . '-' . $value->description;
+    }
+  }
+
+  // Else, just pass through the $ship_label when no match is found.
+  return $ship_label;
 }
 
 /**
