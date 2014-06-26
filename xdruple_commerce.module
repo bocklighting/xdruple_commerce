@@ -2314,46 +2314,9 @@ function xdruple_commerce_checkout_purchased_items_pane_checkout_form($form, &$f
 }
 
 /**
- * Implements hook_commerce_authnet_billing_address_from_customer_alter()
+ * Implements hook_commerce_ups_ship_from_address_alter()
  */
-function xdruple_commerce_commerce_authnet_billing_address_from_customer_alter(&$billing_address, $order_wrapper) {
-  try {
-    if ($bill_to_address = $order_wrapper->commerce_customer_billing->xd_bill_to_address->value()) {
-      $billing_address['thoroughfare'] = $bill_to_address->line1;
-      $billing_address['locality'] = $bill_to_address->city;
-      $billing_address['administrative_area'] = $bill_to_address->state;
-      $billing_address['postal_code'] = $bill_to_address->postalCode;
-      $billing_address['country'] = $bill_to_address->country;
-    }
-  } catch (\Exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
-    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
-
-  try {
-    if ($bill_to_contact = $order_wrapper->commerce_customer_billing->xd_bill_to_contact->value()) {
-      $billing_address['first_name'] = $bill_to_contact->firstName;
-      $billing_address['last_name'] = $bill_to_contact->lastName;
-    }
-  } catch (\Exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
-    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
-
-  try {
-    if ($customer = $order_wrapper->commerce_customer_billing->xd_customer->value()) {
-      $billing_address['organisation_name'] = $customer->name;
-    }
-  } catch (\Exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
-    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
-}
-
-/**
- * Implements hook_commerce_ups_shipping_address_from_order_alter()
- */
-function xdruple_commerce_commerce_ups_shipping_address_from_order_alter(&$shipping_address, $order_wrapper) {
+function xdruple_commerce_commerce_ups_ship_from_address_alter(&$shipping_address, $order_wrapper) {
   // Necessary for country_get_list().
   require_once DRUPAL_ROOT . '/includes/locale.inc';
 
