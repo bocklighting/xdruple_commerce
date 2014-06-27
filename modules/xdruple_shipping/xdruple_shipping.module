@@ -218,6 +218,21 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
       $ship_to_address['administrative_area'] = $xd_ship_to_address->state;
       $ship_to_address['postal_code']         = $xd_ship_to_address->postalCode;
       $ship_to_address['country']             = $country_code;
+    } elseif ($xd_ship_to = $order_wrapper->commerce_customer_shipping->xd_ship_to->value()) {
+      $countries = country_get_list();
+      $country_match = array_keys($countries, $xd_ship_to->address['country']);
+      if (count($country_match) === 1) {
+        $country_code = $country_match[0];
+      } else {
+        $country_code = 'US';
+      }
+
+      $ship_to_address['thoroughfare']        = $xd_ship_to->address['line1'];
+      $ship_to_address['premise']             = $xd_ship_to->address['line2'];
+      $ship_to_address['locality']            = $xd_ship_to->address['city'];
+      $ship_to_address['administrative_area'] = $xd_ship_to->address['state'];
+      $ship_to_address['postal_code']         = $xd_ship_to->address['postalCode'];
+      $ship_to_address['country']             = $country_code;
     }
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
