@@ -39,6 +39,8 @@ function xdruple_queries_menu() {
 
   $items['products/%'] = array(
     'title'            => 'Product',
+    'title callback'   => 'xdruple_queries_product_page_title',
+    'title arguments'  => array(1),
     'page callback'    => 'xdruple_queries_product_page',
     'page arguments'   => array(1),
     'access callback'  => 'xdruple_access',

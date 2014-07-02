@@ -29,18 +29,30 @@ function xdruple_queries_product_page($product_id) {
     ));
   }
 
-  $view = views_get_view(variable_get('xdruple_queries_product_page_view_name', 'ft_commerce_product'));
-  $view->execute_display('default', array($product_id));
-  if (!empty($view->result)) {
-    if (!empty($view->result[0]->title)) {
-      drupal_set_title($view->result[0]->title);
-    }
+  $product = entity_load_single('commerce_product', $product_id);
 
-    $output .= $view->render();
+  if (!empty($product)) {
+    $product_render = entity_view('commerce_product', array($product));
+    $output .= drupal_render($product_render);
   }
   else {
     drupal_not_found();
   }
 
   return $output;
+}
+
+function xdruple_queries_product_page_title($product_id) {
+  $title = '';
+
+  $product = entity_load_single('commerce_product', $product_id);
+  if (!empty($product)) {
+    $title = $product->title;
+  }
+
+  return $title;
+}
+
+function xdruple_queries_node_view_alter(&$build) {
+
 }
