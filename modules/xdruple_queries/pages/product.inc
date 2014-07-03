@@ -32,7 +32,7 @@ function xdruple_queries_product_page($product_id) {
   $product = entity_load_single('commerce_product', $product_id);
 
   if (!empty($product)) {
-    $product_render = entity_view('commerce_product', array($product));
+    $product_render = entity_view('commerce_product', array($product), 'full', NULL, TRUE);
     $output .= drupal_render($product_render);
   }
   else {
