@@ -467,7 +467,9 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
               } else {
                 if (!$file_exists) {
                   // Set the UUID to match xTuples.
-                  $file->uuid = $url['url']['uuid'];
+                  $file->uuid  = $url['url']['uuid'];
+                  $file->title = $url['url']['name'];
+                  $file->alt   = $url['url']['name'];
                   $file = file_save($file);
                   file_usage_add($file, 'file', $entity_type, $entity_id);
                 }
@@ -476,8 +478,8 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
                   // Associate that file with this product entity.
                   $entity->xt_url_image_field[LANGUAGE_NONE][$image_delta] = array(
                     'fid' => $file->fid,
-                    'alt' => '',
-                    'title' => '',
+                    'alt' => $url['url']['name'],
+                    'title' => $url['url']['name'],
                     'width' => $info['width'],
                     'height' => $info['height'],
                   );
@@ -490,8 +492,10 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
               if (!$info) {
                 if (!$file_exists) {
                   // Set the UUID to match xTuples.
-                  $file->uuid = $url['url']['uuid'];
-                  $file = file_save($file);
+                  $file->uuid  = $url['url']['uuid'];
+                  $file->title = $url['url']['name'];
+                  $file->alt   = $url['url']['name'];
+                  $file        = file_save($file);
                   file_usage_add($file, 'file', $entity_type, $entity_id);
                 }
 
@@ -499,8 +503,8 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
                   // Associate that file with this product entity.
                   $entity->xt_url_file_field[LANGUAGE_NONE][$file_delta] = array(
                     'fid' => $file->fid,
-                    'alt' => '',
-                    'title' => '',
+                    'alt' => $url['url']['name'],
+                    'title' => $url['url']['name'],
                   );
 
                   $file_delta++;
@@ -522,233 +526,6 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
  * Set Customer default on checkout forms.
  */
 function xdruple_fields_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id === 'commerce_checkout_form_checkout' || $form_id === 'commerce_order_ui_order_form') {
-    if ($form_id === 'commerce_checkout_form_checkout') {
-      $form_billing = &$form['customer_profile_billing'];
-      $form_shipping = &$form['customer_profile_shipping'];
-      if (isset($form_state['values']['customer_profile_billing'])) {
-        $form_state_billing = &$form_state['values']['customer_profile_billing'];
-      }
-      if (isset($form_state['values']['customer_profile_shipping'])) {
-        $form_state_shipping = &$form_state['values']['customer_profile_shipping'];
-      }
-    } else if ($form_id === 'commerce_order_ui_order_form') {
-      $form_billing = &$form['commerce_customer_billing'][LANGUAGE_NONE]['profiles'][0];
-      $form_shipping = &$form['commerce_customer_shipping'][LANGUAGE_NONE]['profiles'][0];
-
-      if (isset($form_state['values']['xd_customer'])) {
-        $form_state_billing = &$form_state['values'];
-      }
-      if (isset($form_state['values']['xd_ship_to'])) {
-        $form_state_shipping = &$form_state['values'];
-      }
-    }
-
-    // Add ajax call back to the Ship To select so we can dynamically add the
-    // Contact and Address fields if no Ship To is set.
-    $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#ajax'] = array(
-      'callback' => 'xdruple_fields_checkout_shipto_ajax_callback',
-      'wrapper' => 'xtuple-ship-to-wrapper',
-      'method' => 'replace',
-      'effect' => 'fade',
-    );
-    $form_billing['xd_customer'][LANGUAGE_NONE]['#ajax'] = array(
-      'callback' => 'xdruple_fields_checkout_shipto_ajax_callback',
-      'wrapper' => 'xtuple-ship-to-wrapper',
-      'method' => 'replace',
-      'effect' => 'fade',
-    );
-
-    if ($form_id === 'commerce_order_ui_order_form') {
-      // Limit validation to skip the 'commerce_customer_billing' and 'commerce_customer_shipping' fields.
-      // @See: commerce_customer_profile_manager_validate()
-      foreach ($form_state['field'] as $field_name => $field) {
-        if ($field_name !== 'commerce_customer_billing' && $field_name !== 'commerce_customer_shipping') {
-          $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
-        }
-      }
-    }
-    if ($form_id === 'commerce_checkout_form_checkout') {
-      foreach ($form_state['field']['#parents'] as $field_name => $field) {
-        $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
-      }
-    }
-
-    $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#submit'] = array('');
-    $form_billing['xd_customer'][LANGUAGE_NONE]['#submit'] = array('');
-
-    // Remove the 'erp_xdruplecommercecontactaddress' field from the form.
-    // There is a seperate address field on billing and shipping profiles
-    // that we use for orders. This allows the user to set a different address
-    // from the one associated with their contact.
-    if (isset($form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress'])) {
-      unset($form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress']);
-    }
-    if (isset($form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress'])) {
-      unset($form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress']);
-    }
-
-    $shiptos = array();
-    // Remove the Ship Tos that are not for this customer. Reset the #options array.
-    if (isset($form_billing['xd_customer'][LANGUAGE_NONE]['#default_value']) &&
-      (!isset($form_state['values']) || empty($form_state['values'])) &&
-      $default_customer = $form_billing['xd_customer'][LANGUAGE_NONE]['#default_value'][0]) {
-      // This is the first load of an edit form, use the default.
-
-      $shiptos = xdruple_fields_get_ship_to_list($default_customer);
-    } elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value']) &&
-      (!isset($form_state['values']) || empty($form_state['values'])) &&
-      preg_match("/.+\(([\w\+@\.]+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches)) {
-      // This is the first load of an edit form, use the default from autocomplete.
-
-      $shiptos = xdruple_fields_get_ship_to_list($matches[1]);
-    } else {
-      // This is the second or more Ajax load, get it from the saved order.
-
-      if ($form_id === 'commerce_order_ui_order_form') {
-        $order = commerce_order_load_by_number($form_state['commerce_order']->order_number);
-        $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
-        $cust_key = $order_wrapper->commerce_customer_billing->xd_customer->number->value();
-        $shiptos = xdruple_fields_get_ship_to_list($cust_key);
-      }
-      if ($form_id === 'commerce_checkout_form_checkout') {
-        if (isset($form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) &&
-          $default_customer = $form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) {
-
-          $shiptos = xdruple_fields_get_ship_to_list($default_customer);
-        } elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
-          preg_match("/.+\((.+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches);
-          // This is the first load of an edit form, use the default from autocomplete.
-
-          $shiptos = xdruple_fields_get_ship_to_list($matches[1]);
-        }
-      }
-    }
-
-    if (count($shiptos) > 0) {
-      // Reset the '#empty_option' => '- None -' to be more descriptive.
-      $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] = array('_none' => '- Custom Ship To -');
-      $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] = $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] + $shiptos;
-    }
-
-    // Add wapper to 'customer_profile_shipping' fieldset so changing Ship To can do an ajax
-    // replace to update that section of the form.
-    $form_shipping['#prefix'] = '<div id="xtuple-ship-to-wrapper">';
-    $form_shipping['#suffix'] = '</div>';
-
-    if (isset($form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value'][0]) && (!isset($form_state['values']) || empty($form_state['values']))) {
-      // First time loading form with a default set.
-      $shipto_id = $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value'][0];
-    } else if (isset($form_state_shipping['xd_ship_to'][LANGUAGE_NONE][0]['target_id'])) {
-      // After first load with target_id set.
-      $shipto_id = $form_state_shipping['xd_ship_to'][LANGUAGE_NONE][0]['target_id'];
-    }
-
-    // If a default Ship To is set on first load of the form OR the Ship To
-    // select list was changed and a Ship To was selected, remove Contact and Address.
-    if (isset($shipto_id) && array_key_exists($shipto_id, $shiptos)) {
-      // Remove the Inline Entity Form entities so the Custom Ship To Contact
-      // and Address will be blank if the user flips back to it.
-      $contact_ief_id = $form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['#ief_id'];
-      $address_ief_id = $form_shipping['xd_ship_to_address'][LANGUAGE_NONE]['#ief_id'];
-      foreach($form_state['inline_entity_form'] as $ief_key => $ief_child) {
-        if (strncmp($ief_key, $contact_ief_id, strlen($contact_ief_id)) === 0) {
-          unset($form_state['inline_entity_form'][$ief_key]);
-        }
-        if (strncmp($ief_key, $address_ief_id, strlen($address_ief_id)) === 0) {
-          unset($form_state['inline_entity_form'][$ief_key]);
-        }
-      }
-
-      // Remove the Ship To Contact and Address parts of the checkout form.
-      unset($form_shipping['xd_ship_to_contact']);
-      unset($form_shipping['xd_ship_to_address']);
-      if (isset($form_state_shipping['ship_to_contact_wrapper'])) {
-        unset($form_state_shipping['ship_to_contact_wrapper']);
-      }
-      if (isset($form_state_shipping['ship_to_address_wrapper'])) {
-        unset($form_state_shipping['ship_to_address_wrapper']);
-      }
-      if (isset($form_state_shipping['xd_ship_to_contact'])) {
-        unset($form_state_shipping['xd_ship_to_contact']);
-      } else {
-        // TODO
-      }
-      if (isset($form_state_shipping['xd_ship_to_address'])) {
-        unset($form_state_shipping['xd_ship_to_address']);
-      } else {
-        // TODO
-      }
-      unset($form_state['input']['customer_profile_shipping']['xd_ship_to_contact']);
-      unset($form_state['input']['customer_profile_shipping']['xd_ship_to_address']);
-
-      // Get and display as read-only the Contact and Address from the selected ship to.
-      $shipto = entity_load_single('xtuple_xdruplecommerceshipto', $shipto_id);
-
-      // Show the user the selected Ship To's Contact and Address.
-      $form_shipping['ship_to_contact_wrapper'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Ship To Contact'),
-        'first_name' => array(
-          '#type' => 'textfield',
-          '#title' => t('First Name'),
-          '#default_value' => isset($shipto->contact['firstName']) ? $shipto->contact['firstName'] : '',
-          '#disabled' => true,
-        ),
-        'last_name' => array(
-          '#type' => 'textfield',
-          '#title' => t('Last Name'),
-          '#default_value' => isset($shipto->contact['lastName']) ? $shipto->contact['lastName'] : '',
-          '#disabled' => true,
-        ),
-        'email' => array(
-          '#type' => 'textfield',
-          '#title' => t('Primary Email'),
-          '#default_value' => isset($shipto->contact['primaryEmail']) ? $shipto->contact['primaryEmail'] : '',
-          '#disabled' => true,
-        ),
-        'phone' => array(
-          '#type' => 'textfield',
-          '#title' => t('Phone'),
-          '#default_value' => isset($shipto->contact['phone']) ? $shipto->contact['phone'] : '',
-          '#disabled' => true,
-        ),
-      );
-      $form_shipping['ship_to_address_wrapper'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Ship To Address'),
-        'line1' => array(
-          '#type' => 'textfield',
-          '#title' => t('Line1'),
-          '#default_value' => isset($shipto->address['line1']) ? $shipto->address['line1'] : '',
-          '#disabled' => true,
-        ),
-        'line2' => array(
-          '#type' => 'textfield',
-          '#title' => t('Line2'),
-          '#default_value' => isset($shipto->address['line2']) ? $shipto->address['line2'] : '',
-          '#disabled' => true,
-        ),
-        'city' => array(
-          '#type' => 'textfield',
-          '#title' => t('City'),
-          '#default_value' => isset($shipto->address['city']) ? $shipto->address['city'] : '',
-          '#disabled' => true,
-        ),
-        'state' => array(
-          '#type' => 'select',
-          '#title' => t('State'),
-          '#options' => array(isset($shipto->address['state']) ? $shipto->address['state'] : ''),
-          '#default_value' => isset($shipto->address['state']) ? $shipto->address['state'] : '',
-          '#disabled' => true,
-        ),
-      );
-    } else {
-      // This is a Custom Ship To. Unset the default value.
-      unset($form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value']);
-      $_SESSION['rescued']['custom_ship_to'] = true;
-    }
-  }
 
   if (strpos($form_id, 'views_form_commerce_cart_form_') === 0 ||
       strpos($form_id, 'views_form_ft_commerce_cart_form_') === 0) {
@@ -823,16 +600,6 @@ function xdruple_fields_checkout_shipto_ajax_callback($form, $form_state) {
  *   The entityreference field instance.
  */
 function xdruple_fields_entityreference_prepopulate_default_ids_alter(&$ids, $field, $instance) {
-  if (!$ids) {
-    // TODO: Add your id to the array.
-    //$ids[] = 1;
-    //$ids = array('95');
-  } else {
-    // TODO: Modify the Existing defualt ids.
-    //$ids[0] = 2;
-    //$ids = array('95');
-  }
-
   if ($field['field_name'] === 'xd_customer' && isset($_SESSION['rescued']['customer'])) {
     $ids = array($_SESSION['rescued']['customer']);
   }
@@ -845,7 +612,7 @@ function xdruple_fields_entityreference_prepopulate_default_ids_alter(&$ids, $fi
     $ids = array(xdruple_fields_get_bill_to_addr_default($_SESSION['rescued']['customer']));
   }
 
-  if ($field['field_name'] === 'xd_ship_to' && !$_SESSION['rescued']['custom_ship_to']) {
+  if ($field['field_name'] === 'xd_ship_to' && isset($_SESSION['rescued']['custom_ship_to']) && !$_SESSION['rescued']['custom_ship_to']) {
     if (isset($_SESSION['rescued']['ship_to'])) {
       $ids = array($_SESSION['rescued']['ship_to']);
     } else {
