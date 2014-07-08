@@ -467,7 +467,9 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
               } else {
                 if (!$file_exists) {
                   // Set the UUID to match xTuples.
-                  $file->uuid = $url['url']['uuid'];
+                  $file->uuid  = $url['url']['uuid'];
+                  $file->title = $url['url']['name'];
+                  $file->alt   = $url['url']['name'];
                   $file = file_save($file);
                   file_usage_add($file, 'file', $entity_type, $entity_id);
                 }
@@ -490,8 +492,10 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
               if (!$info) {
                 if (!$file_exists) {
                   // Set the UUID to match xTuples.
-                  $file->uuid = $url['url']['uuid'];
-                  $file = file_save($file);
+                  $file->uuid  = $url['url']['uuid'];
+                  $file->title = $url['url']['name'];
+                  $file->alt   = $url['url']['name'];
+                  $file        = file_save($file);
                   file_usage_add($file, 'file', $entity_type, $entity_id);
                 }
 
