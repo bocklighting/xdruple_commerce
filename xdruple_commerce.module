@@ -1545,15 +1545,32 @@ function xdruple_commerce_api_customer_item_price($discovery_client = 'xtuple', 
 }
 
 function xdruple_commerce_get_customer_line_item_price($line_item) {
-  if (!isset($_SESSION['rescued']['customer'], $_SESSION['rescued']['ship_to'], $_SESSION['rescued']['site'])) {
+  global $user;
+
+  if (!isset($_SESSION['rescued']['customer'], $_SESSION['rescued']['ship_to'], $_SESSION['rescued']['site']) &&
+    $user->uid !== 0) {
+
     // We cannot get a price quote without all of these set.
     return;
   }
 
-  $customer = $_SESSION['rescued']['customer'];
+  if ($user->uid === 0 && !variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE)) {
+    // Do not get price quote from guest customer price schedule.
+    return;
+  }
+
+  if ($user->uid === 0) {
+    // Get anonymous checkout defaults from control panel.
+    $customer = variable_get('xdruple_checkout_guest_customer', null);
+    $shipto = null;
+    $site = variable_get('xdruple_commerce_default_warehouse', null);
+  } else {
+    $customer = $_SESSION['rescued']['customer'];
+    $shipto = $_SESSION['rescued']['ship_to'];
+    $site = $_SESSION['rescued']['site'];
+  }
+
   $date = xdruple_rescued_scheduled_date('tomorrow');
-  $shipto = $_SESSION['rescued']['ship_to'];
-  $site = $_SESSION['rescued']['site'];
 
   $cid = 'xdruple_commerce_customer_line_item_price-' .
          $customer . '-' .
@@ -1565,17 +1582,22 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
   $cache = cache_get($cid, 'cache');
 
   if (empty($cache)) {
+    $options = array(
+      'asOf' => $date, // The scheduled date for the order.
+      'siteId' => $site,
+      'effective' => format_date(REQUEST_TIME, 'custom', 'Y-m-d'), // Always today.
+    );
+
+    if (!empty($shipto)) {
+      $options['shiptoId'] = $shipto;
+    }
+
     $postBody = array(
       'attributes' => array(
         $customer,
         $line_item->line_item_label,
         $line_item->quantity,
-        array(
-          'asOf' => $date, // The scheduled date for the order.
-          'shiptoId' => $shipto,
-          'siteId' => $site,
-          'effective' => format_date(REQUEST_TIME, 'custom', 'Y-m-d'), // Always today.
-        ),
+        $options,
       ),
     );
 

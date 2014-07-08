@@ -69,6 +69,19 @@ function xdruple_checkout_cpanel_alter(&$form, &$form_state) {
       unset($form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#empty_option']);
     }
   }
+  $form['xdruple_commerce_store_settings']['xdruple_checkout_use_guest_customer_price_schedule'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t("Use Guest Customer's price schedule for anonymous users"),
+    '#description'   => t('When checked, anonymous users will not see the Item List Price. ' .
+                          'Instead a price quote will be fetched and whatever pricing schdule ' .
+                          'the Guest Customer above is assigned to will adjust prices accordingly.'),
+    '#default_value' => variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE),
+    '#states' => array (
+      'visible' => array(
+        ':input[name="xdruple_checkout_anonymous"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
 
   // Chekout button help text for e-mail verification when a visitor creates an account.
   if (variable_get('user_email_verification', TRUE)) {
