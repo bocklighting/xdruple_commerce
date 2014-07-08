@@ -478,8 +478,8 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
                   // Associate that file with this product entity.
                   $entity->xt_url_image_field[LANGUAGE_NONE][$image_delta] = array(
                     'fid' => $file->fid,
-                    'alt' => '',
-                    'title' => '',
+                    'alt' => $url['url']['name'],
+                    'title' => $url['url']['name'],
                     'width' => $info['width'],
                     'height' => $info['height'],
                   );
@@ -503,8 +503,8 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
                   // Associate that file with this product entity.
                   $entity->xt_url_file_field[LANGUAGE_NONE][$file_delta] = array(
                     'fid' => $file->fid,
-                    'alt' => '',
-                    'title' => '',
+                    'alt' => $url['url']['name'],
+                    'title' => $url['url']['name'],
                   );
 
                   $file_delta++;
