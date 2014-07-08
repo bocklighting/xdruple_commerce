@@ -25,5 +25,7 @@ function xdruple_checkout_uninstall() {
   // Clean up variables used by module.
   variable_del('xdruple_checkout_message');
   variable_del('xdruple_checkout_anonymous');
+  variable_del('xdruple_checkout_guest_customer');
+  variable_del('xdruple_checkout_use_guest_customer_price_schedule');
   variable_del('xdruple_checkout_reset_password_message');
 }
