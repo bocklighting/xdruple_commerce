@@ -266,12 +266,19 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
   // Necessary for country_get_list().
   require_once DRUPAL_ROOT . '/includes/locale.inc';
 
-  $id          = $_SESSION['rescued']['site'];
+  $id          = !empty($_SESSION['rescued']['site']) ? $_SESSION['rescued']['site'] : null;
   $entity_type = 'xtuple_site';
-  $site        = entity_load_single($entity_type, $id);
+
+  if (!empty($id)) {
+    $site        = entity_load_single($entity_type, $id);
+  } else {
+    // Default site from control panel to support anonymous checkout.
+    $id          = variable_get('xdruple_commerce_default_warehouse', null);
+    $site        = entity_load_single($entity_type, $id);
+  }
 
   try {
-    if ($site_address = $site->address) {
+    if (!empty($site) && $site_address = $site->address) {
       $countries = country_get_list();
       $country_match = array_keys($countries, $site_address['country']);
       if (count($country_match) === 1) {
