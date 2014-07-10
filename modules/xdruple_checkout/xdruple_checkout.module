@@ -1,9 +1,5 @@
 <?php
 
-// TODO: Refactor. Move form_alter here.
-
-// TODO: Refactor. Move checkout_complete here.
-
 /**
  * Implements hook_cpanel_alter()
  */

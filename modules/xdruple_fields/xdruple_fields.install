@@ -1191,17 +1191,17 @@ function xdruple_fields_install() {
             'existing_widget' => 'options_select',
             'delete_references' => 0,
             'existing_widget_settings' => array(
-              'module' => 'options',
-              'type' => 'options_select',
+              'module'            => 'options',
+              'type'              => 'options_select',
               'multiple_entities' => true,
-              'cardinality' => 1
+              'cardinality'       => 1
             ),
           ),
           'match_operator' => 'CONTAINS',
         ),
       );
       $instance['settings'] = array(
-        'behaviors' => array(
+        'behaviors'          => array(
           'prepopulate' => array(
             'status' => 0,
           ),
@@ -1210,14 +1210,14 @@ function xdruple_fields_install() {
       );
       $instance['display'] = array(
         'default' => array(
-          'label' => 'hidden',
-          'type' => 'entityreference_entity_view',
-          'weight' => -10,
+          'label'    => 'hidden',
+          'type'     => 'entityreference_entity_view',
+          'weight'   => -10,
           'settings' => array(
             'view_mode' => '',
-            'link' => false,
+            'link'      => false,
           ),
-          'module' => 'entityreference',
+          'module'   => 'entityreference',
         ),
       );
       field_update_instance($instance);
@@ -1228,19 +1228,19 @@ function xdruple_fields_install() {
   // configured to use IEF and EFQ.
   if ($field = field_info_field('erp_xdrupleusercontactcontact')) {
     $field['settings'] = array(
-      'target_type' => 'xtuple_xdruplecommercecontact',
-      'handler' => 'efq_views',
+      'target_type'      => 'xtuple_xdruplecommercecontact',
+      'handler'          => 'efq_views',
       'handler_settings' => array(
         'view' => array(
-          'view_name' => 'xd_contact_list',
+          'view_name'    => 'xd_contact_list',
           'display_name' => 'entityreference_efq_views_1',
-          'args' => array(),
+          'args'         => array(),
         ),
         'behaviors' => array(
           'views-select-list' => array(
             'status' => 0,
           ),
-          'reference-nkey' => array(
+          'reference-nkey'    => array(
             'status' => 0,
           ),
         ),
@@ -1253,29 +1253,29 @@ function xdruple_fields_install() {
     if ($instance) {
       $instance['label'] = 'Associated Contact';
       $instance['widget'] = array(
-        'weight' => -10,
-        'type' => 'inline_entity_form_single',
-        'module' => 'inline_entity_form',
-        'active' => 1,
+        'weight'   => -10,
+        'type'     => 'inline_entity_form_single',
+        'module'   => 'inline_entity_form',
+        'active'   => 1,
         'settings' => array(
-          'fields' => array(),
-          'type_settings' => array(
-            'allow_existing' => true,
-            'match_operator' => 'CONTAINS',
-            'existing_widget' => 'options_select',
-            'delete_references' => 0,
+          'fields'         => array(),
+          'type_settings'  => array(
+            'allow_existing'           => true,
+            'match_operator'           => 'CONTAINS',
+            'existing_widget'          => 'options_select',
+            'delete_references'        => 0,
             'existing_widget_settings' => array(
-              'module' => 'options',
-              'type' => 'options_select',
+              'module'            => 'options',
+              'type'              => 'options_select',
               'multiple_entities' => true,
-              'cardinality' => 1
+              'cardinality'       => 1
             ),
           ),
           'match_operator' => 'CONTAINS',
         ),
       );
       $instance['settings'] = array(
-        'behaviors' => array(
+        'behaviors'          => array(
           'prepopulate' => array(
             'status' => 0,
           ),
@@ -1284,12 +1284,12 @@ function xdruple_fields_install() {
       );
       $instance['display'] = array(
         'default' => array(
-          'label' => 'hidden',
-          'type' => 'entityreference_entity_view',
-          'weight' => -10,
+          'label'    => 'hidden',
+          'type'     => 'entityreference_entity_view',
+          'weight'   => -10,
           'settings' => array(
             'view_mode' => '',
-            'link' => false,
+            'link'      => false,
           ),
           'module' => 'entityreference',
         ),
@@ -1303,17 +1303,17 @@ function xdruple_fields_install() {
   // @See: xdruple_fields_rescued_create_child_fields()
   if (!field_info_field('xt_url_image_field')) {
     $field = array(
-      'field_name' => 'xt_url_image_field',
-      'type' => 'image',
+      'field_name'  => 'xt_url_image_field',
+      'type'        => 'image',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      'module' => 'image',
-      'storage' => array(
-        'type' => 'xdfields_rest_storage',
+      'module'      => 'image',
+      'storage'     => array(
+        'type'     => 'xdfields_rest_storage',
         'settings' => array(),
-        'module' => 'xdfields_rest_storage',
-        'active' => 1,
+        'module'   => 'xdfields_rest_storage',
+        'active'   => 1,
       ),
-      'settings' => array(
+      'settings'    => array(
         'default_image' => 0,
       ),
     );
@@ -1326,15 +1326,35 @@ function xdruple_fields_install() {
   // @See: xdruple_fields_rescued_create_child_fields()
   if (!field_info_field('xt_url_file_field')) {
     $field = array(
-      'field_name' => 'xt_url_file_field',
-      'type' => 'file',
+      'field_name'  => 'xt_url_file_field',
+      'type'        => 'file',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      'module' => 'file',
-      'storage' => array(
-        'type' => 'xdfields_rest_storage',
+      'module'      => 'file',
+      'storage'     => array(
+        'type'     => 'xdfields_rest_storage',
         'settings' => array(),
-        'module' => 'xdfields_rest_storage',
-        'active' => 1,
+        'module'   => 'xdfields_rest_storage',
+        'active'   => 1,
+      ),
+    );
+
+    field_create_field($field);
+  }
+
+  // Add xt_url_link_field. Instances are created through
+  // hook_rescued_create_child_fields().
+  // @See: xdruple_fields_rescued_create_child_fields()
+  if (!field_info_field('xt_url_link_field')) {
+    $field = array(
+      'field_name'  => 'xt_url_link_field',
+      'type'        => 'link_field',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'module'      => 'link',
+      'storage'     => array(
+        'type'     => 'xdfields_rest_storage',
+        'settings' => array(),
+        'module'   => 'xdfields_rest_storage',
+        'active'   => 1,
       ),
     );
 
@@ -1351,17 +1371,17 @@ function xdruple_fields_update_7101(&$sandbox) {
   // @See: xdruple_fields_rescued_create_child_fields()
   if (!field_info_field('xt_url_image_field')) {
     $field = array(
-      'field_name' => 'xt_url_image_field',
-      'type' => 'image',
+      'field_name'  => 'xt_url_image_field',
+      'type'        => 'image',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      'module' => 'image',
-      'storage' => array(
-        'type' => 'xdfields_rest_storage',
+      'module'      => 'image',
+      'storage'     => array(
+        'type'     => 'xdfields_rest_storage',
         'settings' => array(),
-        'module' => 'xdfields_rest_storage',
-        'active' => 1,
+        'module'   => 'xdfields_rest_storage',
+        'active'   => 1,
       ),
-      'settings' => array(
+      'settings'    => array(
         'default_image' => 0,
       ),
     );
@@ -1374,15 +1394,40 @@ function xdruple_fields_update_7101(&$sandbox) {
   // @See: xdruple_fields_rescued_create_child_fields()
   if (!field_info_field('xt_url_file_field')) {
     $field = array(
-      'field_name' => 'xt_url_file_field',
-      'type' => 'file',
+      'field_name'  => 'xt_url_file_field',
+      'type'        => 'file',
       'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      'module' => 'file',
-      'storage' => array(
-        'type' => 'xdfields_rest_storage',
+      'module'      => 'file',
+      'storage'     => array(
+        'type'     => 'xdfields_rest_storage',
         'settings' => array(),
-        'module' => 'xdfields_rest_storage',
-        'active' => 1,
+        'module'   => 'xdfields_rest_storage',
+        'active'   => 1,
+      ),
+    );
+
+    field_create_field($field);
+  }
+}
+
+/**
+ * Ensure new fields are installed.
+ */
+function xdruple_fields_update_7102(&$sandbox) {
+  // Add xt_url_link_field. Instances are created through
+  // hook_rescued_create_child_fields().
+  // @See: xdruple_fields_rescued_create_child_fields()
+  if (!field_info_field('xt_url_link_field')) {
+    $field = array(
+      'field_name'  => 'xt_url_link_field',
+      'type'        => 'link_field',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'module'      => 'link',
+      'storage'     => array(
+        'type'     => 'xdfields_rest_storage',
+        'settings' => array(),
+        'module'   => 'xdfields_rest_storage',
+        'active'   => 1,
       ),
     );
 

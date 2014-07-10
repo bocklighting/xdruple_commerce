@@ -171,27 +171,27 @@ function xdruple_fields_rescued_create_child_fields($name, $resource, $property,
       $instance = field_info_instance('commerce_product', $field_name, 'product');
       if (is_null($instance)) {
         $instance = array(
-          'field_name' => $field_name,
+          'field_name'  => $field_name,
           'entity_type' => 'commerce_product',
-          'bundle' => 'product',
-          'label' => 'Product Images',
+          'bundle'      => 'product',
+          'label'       => 'Product Images',
         );
-        $instance['widget']['weight'] = $weight;
+        $instance['widget']['weight']             = $weight;
         $instance['display']['default']['weight'] = $weight;
         field_create_instance($instance);
       }
 
       // Add 'xtuple_xdruplecommerceproduct' instance.
       $entity_type = $name . '_' . strtolower($resource);
-      $instance = field_info_instance($entity_type, $field_name, $entity_type);
+      $instance    = field_info_instance($entity_type, $field_name, $entity_type);
       if (is_null($instance)) {
         $instance = array(
-          'field_name' => $field_name,
+          'field_name'  => $field_name,
           'entity_type' => $name . '_' . strtolower($resource),
-          'bundle' => $name . '_' . strtolower($resource),
-          'label' => 'Product Images',
+          'bundle'      => $name . '_' . strtolower($resource),
+          'label'       => 'Product Images',
         );
-        $instance['widget']['weight'] = $weight;
+        $instance['widget']['weight']             = $weight;
         $instance['display']['default']['weight'] = $weight;
         field_create_instance($instance);
       }
@@ -206,33 +206,90 @@ function xdruple_fields_rescued_create_child_fields($name, $resource, $property,
       $instance = field_info_instance('commerce_product', $field_name, 'product');
       if (is_null($instance)) {
         $instance = array(
-          'field_name' => $field_name,
+          'field_name'  => $field_name,
           'entity_type' => 'commerce_product',
-          'bundle' => 'product',
-          'label' => 'Product Files',
+          'bundle'      => 'product',
+          'label'       => 'Product Files',
         );
-        $instance['settings']['file_extensions'] = 'txt pdf';
-        $instance['widget']['weight'] = $weight;
+        $instance['settings']['file_extensions']  = 'txt pdf';
+        $instance['widget']['weight']             = $weight;
         $instance['display']['default']['weight'] = $weight;
         field_create_instance($instance);
       }
 
       // Add 'xtuple_xdruplecommerceproduct' instance.
       $entity_type = $name . '_' . strtolower($resource);
-      $instance = field_info_instance($entity_type, $field_name, $entity_type);
+      $instance    = field_info_instance($entity_type, $field_name, $entity_type);
       if (is_null($instance)) {
         $instance = array(
-          'field_name' => $field_name,
+          'field_name'  => $field_name,
           'entity_type' => $name . '_' . strtolower($resource),
-          'bundle' => $name . '_' . strtolower($resource),
-          'label' => 'Product Files',
+          'bundle'      => $name . '_' . strtolower($resource),
+          'label'       => 'Product Files',
         );
-        $instance['settings']['file_extensions'] = 'txt pdf';
-        $instance['widget']['weight'] = $weight;
+        $instance['settings']['file_extensions']  = 'txt pdf';
+        $instance['widget']['weight']             = $weight;
         $instance['display']['default']['weight'] = $weight;
         field_create_instance($instance);
       }
     }
+
+    // Add url link field instances.
+    $field_name = 'xt_url_link_field';
+
+    // This field should get created in xdruple_fields.install.
+    if (field_info_field($field_name)) {
+      // Add 'commerce_product' instance.
+      $instance = field_info_instance('commerce_product', $field_name, 'product');
+      if (is_null($instance)) {
+        $instance = array(
+          'field_name'  => $field_name,
+          'entity_type' => 'commerce_product',
+          'bundle'      => 'product',
+          'label'       => 'Additional References',
+        );
+        $instance['widget']['type']                   = 'link_field';
+        $instance['widget']['weight']                 = $weight;
+        $instance['settings']['validate_url']         = 1;
+        $instance['settings']['title']                = 'optional';
+        $instance['settings']['attributes']['target'] = '_blank';
+        $instance['display']['default']['weight']     = $weight;
+        field_create_instance($instance);
+      }
+
+      // Add 'xtuple_xdruplecommerceproduct' instance.
+      $entity_type = $name . '_' . strtolower($resource);
+      $instance    = field_info_instance($entity_type, $field_name, $entity_type);
+      if (is_null($instance)) {
+        $instance = array(
+          'field_name'  => $field_name,
+          'entity_type' => $name . '_' . strtolower($resource),
+          'bundle'      => $name . '_' . strtolower($resource),
+          'label'       => 'Additional References',
+        );
+        $instance['widget']['type']                   = 'link_field';
+        $instance['widget']['weight']                 = $weight;
+        $instance['settings']['validate_url']         = 1;
+        $instance['settings']['title']                = 'optional';
+        $instance['settings']['attributes']['target'] = '_blank';
+        $instance['display']['default']['weight']     = $weight;
+        field_create_instance($instance);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_widget_link_field_form_alter().
+ */
+function xdruple_fields_field_widget_link_field_form_alter(&$element, &$form_state, $context) {
+  if ($element['#field_name'] === 'xt_url_link_field') {
+    // Expose the attributes array in the widget so we can pass through the
+    // url uuid on form submit and link it back to xTuple on updates.
+    $element['attributes'] = array(
+      '#type' => 'value',
+      '#value' => !empty($context['items'][$context['delta']]['attributes']) ? $context['items'][$context['delta']]['attributes'] : array(),
+    );
   }
 }
 
@@ -254,17 +311,31 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
   if (isset($entity_info['discovery-client']) && $entity_info['discovery-client'] === 'xtuple') {
 
     // Get all the fields attached to this entity.
-    $bundle = $entity_type === 'commerce_product' ? 'product' : $entity_type;
+    $bundle    = $entity_type === 'commerce_product' ? 'product' : $entity_type;
     $instances = field_info_instances($entity_type, $bundle);
+
+    $handled_file_extentions = array();
+
     foreach ($instances as $field_name => $instance) {
-      if ($field_name !== 'xt_url_image_field' && $field_name !== 'xt_url_file_field') {
+      if ($field_name !== 'xt_url_image_field' && $field_name !== 'xt_url_file_field' && $field_name !== 'xt_url_link_field') {
+        continue;
+      }
+
+      // Find file extensions supported by image and file fields.
+      if (isset($instance['settings']['file_extensions'])) {
+        $handled_file_extentions += explode(' ', $instance['settings']['file_extensions']);
+      }
+    }
+
+    foreach ($instances as $field_name => $instance) {
+      if ($field_name !== 'xt_url_image_field' && $field_name !== 'xt_url_file_field' && $field_name !== 'xt_url_link_field') {
         continue;
       }
 
       $field_info = field_info_field($field_name);
-      $type = $field_info['type'];
+      $type       = $field_info['type'];
 
-      $resource = $entity_info['resource'];
+      $resource          = $entity_info['resource'];
       $entity_properties = $entity_info['json-schema'][$resource]['properties'];
 
       // Check the entity for 'urls' property.
@@ -279,31 +350,38 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
             // saved urls where $url['url'] is just a uuid, not an array.
             if (is_array($url['url'])) {
               $remote_url = parse_url($url['url']['path']);
-              $parts = explode('/', $remote_url['path']);
-              $file_name = array_pop($parts);
+              $parts      = isset($remote_url['path']) ? explode('/', $remote_url['path']) : array();
+              $file_name  = array_pop($parts);
               $file_parts = explode('.', $file_name);
-              $file_type = array_pop($file_parts);
+              $file_type  = array_pop($file_parts);
 
               // Handle images with the image field and pdfs with the file field.
-              $allowed_ext = explode(' ', $instance['settings']['file_extensions']);
-              if (!in_array($file_type, $allowed_ext)) {
-                continue;
+              if (isset($instance['settings']['file_extensions'])) {
+                $allowed_ext = explode(' ', $instance['settings']['file_extensions']);
+                if (!in_array($file_type, $allowed_ext)) {
+                  continue;
+                }
+
+                $field_type_urls[$url_key] = $url;
+              } else {
+                if (in_array($file_type, $handled_file_extentions)) {
+                  continue;
+                }
+
+                $field_type_urls[$url_key] = $url;
               }
 
-              $field_type_urls[$url_key] = $url;
+
             } else {
               // Set values for half saved urls so they don't get unset on the entity.
               $field_type_urls[$url_key] = $url;
-              $associated_urls[] = $url['uuid'];
+              $associated_urls[]         = $url['uuid'];
             }
           }
         }
 
         // This url is handled by this field type.
-        foreach ($entity->{$field_name}[LANGUAGE_NONE] as $file_info) {
-          // Get the file info.
-          $file = file_load($file_info['fid']);
-
+        foreach ($entity->{$field_name}[LANGUAGE_NONE] as $field_delta => $field_data) {
           $url_url_uuids = array();
           foreach ($field_type_urls as $url_key => $url) {
             // Because filefield_paths_entity_update() calls field_attach_update(),
@@ -316,52 +394,82 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
             }
           }
 
-          if ($matching_uuid = array_search($file->uuid, $url_url_uuids)) {
+          if ($type === 'link_field') {
+            $field_attributes = unserialize($field_data['attributes']);
+            $field_uuid       = $field_attributes['uuid'];
+            $field_title      = $field_data['title'];
+          } else {
+            // Get the file info.
+            $file        = file_load($field_data['fid']);
+            $field_uuid  = $file->uuid;
+            $field_title = !empty($file->title) ? $file->title : $file->filename;
+          }
+
+          if ($matching_uuid = array_search($field_uuid, $url_url_uuids)) {
+            // Update the url link to match any changes.
+            if ($type === 'link_field') {
+              // Find the correct $entity->urls to update.
+              foreach ($field_type_urls as $url_key => $url) {
+                if ($url['url']['uuid'] === $field_uuid) {
+                  $update_url       = entity_load_single('xtuple_url', $field_uuid);
+                  $update_url->name = $field_title;
+                  $update_url->path = $field_data['url'];
+                  entity_save('xtuple_url', $update_url);
+                }
+              }
+            }
+
+            // File and image fields don't allow you to change them, just remove it, which we
+            // handle below.
 
             $associated_urls[] = $matching_uuid;
-
-            // TODO: Update any changes? Currently, file and image fields
-            // don't allow you to change a file, just remove it, which we
-            // handle below.
           } else {
             // The filefield_paths module can change a uploaded file's path.
             // It does it after this is called. Figure out what the path will
             // be changed to and save that back to xTuple.
-            if (module_exists('filefield_paths')) {
+            if (module_exists('filefield_paths') && $type !== 'link_field') {
               $filefield_data = array(
-                'file' => $file,
+                'file'       => $file,
                 $entity_type => $entity,
               );
 
-              $filefield_path_value = $instance['settings']['filefield_paths']['file_path']['value'];
+              $filefield_path_value    = $instance['settings']['filefield_paths']['file_path']['value'];
               $filefield_path_settings = $instance['settings']['filefield_paths']['file_path']['options'];
-              $filefield_path = filefield_paths_process_string($filefield_path_value, $filefield_data, $filefield_path_settings);
+              $filefield_path          = filefield_paths_process_string($filefield_path_value, $filefield_data, $filefield_path_settings);
 
-              $filefield_name_value = $instance['settings']['filefield_paths']['file_name']['value'];
+              $filefield_name_value    = $instance['settings']['filefield_paths']['file_name']['value'];
               $filefield_name_settings = $instance['settings']['filefield_paths']['file_name']['options'];
-              $filefield_name = filefield_paths_process_string($filefield_name_value, $filefield_data, $filefield_name_settings);
+              $filefield_name          = filefield_paths_process_string($filefield_name_value, $filefield_data, $filefield_name_settings);
 
               $upload_path = file_create_url($field_info['settings']['uri_scheme'] . '://' . $filefield_path . '/' . $filefield_name);
-            } else {
+            } elseif ($type !== 'link_field') {
               $upload_path = file_create_url($file->uri);
+            } else {
+              $upload_path = $field_data['url'];
             }
 
             $url_values = array(
-              'uuid' => $file->uuid,
-              'name' => !empty($file->title) ? $file->title : $file->filename,
+              'uuid' => $field_uuid,
+              'name' => $field_title,
               'path' => $upload_path,
             );
             $new_url = entity_create('xtuple_url', $url_values);
             entity_save('xtuple_url', $new_url);
 
-            // The API may return a different UUID. Update the Drupal file to match.
-            $file->uuid = $new_url->uuid;
-            $file = file_save($file);
+            if ($type === 'link_field') {
+              // The API may return a different UUID. Update the 'xt_url_link_field' to match.
+              // This also prevents filefield_paths_entity_update() from duplicating the new field on the second call.
+              $entity->{$field_name}[LANGUAGE_NONE][$field_delta]['attributes'] = serialize(array('uuid' => $new_url->uuid));
+            } else {
+              // The API may return a different UUID. Update the Drupal file to match.
+              $file->uuid = $new_url->uuid;
+              $file       = file_save($file);
+            }
 
             $new_uuid = xdruple_guidv4();
             $entity->urls[] = array(
-              'uuid' => $new_uuid,
-              'url' => $new_url->uuid,
+              'uuid'    => $new_uuid,
+              'url'     => $new_url->uuid,
               'purpose' => 'S'
             );
 
@@ -370,7 +478,7 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
             // Get the key of the last value.
             $new_key = key($entity->urls);
 
-            $associated_urls[] = $new_uuid;
+            $associated_urls[]         = $new_uuid;
             $field_type_urls[$new_key] = $entity->urls[$new_key];
 
             // Reset the array pointer back to the start.
@@ -394,8 +502,8 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
 /**
  * Implements hook_field_storage_pre_load().
  *
- * Side loads images and files from a xTuple entity's 'urls' property into
- * the 'xt_url_image_field' and 'xt_url_file_field' respective fields.
+ * Side loads images, files and urls from a xTuple entity's 'urls' property into
+ * the 'xt_url_image_field', 'xt_url_file_field' and 'xt_url_link_field' respective fields.
  */
 function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$skip_fields, $options) {
   // Check $entity_type and only act on ones we support.
@@ -404,27 +512,31 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
   if (isset($entity_info['discovery-client']) && $entity_info['discovery-client'] === 'xtuple') {
 
     // Get all the fields attached to this entity.
-    $bundle = $entity_type === 'commerce_product' ? 'product' : $entity_type;
-    $instances = field_info_instances($entity_type, $bundle);
+    $bundle             = $entity_type === 'commerce_product' ? 'product' : $entity_type;
+    $instances          = field_info_instances($entity_type, $bundle);
+    $url_uuid_handled   = array();
+    $url_uuid_delta_map = array();
+
     foreach ($instances as $field_name => $instance) {
-      if ($field_name !== 'xt_url_image_field' && $field_name !== 'xt_url_file_field') {
+      if ($field_name !== 'xt_url_image_field' && $field_name !== 'xt_url_file_field' && $field_name !== 'xt_url_link_field') {
         continue;
       }
 
-      $field_info = field_info_field($field_name);
-      $type = $field_info['type'];
-
-      $resource = $entity_info['resource'];
+      $field_info        = field_info_field($field_name);
+      $type              = $field_info['type'];
+      $resource          = $entity_info['resource'];
       $entity_properties = $entity_info['json-schema'][$resource]['properties'];
 
       // Check the entity for 'urls' property.
       if (array_key_exists('urls', $entity_properties)) {
         foreach ($entities as $entity_id => $entity) {
           $image_delta = 0;
-          $file_delta = 0;
+          $file_delta  = 0;
+          $url_delta   = 0;
+
           foreach ($entity->urls as $url) {
             // Check file_associations for existing uuid.
-            $query = new EntityFieldQuery();
+            $query  = new EntityFieldQuery();
             $result = $query->entityCondition('entity_type', 'file')
               ->propertyCondition('uuid', $url['url']['uuid'])
               ->execute();
@@ -432,32 +544,50 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
             $file_exists = false;
 
             $remote_url = parse_url($url['url']['path']);
-            $parts = explode('/', $remote_url['path']);
-            $file_name = array_pop($parts);
+            $parts      = isset($remote_url['path']) ? explode('/', $remote_url['path']) : array();
+            $file_name  = array_pop($parts);
             $file_parts = explode('.', $file_name);
-            $file_type = array_pop($file_parts);
+            $file_type  = array_pop($file_parts);
+
+            // Add all urls as URL fields, then remove and file and images from the URL field below.
+            if ($type === 'link_field') {
+              // Associate the url with this product entity.
+              $entity->xt_url_link_field[LANGUAGE_NONE][$url_delta] = array(
+                'url'      => $url['url']['path'],
+                'title'      => $url['url']['name'],
+                'attributes' => serialize(array('uuid' => $url['url']['uuid'])),
+              );
+
+              $url_uuid_delta_map[$url['url']['uuid']] = $url_delta;
+
+              $url_delta++;
+            }
 
             // Handle images with the image field and pdfs with the file field.
-            $allowed_ext = explode(' ', $instance['settings']['file_extensions']);
+            if (isset($instance['settings']['file_extensions'])) {
+              $allowed_ext = explode(' ', $instance['settings']['file_extensions']);
+            } else {
+              $allowed_ext = array();
+            }
             if (!in_array($file_type, $allowed_ext)) {
+              // This is a URL field.
               continue;
             }
 
             if (count($result) === 0) {
               // If uuid doesn't exist, fetch the file from the remote URL.
-              $parts_path = implode('/', $parts);
-              $path = 'public://xtuple' . $parts_path;
+              $parts_path  = implode('/', $parts);
+              $path        = 'public://xtuple' . $parts_path;
               $remote_file = file_get_contents($url['url']['path']);
               file_prepare_directory($path, FILE_CREATE_DIRECTORY);
               $destination = $path . '/' . $file_name;
 
               // Insert the file into Drupal's file system.
-              $file = file_save_data($remote_file, $destination, FILE_EXISTS_RENAME);
-              $info = image_get_info($file->uri);
+              $file        = file_save_data($remote_file, $destination, FILE_EXISTS_RENAME);
+              $info        = image_get_info($file->uri);
             } else {
-              $file = file_load(key($result['file']));
-              $info = image_get_info($file->uri);
-
+              $file        = file_load(key($result['file']));
+              $info        = image_get_info($file->uri);
               $file_exists = true;
             }
 
@@ -470,19 +600,22 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
                   $file->uuid  = $url['url']['uuid'];
                   $file->title = $url['url']['name'];
                   $file->alt   = $url['url']['name'];
-                  $file = file_save($file);
+                  $file        = file_save($file);
                   file_usage_add($file, 'file', $entity_type, $entity_id);
                 }
 
                 if (!empty($file)) {
                   // Associate that file with this product entity.
                   $entity->xt_url_image_field[LANGUAGE_NONE][$image_delta] = array(
-                    'fid' => $file->fid,
-                    'alt' => $url['url']['name'],
-                    'title' => $url['url']['name'],
-                    'width' => $info['width'],
+                    'fid'    => $file->fid,
+                    'alt'    => $url['url']['name'],
+                    'title'  => $url['url']['name'],
+                    'width'  => $info['width'],
                     'height' => $info['height'],
                   );
+
+                  // Add to handled array to remove from 'xt_url_link_field'.
+                  $url_uuid_handled[] = $url['url']['uuid'];
 
                   $image_delta++;
                 }
@@ -502,10 +635,13 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
                 if (!empty($file)) {
                   // Associate that file with this product entity.
                   $entity->xt_url_file_field[LANGUAGE_NONE][$file_delta] = array(
-                    'fid' => $file->fid,
-                    'alt' => $url['url']['name'],
+                    'fid'   => $file->fid,
+                    'alt'   => $url['url']['name'],
                     'title' => $url['url']['name'],
                   );
+
+                  // Add to handled array to remove from 'xt_url_link_field'.
+                  $url_uuid_handled[] = $url['url']['uuid'];
 
                   $file_delta++;
                 }
@@ -516,6 +652,21 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
       }
       // Add this field to $skip_fields.
       $skip_fields[$field_info['id']] = $field_info;
+    }
+
+    foreach ($entities as $entity_id => $entity) {
+      if (isset($entity->xt_url_link_field[LANGUAGE_NONE]) && count($entity->xt_url_link_field[LANGUAGE_NONE]) > 0) {
+        // Unset the URL fields handled by the image or file field.
+        foreach($url_uuid_handled as $handled_uuid) {
+          if (array_key_exists($handled_uuid, $url_uuid_delta_map)) {
+            $mapped_url_delta = $url_uuid_delta_map[$handled_uuid];
+            unset($entity->xt_url_link_field[LANGUAGE_NONE][$mapped_url_delta]);
+          }
+        }
+
+        // Resort xt_url_link_field so keys are sequential.
+        $entity->xt_url_link_field[LANGUAGE_NONE] = array_values($entity->xt_url_link_field[LANGUAGE_NONE]);
+      }
     }
   }
 }

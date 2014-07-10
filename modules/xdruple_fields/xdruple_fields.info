@@ -9,3 +9,4 @@ dependencies[] = date_popup
 dependencies[] = field_permissions
 dependencies[] = entityreference_prepopulate
 dependencies[] = extensions
+dependencies[] = link
