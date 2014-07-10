@@ -211,9 +211,10 @@ function xdruple_fields_rescued_create_child_fields($name, $resource, $property,
           'bundle'      => 'product',
           'label'       => 'Product Files',
         );
-        $instance['settings']['file_extensions']  = 'txt pdf';
-        $instance['widget']['weight']             = $weight;
-        $instance['display']['default']['weight'] = $weight;
+        $instance['settings']['file_extensions']    = 'txt pdf';
+        $instance['settings']['description_field']  = 1;
+        $instance['widget']['weight']               = $weight;
+        $instance['display']['default']['weight']   = $weight;
         field_create_instance($instance);
       }
 
@@ -227,9 +228,10 @@ function xdruple_fields_rescued_create_child_fields($name, $resource, $property,
           'bundle'      => $name . '_' . strtolower($resource),
           'label'       => 'Product Files',
         );
-        $instance['settings']['file_extensions']  = 'txt pdf';
-        $instance['widget']['weight']             = $weight;
-        $instance['display']['default']['weight'] = $weight;
+        $instance['settings']['file_extensions']    = 'txt pdf';
+        $instance['settings']['description_field']  = 1;
+        $instance['widget']['weight']               = $weight;
+        $instance['display']['default']['weight']   = $weight;
         field_create_instance($instance);
       }
     }
@@ -370,8 +372,6 @@ function xdruple_fields_field_storage_pre_update($entity_type, $entity, &$skip_f
 
                 $field_type_urls[$url_key] = $url;
               }
-
-
             } else {
               // Set values for half saved urls so they don't get unset on the entity.
               $field_type_urls[$url_key] = $url;
@@ -625,19 +625,21 @@ function xdruple_fields_field_storage_pre_load($entity_type, $entities, $age, &$
               if (!$info) {
                 if (!$file_exists) {
                   // Set the UUID to match xTuples.
-                  $file->uuid  = $url['url']['uuid'];
-                  $file->title = $url['url']['name'];
-                  $file->alt   = $url['url']['name'];
-                  $file        = file_save($file);
+                  $file->uuid        = $url['url']['uuid'];
+                  $file->title       = $url['url']['name'];
+                  $file->alt         = $url['url']['name'];
+                  $file->description = $url['url']['name'];
+                  $file              = file_save($file);
                   file_usage_add($file, 'file', $entity_type, $entity_id);
                 }
 
                 if (!empty($file)) {
                   // Associate that file with this product entity.
                   $entity->xt_url_file_field[LANGUAGE_NONE][$file_delta] = array(
-                    'fid'   => $file->fid,
-                    'alt'   => $url['url']['name'],
-                    'title' => $url['url']['name'],
+                    'fid'         => $file->fid,
+                    'alt'         => $url['url']['name'],
+                    'title'       => $url['url']['name'],
+                    'description' => $url['url']['name'],
                   );
 
                   // Add to handled array to remove from 'xt_url_link_field'.
