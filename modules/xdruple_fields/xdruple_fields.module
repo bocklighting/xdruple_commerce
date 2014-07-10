@@ -211,9 +211,10 @@ function xdruple_fields_rescued_create_child_fields($name, $resource, $property,
           'bundle'      => 'product',
           'label'       => 'Product Files',
         );
-        $instance['settings']['file_extensions']  = 'txt pdf';
-        $instance['widget']['weight']             = $weight;
-        $instance['display']['default']['weight'] = $weight;
+        $instance['settings']['file_extensions']    = 'txt pdf';
+        $instance['settings']['description_field']  = 1;
+        $instance['widget']['weight']               = $weight;
+        $instance['display']['default']['weight']   = $weight;
         field_create_instance($instance);
       }
 
@@ -227,9 +228,10 @@ function xdruple_fields_rescued_create_child_fields($name, $resource, $property,
           'bundle'      => $name . '_' . strtolower($resource),
           'label'       => 'Product Files',
         );
-        $instance['settings']['file_extensions']  = 'txt pdf';
-        $instance['widget']['weight']             = $weight;
-        $instance['display']['default']['weight'] = $weight;
+        $instance['settings']['file_extensions']    = 'txt pdf';
+        $instance['settings']['description_field']  = 1;
+        $instance['widget']['weight']               = $weight;
+        $instance['display']['default']['weight']   = $weight;
         field_create_instance($instance);
       }
     }
