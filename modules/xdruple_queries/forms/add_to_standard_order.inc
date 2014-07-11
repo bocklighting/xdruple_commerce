@@ -40,7 +40,7 @@ function xdruple_queries_add_to_standard_order_form_validate($form, &$form_state
  * Form submission: xdruple_queries_add_to_standard_order_form
  */
 function xdruple_queries_add_to_standard_order_form_submit($form, &$form_state) {
-  $entity_type = 'xtuple_xdstdorditem';
+  $entity_type = 'xtuple_xdstdordproduct';
 
   try {
     $values         = $form_state['values'];

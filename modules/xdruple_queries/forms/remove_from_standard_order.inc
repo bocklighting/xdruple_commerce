@@ -40,17 +40,17 @@ function xdruple_queries_remove_from_standard_order_form_validate($form, &$form_
  * Form submission: xdruple_queries_remove_from_standard_order_form
  */
 function xdruple_queries_remove_from_standard_order_form_submit($form, &$form_state) {
-  $entity_type = 'xtuple_xdstdorditem';
+  $entity_type = 'xtuple_xdstdordproduct';
 
   try {
-    $values         = $form_state['values'];
-    $std_order_item = entity_load($entity_type, FALSE, array(
+    $values            = $form_state['values'];
+    $std_order_product = entity_load($entity_type, FALSE, array(
       'product'  => $values['product_id'],
       'customer' => $values['customer'],
       'shipTo'   => $values['ship_to'],
     ));
-    if (count($std_order_item) === 1) {
-      $uuid = key($std_order_item);
+    if (count($std_order_product) === 1) {
+      $uuid = key($std_order_product);
       entity_delete($entity_type, $uuid);
 
       // Invalidate cache.
