@@ -169,7 +169,7 @@ function xdruple_checkout_commerce_checkout_complete($order) {
   }
   // Load the full customer so we get Terms, Tax, etc. we normally do not expose.
   // TODO: Assuming 'xtuple' here. Get setting.
-  $cust_entityType = 'xtuple_xdruplecustomer';
+  $cust_entityType = 'xtuple_xdcustomer';
   $customer = entity_load($cust_entityType, array($cust_key));
   $customer = $customer[$cust_key];
 
