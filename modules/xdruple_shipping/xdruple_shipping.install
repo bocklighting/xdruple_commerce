@@ -14,7 +14,7 @@ function xdruple_shipping_install() {
       'module' => 'physical',
       'entity_types' => array(
         'commerce_product',
-        'xtuple_xdruplecommerceproduct',
+        'xtuple_xdproduct',
       ),
       'storage' => array(
         'type' => 'xdfields_rest_storage',
@@ -54,7 +54,7 @@ function xdruple_shipping_install() {
     }
 
     // Add 'xtuple_xdruplecommerceproduct' instance.
-    $entity_type = 'xtuple_xdruplecommerceproduct';
+    $entity_type = 'xtuple_xdproduct';
     $instance = field_info_instance($entity_type, $field_name, $entity_type);
     if (is_null($instance)) {
       $instance = array(
@@ -111,7 +111,7 @@ function xdruple_shipping_install() {
     }
 
     // Add 'xtuple_xdruplecommerceproduct' instance.
-    $entity_type = 'xtuple_xdruplecommerceproduct';
+    $entity_type = 'xtuple_xdproduct';
     $instance = field_info_instance($entity_type, $field_name, $entity_type);
     if (is_null($instance)) {
       $instance = array(
