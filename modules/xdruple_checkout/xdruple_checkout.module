@@ -584,15 +584,15 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
   $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#submit'] = array('');
   $form_billing['xd_customer'][LANGUAGE_NONE]['#submit'] = array('');
 
-  // Remove the 'erp_xdruplecommercecontactaddress' field from the form.
+  // Remove the 'erp_xdcontactaddress' field from the form.
   // There is a seperate address field on billing and shipping profiles
   // that we use for orders. This allows the user to set a different address
   // from the one associated with their contact.
-  if (isset($form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress'])) {
-    unset($form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress']);
+  if (isset($form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['form']['erp_xdcontactaddress'])) {
+    unset($form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['form']['erp_xdcontactaddress']);
   }
-  if (isset($form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress'])) {
-    unset($form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['erp_xdruplecommercecontactaddress']);
+  if (isset($form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['erp_xdcontactaddress'])) {
+    unset($form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['erp_xdcontactaddress']);
   }
 
   // Hide entity reference fields for anonymous users.
@@ -708,7 +708,7 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     unset($form_state['input']['customer_profile_shipping']['xd_ship_to_address']);
 
     // Get and display as read-only the Contact and Address from the selected ship to.
-    $shipto = entity_load_single('xtuple_xdruplecommerceshipto', $shipto_id);
+    $shipto = entity_load_single('xtuple_xdshipto', $shipto_id);
 
     // Show the user the selected Ship To's Contact and Address.
     $form_shipping['ship_to_contact_wrapper'] = array(

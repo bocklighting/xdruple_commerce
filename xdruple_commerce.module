@@ -35,7 +35,7 @@ function xdruple_commerce_entity_info_alter(&$info) {
     // Override 'api-list-callback' to support exclusive items.
     $info['xtuple_xdproduct']['api-list-callback'] = 'xdruple_commerce_api_customer_exclusive_item_list';
 
-    // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdruplecommerceproduct']
+    // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdproduct']
     $info['commerce_product'] = $info['xtuple_xdproduct'];
     $info['commerce_product']['entity keys']['bundle'] = 'type';
     $info['commerce_product']['entity keys']['name'] = 'product_id';
@@ -63,14 +63,14 @@ function xdruple_commerce_entity_operation_info_alter(&$operation_info) {
 
   // Add a handler for commerce_product.
   if (isset($operation_info['xtuple_xdproduct'])) {
-    // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdruplecommerceproduct']
+    // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdproduct']
     $operation_info['commerce_product'] = $operation_info['xtuple_xdproduct'];
   }
 
   // Add a handler for commerce_customer_profile.
-//   if (isset($operation_info['xtuple_xdruplecommercecustomerprofile'])) {
-//     // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdruplecommercecustomerprofile']
-//     $operation_info['commerce_customer_profile'] = $operation_info['xtuple_xdruplecommercecustomerprofile'];
+//   if (isset($operation_info['xtuple_xdcustomerrelationprofile'])) {
+//     // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdcustomerrelationprofile']
+//     $operation_info['commerce_customer_profile'] = $operation_info['xtuple_xdcustomerrelationprofile'];
 //   }
 }
 
@@ -626,7 +626,7 @@ function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langco
   }
 
   if ($entity_type === 'xtuple_xdshipto') {
-    $entity->content['erp_xdruplecommerceshiptocontact']['#formatter'] = 'entityreference_entity_view';
+    $entity->content['erp_xdshiptocontact']['#formatter'] = 'entityreference_entity_view';
     // Reset the weights to the correct order.
     $entity->content['number']['#weight'] = -4;
     $entity->content['name']['#weight'] = -3;
@@ -1287,7 +1287,7 @@ function xdruple_commerce_theme() {
 function xdruple_commerce_user_insert(&$edit, $account, $category) {
   $field_name = 'xd_contact_association';
 
-  // Get the XdrupleUserContact uuid from this user's Entity Reference and load that entity.
+  // Get the XdUserContact uuid from this user's Entity Reference and load that entity.
   if (isset($edit[$field_name][LANGUAGE_NONE][0]['target_id'])) {
     $field = field_info_field($field_name);
     $entity_type = $field['settings']['target_type'];
@@ -1309,7 +1309,7 @@ function xdruple_commerce_user_insert(&$edit, $account, $category) {
 function xdruple_commerce_user_update(&$edit, $account, $category) {
   $field_name = 'xd_contact_association';
 
-  // Get the XdrupleUserContact uuid from this user's Entity Reference and load that entity.
+  // Get the XdUserContact uuid from this user's Entity Reference and load that entity.
   if (isset($edit[$field_name][LANGUAGE_NONE][0]['target_id'])) {
     $field = field_info_field($field_name);
     $entity_type = $field['settings']['target_type'];
@@ -1356,7 +1356,7 @@ function xdruple_commerce_form_commerce_product_ui_product_form_alter(&$form, &$
     'changed',
     'data',
     'commerce_price',
-    'urls', // URLs are loaded through the 'erp_xdruplecommerceproducturls' field.
+    'urls', // URLs are loaded through the 'erp_xdproducturls' field.
   );
 
   // Get the xtuple form version from our controler and loop over our fields in that
@@ -1661,7 +1661,7 @@ function _xdruple_commerce_product_format($item) {
   return $format;
 }
 
-function xdruple_commerce_xtuple_xdruplecommerceshipto_view_alter(&$build, $entity_type) {
+function xdruple_commerce_xtuple_xdshipto_view_alter(&$build, $entity_type) {
   $build['#page'] = TRUE;
 
   if (!empty($build['isDefault']['#access'])) {
@@ -1682,7 +1682,7 @@ function xdruple_commerce_xtuple_xdruplecommerceshipto_view_alter(&$build, $enti
   }
 }
 
-function xdruple_commerce_xtuple_xdruplecommercecustomer_view_alter(&$build, $entity_type) {
+function xdruple_commerce_xtuple_xdcustomerrelation_view_alter(&$build, $entity_type) {
   $build['#page'] = TRUE;
   if (empty($build['erp_xdcustomerrelationbillingcontact'][0]['#markup'])) {
     $build['erp_xdcustomerrelationbillingcontact']['#access'] = FALSE;
@@ -1707,7 +1707,7 @@ function xdruple_commerce_xtuple_xdruplecommercecustomer_view_alter(&$build, $en
   }
 }
 
-function xdruple_commerce_xtuple_xdruplecommercecontact_view_alter(&$build, $entity_type) {
+function xdruple_commerce_xtuple_xdcontact_view_alter(&$build, $entity_type) {
   $build['#page'] = TRUE;
   $name           = array();
   if (!empty($build['firstName'][0]['#markup'])) {
@@ -1738,7 +1738,7 @@ function xdruple_commerce_xtuple_xdruplecommercecontact_view_alter(&$build, $ent
   }
 }
 
-function xdruple_commerce_xtuple_xdruplecommerceaddress_view_alter(&$build, $entity_type) {
+function xdruple_commerce_xtuple_xdaddress_view_alter(&$build, $entity_type) {
   $build['#page'] = TRUE;
   if (!empty($build['line1'][0]['#markup'])) {
     $build['line1']['#label_display'] = 'hidden';
@@ -1784,7 +1784,7 @@ function xdruple_commerce_xtuple_xdruplecommerceaddress_view_alter(&$build, $ent
   }
 }
 
-function xdruple_commerce_xtuple_xdrupleusercontact_view_alter(&$build, $entity_type) {
+function xdruple_commerce_xtuple_xdusercontact_view_alter(&$build, $entity_type) {
   $build['#page'] = TRUE;
 
   $build['uuid']['#access'] = FALSE;
@@ -2053,9 +2053,9 @@ function xdruple_commerce_checkout_purchased_items_pane_checkout_form($form, &$f
 }
 
 /**
- * Implements hook_form_FORM_ID_alter for entity_operations_operation_form_xtuple_xdruplecommerceshipto
+ * Implements hook_form_FORM_ID_alter for entity_operations_operation_form_xtuple_xdshipto
  */
-function xdruple_commerce_form_entity_operations_operation_form_xtuple_xdruplecommerceshipto_edit_alter(&$form, $form_state) {
+function xdruple_commerce_form_entity_operations_operation_form_xtuple_xdshipto_edit_alter(&$form, $form_state) {
   $form['actions']['#weight'] = 100;
 }
 

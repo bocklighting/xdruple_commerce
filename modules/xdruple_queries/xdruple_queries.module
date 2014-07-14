@@ -121,8 +121,8 @@ function xdruple_queries_rescued_register_clients_resources_alter(&$rescued_clie
   if (!in_array('XdCatalogRecentOrd', $rescued_clients_url_resources['xtuple'])) {
     $rescued_clients_url_resources['xtuple'][] = 'XdCatalogRecentOrd';
   }
-  if (!in_array('XdCatalogShipToStdOrd', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'XdCatalogShipToStdOrd';
+  if (!in_array('XdCatalogShiptoStdOrd', $rescued_clients_url_resources['xtuple'])) {
+    $rescued_clients_url_resources['xtuple'][] = 'XdCatalogShiptoStdOrd';
   }
   if (!in_array('XdStdOrdProduct', $rescued_clients_url_resources['xtuple'])) {
     $rescued_clients_url_resources['xtuple'][] = 'XdStdOrdProduct';
