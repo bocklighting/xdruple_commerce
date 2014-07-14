@@ -1432,9 +1432,9 @@ function xdruple_commerce_entity_query_alter(&$query) {
 }
 
 /**
- * XM.ItemSiteListItem.xdCommerceProductFetch POST query.
+ * XM.XdProduct.XdProductFetch POST query.
  *
- * Query the dispatch function XM.ItemSiteListItem.xdCommerceProductFetch to
+ * Query the dispatch function XM.XdProduct.XdProductFetch to
  * get a filtered list of items that a Customer is allowed to see.
  *
  * @param string $discovery_client The API client name. e.g. 'xtuple'
@@ -1481,7 +1481,7 @@ function xdruple_commerce_api_customer_exclusive_item_list($discovery_client = '
     $params = array('postBody' => $postBody);
 
     // POST the service request.
-    $result = $client->$resource->xdCommerceProductFetch($params);
+    $result = $client->$resource->xdProductFetch($params);
   }
 
   if ($data_only) {
