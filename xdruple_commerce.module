@@ -1357,6 +1357,7 @@ function xdruple_commerce_form_commerce_product_ui_product_form_alter(&$form, &$
     'data',
     'commerce_price',
     'urls', // URLs are loaded through the 'erp_xdproducturls' field.
+    'characteristics', // Characteristics are loaded through the 'erp_xdproductcharacteristics' field.
   );
 
   // Get the xtuple form version from our controler and loop over our fields in that
