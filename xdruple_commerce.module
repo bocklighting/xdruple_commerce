@@ -239,7 +239,7 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
 function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_state, $context) {
   $form_id = $form_state['build_info']['form_id'];
 
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdcatalogproduct') {
+  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdstdordproduct') {
     // Default this form to the customer and ship to in the user's session.
     if (isset($_SESSION['rescued']['customer'])) {
       $customer = $_SESSION['rescued']['customer'];
@@ -994,8 +994,8 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
       $form['create_xtuple_user_association']['#default_value'] = TRUE;
     }
 
-    if (isset($form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdcontactcontact'][LANGUAGE_NONE]['form']['primaryEmail'])) {
-      $contact_form = &$form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdcontactcontact'][LANGUAGE_NONE]['form'];
+    if (isset($form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdusercontactcontact'][LANGUAGE_NONE]['form']['primaryEmail'])) {
+      $contact_form = &$form['xd_contact_association'][LANGUAGE_NONE]['form']['erp_xdusercontactcontact'][LANGUAGE_NONE]['form'];
       $addr_form = &$contact_form['erp_xdcontactaddress'][LANGUAGE_NONE]['form'];
 
       if (!user_access('administer users')) {
