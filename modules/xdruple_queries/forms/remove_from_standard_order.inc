@@ -47,7 +47,7 @@ function xdruple_queries_remove_from_standard_order_form_submit($form, &$form_st
     $std_order_product = entity_load($entity_type, FALSE, array(
       'product'  => $values['product_id'],
       'customer' => $values['customer'],
-      'shipTo'   => $values['ship_to'],
+      'shipto'   => $values['ship_to'],
     ));
     if (count($std_order_product) === 1) {
       $uuid = key($std_order_product);

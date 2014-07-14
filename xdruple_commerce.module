@@ -249,8 +249,8 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
       $customer = null;
     }
     if (isset($_SESSION['rescued']['ship_to'])) {
-      $form['shipTo']['#default_value'] = $_SESSION['rescued']['ship_to'];
-      $form['shipTo']['#options'] = xdruple_fields_get_ship_to_list($customer);
+      $form['shipto']['#default_value'] = $_SESSION['rescued']['ship_to'];
+      $form['shipto']['#options'] = xdruple_fields_get_ship_to_list($customer);
     }
   }
 
@@ -586,7 +586,7 @@ function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$res
       'name' => true,
       'billingContact' => true,
       'correspondenceContact' => true,
-      'shipTo' => true,
+      'shiptos' => true,
     );
 
     // Limit the schema to only the fields we want to display.
@@ -650,7 +650,7 @@ function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langco
     unset($entity->content['isActive']);
     unset($entity->content['billingContact']);
     unset($entity->content['correspondenceContact']);
-    unset($entity->content['shipTo']);
+    unset($entity->content['shiptos']);
   }
 }
 

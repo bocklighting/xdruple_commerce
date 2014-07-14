@@ -188,8 +188,8 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     $ship_to_address = json_decode(json_encode($ship_to->address), FALSE);
 
     // Set multiple ship to email addresses to send order confirmation to.
-    if (isset($ship_to->shipToEmails[0]['email']) && !empty($ship_to->shipToEmails[0]['email'])) {
-      $ship_to_emails = $ship_to->shipToEmails[0]['email'];
+    if (isset($ship_to->shiptoEmails[0]['email']) && !empty($ship_to->shiptoEmails[0]['email'])) {
+      $ship_to_emails = $ship_to->shiptoEmails[0]['email'];
     }
 
     // Load the full customer ship to so we get ShipCharge, shipZone, etc. we normally do not expose.

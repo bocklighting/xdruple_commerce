@@ -191,7 +191,7 @@ function _xdruple_queries_load_orders($entity_type) {
 
     if (empty($cache)) {
       $conditions = array(
-        'shipTo' => $ship_to,
+        'shipto' => $ship_to,
       );
 
       $orders = entity_load("xtuple_{$entity_type}", FALSE, $conditions);
