@@ -36,7 +36,7 @@ function xdruple_queries_products_by_category_page($group_id) {
     'parentGroup' => $group_id,
   ));
   foreach ($group_products as $item) {
-    $product_ids[] = $item->Product;
+    $product_ids[] = $item->product;
   }
 
   $output .= theme('products_page', array(
