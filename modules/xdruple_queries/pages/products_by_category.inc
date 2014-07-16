@@ -14,7 +14,7 @@
 function xdruple_queries_products_by_category_page($group_id) {
   $output = '';
 
-  $catalog = entity_load('xtuple_xdruplecatalog');
+  $catalog = entity_load('xtuple_xdcatalog');
   foreach ($catalog as $cat) {
     if ($cat->id == $group_id) {
       drupal_set_title($cat->name);
@@ -32,11 +32,11 @@ function xdruple_queries_products_by_category_page($group_id) {
   drupal_alter(array('product_page_item', 'products_by_category_page_item'), $params);
 
   $product_ids    = array();
-  $group_products = entity_load('xtuple_xdrupleitemgroupitem', NULL, array(
+  $group_products = entity_load('xtuple_xdcatalogproduct', NULL, array(
     'parentGroup' => $group_id,
   ));
   foreach ($group_products as $item) {
-    $product_ids[] = $item->Product;
+    $product_ids[] = $item->product;
   }
 
   $output .= theme('products_page', array(

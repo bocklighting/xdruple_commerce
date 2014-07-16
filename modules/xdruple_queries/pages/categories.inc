@@ -57,27 +57,27 @@ function _xdruple_queries_categories_build_list_group_items($tree, $catalog) {
  *   Catalog branches.
  */
 function _xdruple_queries_categories_tree() {
-  $cid   = 'xtuple_xdruplecatalog-tree';
+  $cid   = 'xtuple_xdcatalog-tree';
   $cache = cache_get($cid, 'cache');
-  $entity_info = entity_get_info('xtuple_xdruplecatalog');
+  $entity_info = entity_get_info('xtuple_xdcatalog');
 
   if (empty($cache) && !empty($entity_info)) {
     $query = new EntityFieldQuery();
-    $root_group = $query->entityCondition('entity_type', 'xtuple_xdruplecatalog')
+    $root_group = $query->entityCondition('entity_type', 'xtuple_xdcatalog')
       ->propertyCondition('catalog', TRUE, '=')
       ->execute();
 
-    if (empty($root_group['xtuple_xdruplecatalog'])) {
+    if (empty($root_group['xtuple_xdcatalog'])) {
       drupal_set_message(t('Catalog structure not set. Contact the site administrator.'), 'error');
       return array('tree' => array(), 'catalog' => array());
     }
 
-    if (empty($root_group['xtuple_xdruplecatalog'])) {
+    if (empty($root_group['xtuple_xdcatalog'])) {
       drupal_set_message(t('Catalog structure not set. Contact the site administrator.'), 'error');
       return array('tree' => array(), 'catalog' => array());
     }
 
-    $root_key = key($root_group['xtuple_xdruplecatalog']);
+    $root_key = key($root_group['xtuple_xdcatalog']);
 
     $tree    = array(
       $root_key => array(),
@@ -116,7 +116,7 @@ function _xdruple_queries_categories_tree() {
  */
 function _xdruple_queries_categories_build_tree(&$tree, &$catalog) {
   foreach ($tree as $id => $temp) {
-    $group        = entity_load_single('xtuple_xdruplecatalog', $id);
+    $group        = entity_load_single('xtuple_xdcatalog', $id);
     $catalog[$id] = $group;
 
     foreach ($group->groups as $group_id) {

@@ -97,7 +97,7 @@ function xdruple_order_views_pre_execute($view) {
     // Query on Ship To.
     if (isset($_SESSION['rescued']['ship_to'])) {
       // Get the Ship To Name.
-      $shipto_name = entity_load_single('xtuple_xdruplecommerceshipto', $_SESSION['rescued']['ship_to']);
+      $shipto_name = entity_load_single('xtuple_xdshipto', $_SESSION['rescued']['ship_to']);
 
       $view->query->query->propertyConditions[]              = array(
         'column'   => 'shiptoName',

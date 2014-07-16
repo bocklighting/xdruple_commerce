@@ -40,16 +40,16 @@ function xdruple_queries_add_to_standard_order_form_validate($form, &$form_state
  * Form submission: xdruple_queries_add_to_standard_order_form
  */
 function xdruple_queries_add_to_standard_order_form_submit($form, &$form_state) {
-  $entity_type = 'xtuple_xdstdorditem';
+  $entity_type = 'xtuple_xdstdordproduct';
 
   try {
     $values         = $form_state['values'];
-    $std_order_item = entity_create($entity_type, array(
+    $std_order_product = entity_create($entity_type, array(
       'product'  => $values['product_id'],
       'customer' => $values['customer'],
-      'shipTo'   => $values['ship_to'],
+      'shipto'   => $values['ship_to'],
     ));
-    entity_save($entity_type, $std_order_item);
+    entity_save($entity_type, $std_order_product);
 
     // Invalidate cache.
     $cid = 'xtuple_xdcatalogshiptostdord-' . $values['ship_to'];
