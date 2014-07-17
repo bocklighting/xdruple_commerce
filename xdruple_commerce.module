@@ -1079,7 +1079,7 @@ function xdruple_commerce_user_reg_form_validate(&$element_form, &$form_state, $
   }
 
   // If this is create customer, check the email agianst customer names.
-  if (isset($element_form['#id']) && $element_form['#id'] === 'edit-xd-contact-association-und-form-create-new-customer') {
+  if (isset($element_form['#id']) && strpos($element_form['#id'], 'edit-xd-contact-association-und-form-create-new-customer') !== false) {
     if (!empty($create_association)) {
       // On main form submit.
       if ($form_state['triggering_element']['#type'] === 'submit') {
