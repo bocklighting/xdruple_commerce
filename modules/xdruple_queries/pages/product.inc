@@ -23,7 +23,7 @@ function xdruple_queries_product_page($product_id) {
       'items' => array(
         array(
           'title' => t('Edit'),
-          'link'  => "admin/commerce/products/$product_id/edit",
+          'link' => "admin/commerce/products/$product_id/edit",
         ),
       ),
     ));
@@ -33,7 +33,20 @@ function xdruple_queries_product_page($product_id) {
 
   if (!empty($product)) {
     drupal_set_title($product->title);
+    /** @var array $product_render */
     $product_render = entity_view('commerce_product', array($product), 'full', NULL, TRUE);
+    if (!empty($product_render)) {
+      $product_render['commerce_product'][$product_id]['product_price'] = array(
+        '#markup' => _xdruple_queries_price($product),
+        '#weight' => 20,
+      );
+      $product_render['commerce_product'][$product_id]['add_to_cart'] = array(
+        '#markup' => _xdruple_queries_add_to_cart_button($product, TRUE, array(
+          'commerce_product_page' => TRUE,
+        )),
+        '#weight' => 20,
+      );
+    }
     $output .= drupal_render($product_render);
   }
   else {
