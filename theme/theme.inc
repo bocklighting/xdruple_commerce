@@ -13,6 +13,7 @@ function template_preprocess_xdruple_commerce_similar_product_link_default(&$var
     $product = entity_load_single('commerce_product', $variables['product_id']);
     $path = "products/{$variables['product_id']}";
 
+    $variables['title'] = l($product->title, $path);
     if (!empty($product->xt_url_image_field['und'][0])) {
       $image = $product->xt_url_image_field['und'][0];
       $variables['image'] = l(theme('image_style', array(
@@ -27,15 +28,10 @@ function template_preprocess_xdruple_commerce_similar_product_link_default(&$var
       ));
     }
 
-    $variables['attributes_array'] = array(
-      'class' => 'b-product--teaser'
-    );
+    $variables['attributes_array']['class'][] = 'b-product--teaser';
+    $variables['title_attributes_array']['class'] = 'b-product-title';
     $variables['thumbnail_attributes_array'] = array(
-      'class' => 'b-product-thumbnail'
+      'class' => array('b-product-thumbnail'),
     );
-    $variables['title_attributes_array'] = array(
-      'class' => 'b-product-title'
-    );
-    $variables['title'] = l($product->title, $path);
   }
 }
