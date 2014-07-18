@@ -1263,11 +1263,22 @@ function xdruple_commerce_theme() {
     ),
   );
 
+  $items['xdruple_commerce_similar_product_link_default'] = array(
+    'variables' => array(
+      'product_id' => 0,
+      'style' => '',
+    ),
+    'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+    'file' => 'theme.inc',
+    'template' => 'xdruple-commerce-similar-product-link-default',
+  );
+
   $items += \Xtuple\Xcommerce\Theme\Block::themeDefinition('cart_dropdown', array(
     'hide_empty_title'   => TRUE,
     'hide_empty_content' => TRUE,
     'hide_empty_block'   => TRUE,
   ));
+
 
   return $items;
 }

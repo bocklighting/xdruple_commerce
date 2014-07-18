@@ -7,3 +7,35 @@
 function template_preprocess_xdruple_commerce_cart_dropdown(&$variables) {
   $variables['link'] = url('cart');
 }
+
+function template_preprocess_xdruple_commerce_similar_product_link_default(&$variables) {
+  if (!empty($variables['product_id'])) {
+    $product = entity_load_single('commerce_product', $variables['product_id']);
+    $path = "products/{$variables['product_id']}";
+
+    if (!empty($product->xt_url_image_field['und'][0])) {
+      $image = $product->xt_url_image_field['und'][0];
+      $variables['image'] = l(theme('image_style', array(
+        'style_name' => $variables['style'],
+        'path' => $image['uri'],
+        'width' => !empty($image['width']) ? $image['width'] : NULL,
+        'height' => !empty($image['height']) ? $image['height'] : NULL,
+        'alt' => !empty($image['alt']) ? $image['alt'] : '',
+        'title' => !empty($image['title']) ? $image['title'] : '',
+      )), $path, array(
+        'html' => TRUE,
+      ));
+    }
+
+    $variables['attributes_array'] = array(
+      'class' => 'b-product--teaser'
+    );
+    $variables['thumbnail_attributes_array'] = array(
+      'class' => 'b-product-thumbnail'
+    );
+    $variables['title_attributes_array'] = array(
+      'class' => 'b-product-title'
+    );
+    $variables['title'] = l($product->title, $path);
+  }
+}
