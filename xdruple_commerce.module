@@ -1919,6 +1919,49 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
       }
     }
   }
+
+  if ($type == 'commerce_product' && $build['#view_mode'] == 'full') {
+    $inline_labels = array(
+      'classCode',
+      'productCategory',
+      'sku',
+      'priceUnit',
+      'title',
+      'barcode',
+    );
+    foreach ($inline_labels as $field) {
+      if (!empty($build[$field])) {
+        $build[$field]['#label_display'] = 'inline';
+      }
+    }
+
+    $labels_title = array(
+      'productCategory'    => t('Category'),
+      'extDescrip'         => t('Extended description'),
+      'xt_physical_weight' => t('Weight'),
+      'sku'                => t('Part #'),
+      'classCode'          => t('Manufacturer'),
+      'priceUnit'          => t('UOM'),
+      'title'              => t('Description'),
+      'substitutes'        => t('Related products'),
+    );
+    foreach ($labels_title as $field => $title) {
+      $build[$field]['#title'] = $title;
+    }
+
+    if (!empty($build['substitutes']['#items'])) {
+      foreach ($build['substitutes']['#items'] as $i => $product_id) {
+        $build['substitutes'][$i] = array(
+          '#theme' => 'xdruple_commerce_similar_product_link_default',
+          '#product_id' => $product_id,
+          '#style' => 'ft_commerce_product_thumb',
+        );
+      }
+    }
+    else {
+      $build['substitutes']['#access'] = FALSE;
+    }
+  }
 }
 
 /**
