@@ -1273,7 +1273,7 @@ function xdruple_commerce_theme() {
     'template' => 'xdruple-commerce-similar-product-link-default',
   );
 
-  $items += \Xtuple\Xcommerce\Theme\Block::themeDefinition('cart_dropdown', array(
+  $items += \CDD\OpenCDD\Theme\Block::themeDefinition('cart_dropdown', array(
     'hide_empty_title'   => TRUE,
     'hide_empty_content' => TRUE,
     'hide_empty_block'   => TRUE,

@@ -38,9 +38,9 @@ function xdruple_order_menu() {
 }
 
 /**
- * Implements hook_xcommerce_body_classes_alter()
+ * Implements hook_opencdd_body_classes_alter()
  */
-function xdruple_order_xcommerce_body_classes_alter(&$classes, $path) {
+function xdruple_order_opencdd_body_classes_alter(&$classes, $path) {
   if ($path == 'user/%/pending-orders/%') {
     $classes[] = 'page-user-pending-order';
   }
