@@ -16,6 +16,17 @@ function xdruple_queries_init() {
 }
 
 /**
+ * Implements hook_compass_module()
+ *
+ * @return \CDD\Compass\DrupalModule
+ */
+function xdruple_queries_compass_module() {
+  return new \CDD\Compass\DrupalModule('xdruple_queries', array(
+    'xdruple_queries',
+  ));
+}
+
+/**
  * Implements hook_menu()
  */
 function xdruple_queries_menu() {
@@ -173,6 +184,8 @@ function xdruple_queries_theme() {
     'template'  => 'theme/products-page-item',
     'file'      => 'theme/theme.inc',
   );
+
+  $items += Xtuple\XdrupleQueries\Theme\CategoriesDropdown::definition();
 
   return $items;
 }

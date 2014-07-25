@@ -1,0 +1,75 @@
+@import "compass/css3/box-shadow"
+
+.b-categories-dropdown
+  background: $panel-bg
+  color: $panel-default-text
+  .list-group
+    position: relative
+  .list-group-item:hover
+    .list-group-item-title
+      font-weight: $fw-bold
+    .list-group-item-subcategories
+      display: block
+  .list-group-item-subcategories
+    +box-shadow(rgba(#000, 0.05) 0 1px 1px)
+    background: $panel-bg
+    border: 1px solid $panel-default-border
+    border-radius: $panel-border-radius
+    display: none
+    left: 100%
+    margin: -$panel-border-radius 0 0 0
+    padding: $panel-body-padding
+    position: absolute
+    top: 0
+    width: 300%
+    z-index: 1000
+    ul, ol
+      padding: 0
+    li
+      list-style: none
+      margin: 0
+      padding: 0
+  .list-group-item-subcategories-row
+    margin-bottom: 2em
+  .subcategory-title
+    font-size: $font-size-medium
+  .panel-primary
+    .list-group-item:hover
+      .list-group-item-title
+        color: $brand-primary
+    .subcategory-title
+      color: $brand-primary
+    .list-group-item-subcategories
+      border-color: $brand-primary
+  .panel-success
+    .list-group-item:hover
+      .list-group-item-title
+        color: $brand-success
+    .subcategory-title
+      color: $brand-success
+    .list-group-item-subcategories
+      border-color: $brand-success
+  .panel-info
+    .list-group-item:hover
+      .list-group-item-title
+        color: $brand-info
+    .subcategory-title
+      color: $brand-info
+    .list-group-item-subcategories
+      border-color: $brand-info
+  .panel-warning
+    .list-group-item:hover
+      .list-group-item-title
+        color: $brand-warning
+    .subcategory-title
+      color: $brand-warning
+    .list-group-item-subcategories
+      border-color: $brand-warning
+  .panel-danger
+    .list-group-item:hover
+      .list-group-item-title
+        color: $brand-danger
+    .subcategory-title
+      color: $brand-danger
+    .list-group-item-subcategories
+      border-color: $brand-danger
