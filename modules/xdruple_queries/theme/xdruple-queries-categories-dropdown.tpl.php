@@ -14,7 +14,7 @@
         <ul class="list-group">
           <?php foreach ($root_category->getChildren() as $category): ?>
             <li class="list-group-item">
-              <div class="list-group-item-title"><?php print $category->getName() ?></div>
+              <div class="list-group-item-title"><?php print l($category->getName(), 'products/categories/' . $category->getId()) ?></div>
               <?php $category_children = $category->getChildren(); ?>
               <?php if (!empty($category_children)): ?>
                 <div class="list-group-item-subcategories">
@@ -25,12 +25,16 @@
                       <?php $row_open = TRUE; ?>
                     <?php endif; ?>
                     <div class="col-lg-4">
-                      <h4 class="subcategory-title"><?php print $sub_category->getName() ?></h4>
+                      <h4 class="subcategory-title">
+                        <?php print l($sub_category->getName(), 'products/categories/' . $sub_category->getId()) ?>
+                      </h4>
                       <?php $sub_category_children = $sub_category->getChildren(); ?>
                       <?php if (!empty($sub_category_children)): ?>
                         <ul>
                           <?php foreach ($sub_category_children as $sub_sub_category): ?>
-                            <li><?php print $sub_sub_category->getName() ?></li>
+                            <li>
+                              <?php print l($sub_sub_category->getName(), 'products/categories/' . $sub_sub_category->getId()) ?>
+                            </li>
                           <?php endforeach; ?>
                         </ul>
                       <?php endif; ?>
