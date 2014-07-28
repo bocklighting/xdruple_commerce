@@ -12,7 +12,7 @@
 function xdruple_queries_categories_page() {
   $output = '';
 
-  $cats = \Xtuple\XdrupleQueries\Categories\Tree::getAll();
+  $cats = \Xtuple\XdrupleQueries\Categories\Tree::getCatalog();
   $output .= _xdruple_queries_categories_build_html($cats['tree'], $cats['catalog']);
 
   return $output;
@@ -25,7 +25,7 @@ function xdruple_queries_categories_tree_block() {
   $output = '';
 
   if (xdruple_access('products', 'view', 'xtuple: access product lists')) {
-    $cats = \Xtuple\XdrupleQueries\Categories\Tree::getAll();
+    $cats = \Xtuple\XdrupleQueries\Categories\Tree::getCatalog();
     $output .= _xdruple_queries_categories_build_list_group_items($cats['tree'], $cats['catalog']);
   }
 
