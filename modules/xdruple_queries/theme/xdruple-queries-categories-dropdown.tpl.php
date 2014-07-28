@@ -1,12 +1,14 @@
 <?php
 /**
  * @var \Xtuple\XdrupleQueries\Categories\Category[] $catalog
+ * @var string $content_attributes
+ * @var string $attributes
  */
 ?>
 <?php if (!empty($catalog)): ?>
   <?php foreach ($catalog as $root_category): ?>
-    <div class="b-categories-dropdown b-categories-dropdown--left">
-      <div class="panel panel-primary">
+    <div<?php print $attributes ?>>
+      <div<?php print $content_attributes; ?>>
         <div class="panel-heading">
           <h3 class="panel-title"><?php print $root_category->getName(); ?></h3>
         </div>
