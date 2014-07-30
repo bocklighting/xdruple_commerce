@@ -25,6 +25,8 @@ function xdruple_shipping_install() {
     );
 
     field_create_field($field);
+    // field_create_field() breaks something withing caches so later entity_get_info('xtuple_unit') return empty result
+    drupal_flush_all_caches();
   }
 
   // Add field instances.
@@ -32,7 +34,7 @@ function xdruple_shipping_install() {
     // Get default weightUnit.
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'xtuple_unit');
-    $query->propertyCondition('isItemWeight', true, 'EQUALS');
+    $query->propertyCondition('isItemWeight', TRUE, 'EQUALS');
     $units = $query->execute();
     $default_unit = xdruple_shipping_map_physical_weight_units(key($units['xtuple_unit']));
     $default_unit = $default_unit ? $default_unit : 'oz';
