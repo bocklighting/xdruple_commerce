@@ -1,0 +1,6 @@
+name = xDruple Favorites
+description = Provides functionality for "Favorite" items ("Standard order")
+package = xDruple
+core = 7.x
+
+dependencies[] = xdruple_queries
