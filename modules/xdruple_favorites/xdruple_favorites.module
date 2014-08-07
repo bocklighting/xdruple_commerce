@@ -1,0 +1,190 @@
+<?php
+
+/**
+ * @file keeps Drupal core hooks implementations
+ */
+
+define('XDRUPLE_FAVORITES_ADD', 'add');
+define('XDRUPLE_FAVORITES_REMOVE', 'remove');
+
+/**
+ * Implements hook_forms()
+ */
+function xdruple_favorites_forms($form_id) {
+  $forms = array();
+
+  if (strpos($form_id, 'xdruple_favorites_add_to_favorites_form_') === 0) {
+    $forms[$form_id] = array(
+      'callback' => 'xdruple_favorites_add_to_favorites_form',
+    );
+  }
+
+  if (strpos($form_id, 'xdruple_favorites_remove_from_favorites_form_') === 0) {
+    $forms[$form_id] = array(
+      'callback' => 'xdruple_favorites_remove_from_favorites_form',
+    );
+  }
+
+  return $forms;
+}
+
+/**
+ * Implements hook_init()
+ */
+function xdruple_favorites_init() {
+  module_load_include('inc', 'xdruple_favorites', 'forms/add_to_favorites');
+  module_load_include('inc', 'xdruple_favorites', 'forms/remove_from_favorites');
+}
+
+/**
+ * Implements hook_menu()
+ */
+function xdruple_favorites_menu() {
+  $items = array();
+
+  $items['products/favorites'] = array(
+    'title' => '!favorites',
+    'title arguments' => array(
+      '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
+    ),
+    'page callback' => 'xdruple_favorites_favorite_products_page',
+    'access callback' => 'xdruple_access',
+    'access arguments' => array('products/favorites', 'view', 'xtuple: access product lists'),
+    'file' => 'pages/favorites.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_rescued_register_clients_resources_alter().
+ */
+function xdruple_favorites_rescued_register_clients_resources_alter(&$rescued_clients_url_resources) {
+  if (!in_array('XdCatalogShiptoStdOrd', $rescued_clients_url_resources['xtuple'])) {
+    $rescued_clients_url_resources['xtuple'][] = 'XdCatalogShiptoStdOrd';
+  }
+  if (!in_array('XdStdOrdProduct', $rescued_clients_url_resources['xtuple'])) {
+    $rescued_clients_url_resources['xtuple'][] = 'XdStdOrdProduct';
+  }
+
+  return $rescued_clients_url_resources;
+}
+
+/**
+ * Helper function. Returns form array for "add to" or "remove from" Favorites form
+ *
+ * @param integer $product_id
+ * @param         $customer
+ * @param         $ship_to
+ *
+ * @return array
+ *
+ * @see drupal_get_form()
+ */
+function xdruple_favorites_get_favorites_form($product_id, $customer, $ship_to) {
+  $form_id = _xdruple_favorites_get_favorites_form_id($product_id);
+
+  return drupal_get_form($form_id, $product_id, $customer, $ship_to);
+}
+
+/**
+ * Helper function. Returns Favorites form ID for "add to" or "remove from" Favorites form.
+ *
+ * @param integer $product_id
+ *
+ * @return string
+ */
+function _xdruple_favorites_get_favorites_form_id($product_id) {
+  $form_id = 'xdruple_favorites_add_to_favorites_form_';
+
+  if (in_array($product_id, _xdruple_queries_load_products_by_order_type('xdcatalogshiptostdord'))) {
+    $form_id = 'xdruple_favorites_remove_from_favorites_form_';
+  }
+
+  return $form_id;
+}
+
+/**
+ * Helper function. Prepares "Add to" and "Remove from" form
+ *
+ * @param string $op
+ * @param        $form
+ * @param        $form_state
+ * @param        $product_id
+ * @param        $customer
+ * @param        $ship_to
+ *
+ * @return mixed
+ */
+function _xdruple_favorites_prepare_add_remove_form($op = XDRUPLE_FAVORITES_ADD, $form, &$form_state, $product_id, $customer, $ship_to) {
+  $title = 'Add to the !favorites';
+  $css_id = 'xdruple_favorites_add_to_favorites_form';
+
+  if ($op == XDRUPLE_FAVORITES_REMOVE) {
+    $title = 'Remove from the !favorites';
+    $css_id = 'xdruple_favorites_remove_from_favorites_form';
+  }
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t($title, array(
+      '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
+    )),
+  );
+
+  $form['product_id'] = array(
+    '#type' => 'value',
+    '#value' => $product_id,
+  );
+  $form['customer'] = array(
+    '#type' => 'value',
+    '#value' => $customer,
+  );
+  $form['ship_to'] = array(
+    '#type' => 'value',
+    '#value' => $ship_to,
+  );
+
+  if (variable_get('xdruple_favorites_ajax_enabled', TRUE)) {
+    $form['submit']['#ajax'] = array(
+      'callback' => 'xdruple_favorites_favorites_form_submit_ajax',
+      'method' => 'replace',
+      'prevent' => 'click',
+    );
+    $form['#page_url'] = $_GET['q'];
+  }
+
+  $form['#attributes']['class'][] = drupal_clean_css_identifier($css_id);
+
+  return $form;
+}
+
+/**
+ * AJAX callback. Processes "Add to" and "Remove from" form submissions
+ *
+ * @param $form
+ * @param $form_state
+ *
+ * @return array
+ */
+function xdruple_favorites_favorites_form_submit_ajax($form, $form_state) {
+  $commands = array();
+
+  if (($customer = xdruple_rescued_session_get('customer'))
+    && ($ship_to = xdruple_rescued_session_get('ship_to'))
+  ) {
+    $product_id = $form_state['values']['product_id'];
+    $replace_id = $form['#id'];
+    $new_form = xdruple_favorites_get_favorites_form($product_id, $customer, $ship_to);
+    $commands['replace'] = ajax_command_replace("#$replace_id", drupal_render($new_form));
+  }
+  $commands['messages'] = ajax_command_insert('#status-messages', theme('status_messages'));
+
+  drupal_alter('xdruple_favorites_favorites_form_submit_ajax_commands', $commands, $form, $form_state, $new_form);
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}

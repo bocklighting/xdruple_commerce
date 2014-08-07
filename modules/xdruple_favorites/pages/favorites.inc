@@ -1,13 +1,15 @@
 <?php
 
 /**
- * @file keeps callbacks for /products/standard page
+ * @file keeps callbacks for /products/favorites page
  */
 
 /**
  * Page callback
+ *
+ * @see xdruple_favorites_menu()
  */
-function xdruple_queries_products_standard_page() {
+function xdruple_favorites_favorite_products_page() {
   $output = '';
 
   $params = array(
@@ -17,10 +19,13 @@ function xdruple_queries_products_standard_page() {
       ),
     ),
   );
-  drupal_alter(array('product_page_item', 'products_standard_page_item'), $params);
+  drupal_alter(array(
+    'product_page_item',
+    'products_favorite_page_item',
+  ), $params);
 
   $products_ids = _xdruple_queries_load_products_by_order_type('xdcatalogshiptostdord');
-  $list = _xdruple_prepare_products_list($products_ids, $params, 'products_page_item__standard_order');
+  $list = _xdruple_prepare_products_list($products_ids, $params, 'products_page_item__favorite');
 
   $output .= theme('products_page', array(
     'products' => $list,
