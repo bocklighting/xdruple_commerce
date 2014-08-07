@@ -8,37 +8,8 @@
  * Form builder: xdruple_favorites_add_to_favorites_form
  */
 function xdruple_favorites_add_to_favorites_form($form, &$form_state, $product_id, $customer, $ship_to) {
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add to the !favorites', array(
-      '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
-    )),
-  );
-
-  $form['product_id'] = array(
-    '#type' => 'value',
-    '#value' => $product_id,
-  );
-  $form['customer'] = array(
-    '#type' => 'value',
-    '#value' => $customer,
-  );
-  $form['ship_to'] = array(
-    '#type' => 'value',
-    '#value' => $ship_to,
-  );
-
-  if (variable_get('xdruple_favorites_ajax_enabled', TRUE)) {
-    $form['submit']['#ajax'] = array(
-      'callback' => 'xdruple_favorites_favorites_form_submit_ajax',
-      'method' => 'replace',
-      'prevent' => 'click',
-    );
-    $form['#page_url'] = $_GET['q'];
-  }
-
-  $form['#attributes']['class'][] = drupal_clean_css_identifier('xdruple_favorites_add_to_favorites_form');
-
+  $form = _xdruple_favorites_prepare_add_remove_form(XDRUPLE_FAVORITES_REMOVE, $form, $form_state, $product_id, $customer, $ship_to);
+  
   return $form;
 }
 

@@ -4,6 +4,9 @@
  * @file keeps Drupal core hooks implementations
  */
 
+define('XDRUPLE_FAVORITES_ADD', 'add');
+define('XDRUPLE_FAVORITES_REMOVE', 'remove');
+
 /**
  * Implements hook_forms()
  */
@@ -100,6 +103,61 @@ function _xdruple_favorites_get_favorites_form_id($product_id) {
   }
 
   return $form_id;
+}
+
+/**
+ * Helper function. Prepares "Add to" and "Remove from" form
+ *
+ * @param string $op
+ * @param        $form
+ * @param        $form_state
+ * @param        $product_id
+ * @param        $customer
+ * @param        $ship_to
+ *
+ * @return mixed
+ */
+function _xdruple_favorites_prepare_add_remove_form($op = XDRUPLE_FAVORITES_ADD, $form, &$form_state, $product_id, $customer, $ship_to) {
+  $title = 'Add to the !favorites';
+  $css_id = 'xdruple_favorites_add_to_favorites_form';
+
+  if ($op == XDRUPLE_FAVORITES_REMOVE) {
+    $title = 'Remove from the !favorites';
+    $css_id = 'xdruple_favorites_remove_from_favorites_form';
+  }
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t($title, array(
+      '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
+    )),
+  );
+
+  $form['product_id'] = array(
+    '#type' => 'value',
+    '#value' => $product_id,
+  );
+  $form['customer'] = array(
+    '#type' => 'value',
+    '#value' => $customer,
+  );
+  $form['ship_to'] = array(
+    '#type' => 'value',
+    '#value' => $ship_to,
+  );
+
+  if (variable_get('xdruple_favorites_ajax_enabled', TRUE)) {
+    $form['submit']['#ajax'] = array(
+      'callback' => 'xdruple_favorites_favorites_form_submit_ajax',
+      'method' => 'replace',
+      'prevent' => 'click',
+    );
+    $form['#page_url'] = $_GET['q'];
+  }
+
+  $form['#attributes']['class'][] = drupal_clean_css_identifier($css_id);
+
+  return $form;
 }
 
 /**
