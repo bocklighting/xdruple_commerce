@@ -40,7 +40,10 @@ function xdruple_favorites_menu() {
   $items = array();
 
   $items['products/favorites'] = array(
-    'title' => 'Favorite products',
+    'title' => '!favorites',
+    'title arguments' => array(
+      '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
+    ),
     'page callback' => 'xdruple_favorites_favorite_products_page',
     'access callback' => 'xdruple_access',
     'access arguments' => array('products/favorites', 'view', 'xtuple: access product lists'),

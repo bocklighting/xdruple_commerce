@@ -10,7 +10,9 @@
 function xdruple_favorites_remove_from_favorites_form($form, &$form_state, $product_id, $customer, $ship_to) {
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Remove from the Favorites'),
+    '#value' => t('Remove from the !favorites', array(
+      '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
+    )),
   );
   $form['product_id'] = array(
     '#type' => 'value',
@@ -59,8 +61,9 @@ function xdruple_favorites_remove_from_favorites_form_submit($form, &$form_state
     }
 
     $product = entity_load_single('commerce_product', $values['product_id']);
-    drupal_set_message(t("Product !title removed from the Favorites", array(
+    drupal_set_message(t("Product !title removed from the !favorites", array(
       '!title' => l($product->title, "products/{$product->product_id}"),
+      '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
     )), 'warning');
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
