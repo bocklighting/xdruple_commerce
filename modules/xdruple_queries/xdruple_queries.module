@@ -8,8 +8,6 @@
  * Implements hook_init()
  */
 function xdruple_queries_init() {
-  module_load_include('inc', 'xdruple_queries', 'forms/add_to_standard_order');
-  module_load_include('inc', 'xdruple_queries', 'forms/remove_from_standard_order');
   module_load_include('inc', 'xdruple_queries', 'pages/categories');
   module_load_include('inc', 'xdruple_queries', 'pages/product');
   module_load_include('inc', 'xdruple_queries', 'pages/products_by_category');
@@ -90,17 +88,6 @@ function xdruple_queries_menu() {
     );
   }
 
-  if (variable_get('xdruple_queries_products_standard_page_enabled', TRUE)) {
-    $items['products/standard'] = array(
-      'title'            => 'Standard order',
-      'page callback'    => 'xdruple_queries_products_standard_page',
-      'access callback'  => 'xdruple_access',
-      'access arguments' => array('products/standard', 'view', 'xtuple: access product lists'),
-      'file'             => 'pages/products_standard.inc',
-      'type'             => MENU_LOCAL_TASK,
-    );
-  }
-
   return $items;
 }
 
@@ -132,35 +119,8 @@ function xdruple_queries_rescued_register_clients_resources_alter(&$rescued_clie
   if (!in_array('XdCatalogRecentOrd', $rescued_clients_url_resources['xtuple'])) {
     $rescued_clients_url_resources['xtuple'][] = 'XdCatalogRecentOrd';
   }
-  if (!in_array('XdCatalogShiptoStdOrd', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'XdCatalogShiptoStdOrd';
-  }
-  if (!in_array('XdStdOrdProduct', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'XdStdOrdProduct';
-  }
 
   return $rescued_clients_url_resources;
-}
-
-/**
- * Implements hook_forms()
- */
-function xdruple_queries_forms($form_id, $args) {
-  $forms = array();
-
-  if (strpos($form_id, 'xdruple_queries_add_to_standard_order_form_') === 0) {
-    $forms[$form_id] = array(
-      'callback' => 'xdruple_queries_add_to_standard_order_form',
-    );
-  }
-
-  if (strpos($form_id, 'xdruple_queries_remove_from_standard_order_form_') === 0) {
-    $forms[$form_id] = array(
-      'callback' => 'xdruple_queries_remove_from_standard_order_form',
-    );
-  }
-
-  return $forms;
 }
 
 /**

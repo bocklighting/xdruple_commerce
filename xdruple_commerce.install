@@ -1,8 +1,8 @@
 <?php
 
 /**
-* Implements hook_enable().
-*/
+ * Implements hook_enable().
+ */
 function xdruple_commerce_enable() {
   // Clear caches so xdruple_commerce module can override commerce module.
   cache_clear_all();
@@ -15,4 +15,20 @@ function xdruple_commerce_update_7001() {
   variable_del('commerce_checkout_completion_message');
 
   return t('commerce_checkout_completion_message variable deleted');
+}
+
+/**
+ * Standard orders moved to its own module - xDruple Favorites
+ */
+function xdruple_commerce_update_7002() {
+  $message = 'xDruple Favorites kept disabled';
+
+  if ($enabled = variable_get('xdruple_queries_products_standard_page_enabled', FALSE)) {
+    module_enable(array('xdruple_favorites'));
+    $message = 'xDruple Favorites enabled';
+  }
+
+  variable_del('xdruple_queries_products_standard_page_enabled');
+
+  return t($message);
 }
