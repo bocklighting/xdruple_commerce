@@ -14,6 +14,7 @@ function xdruple_favorites_remove_from_favorites_form($form, &$form_state, $prod
       '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
     )),
   );
+
   $form['product_id'] = array(
     '#type' => 'value',
     '#value' => $product_id,
@@ -26,6 +27,15 @@ function xdruple_favorites_remove_from_favorites_form($form, &$form_state, $prod
     '#type' => 'value',
     '#value' => $ship_to,
   );
+
+  if (variable_get('xdruple_favorites_ajax_enabled', TRUE)) {
+    $form['submit']['#ajax'] = array(
+      'callback' => 'xdruple_favorites_favorites_form_submit_ajax',
+      'method' => 'replace',
+      'prevent' => 'click',
+    );
+    $form['#page_url'] = $_GET['q'];
+  }
 
   $form['#attributes']['class'][] = drupal_clean_css_identifier('xdruple_favorites_remove_from_favorites_form');
 

@@ -101,3 +101,32 @@ function _xdruple_favorites_get_favorites_form_id($product_id) {
 
   return $form_id;
 }
+
+/**
+ * AJAX callback. Processes "Add to" and "Remove from" form submissions
+ *
+ * @param $form
+ * @param $form_state
+ *
+ * @return array
+ */
+function xdruple_favorites_favorites_form_submit_ajax($form, $form_state) {
+  $commands = array();
+
+  if (($customer = xdruple_rescued_session_get('customer'))
+    && ($ship_to = xdruple_rescued_session_get('ship_to'))
+  ) {
+    $product_id = $form_state['values']['product_id'];
+    $replace_id = $form['#id'];
+    $new_form = xdruple_favorites_get_favorites_form($product_id, $customer, $ship_to);
+    $commands['replace'] = ajax_command_replace("#$replace_id", drupal_render($new_form));
+  }
+  $commands['messages'] = ajax_command_insert('#status-messages', theme('status_messages'));
+
+  drupal_alter('xdruple_favorites_favorites_form_submit_ajax_commands', $commands, $form, $form_state, $new_form);
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
