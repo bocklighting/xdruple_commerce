@@ -67,3 +67,37 @@ function xdruple_favorites_rescued_register_clients_resources_alter(&$rescued_cl
 
   return $rescued_clients_url_resources;
 }
+
+/**
+ * Helper function. Returns form array for "add to" or "remove from" Favorites form
+ *
+ * @param integer $product_id
+ * @param         $customer
+ * @param         $ship_to
+ *
+ * @return array
+ *
+ * @see drupal_get_form()
+ */
+function xdruple_favorites_get_favorites_form($product_id, $customer, $ship_to) {
+  $form_id = _xdruple_favorites_get_favorites_form_id($product_id);
+
+  return drupal_get_form($form_id, $product_id, $customer, $ship_to);
+}
+
+/**
+ * Helper function. Returns Favorites form ID for "add to" or "remove from" Favorites form.
+ *
+ * @param integer $product_id
+ *
+ * @return string
+ */
+function _xdruple_favorites_get_favorites_form_id($product_id) {
+  $form_id = 'xdruple_favorites_add_to_favorites_form_';
+
+  if (in_array($product_id, _xdruple_queries_load_products_by_order_type('xdcatalogshiptostdord'))) {
+    $form_id = 'xdruple_favorites_remove_from_favorites_form_';
+  }
+
+  return $form_id;
+}
