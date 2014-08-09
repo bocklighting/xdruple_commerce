@@ -11,6 +11,8 @@ function xdruple_order_page($order_number) {
   $output = '';
   $orders = array();
 
+  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  $session = extensions_get_session();
   if (!empty($order_number) && is_numeric($order_number)) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'xtuple_salesorder')
@@ -20,8 +22,8 @@ function xdruple_order_page($order_number) {
       $orders = $query->execute();
     }
     else {
-      if (isset($_SESSION['rescued']['customer'])) {
-        $query->propertyCondition('customer', $_SESSION['rescued']['customer'], '=');
+      if ($session->getRescued('customer')) {
+        $query->propertyCondition('customer', $session->getRescued('customer'), '=');
         $orders = $query->execute();
       }
     }

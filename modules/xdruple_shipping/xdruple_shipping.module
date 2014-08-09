@@ -266,7 +266,10 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
   // Necessary for country_get_list().
   require_once DRUPAL_ROOT . '/includes/locale.inc';
 
-  $id          = !empty($_SESSION['rescued']['site']) ? $_SESSION['rescued']['site'] : null;
+  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  $session = extensions_get_session();
+
+  $id          = $session->getRescued('site');
   $entity_type = 'xtuple_site';
 
   if (!empty($id)) {

@@ -239,17 +239,20 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
 function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_state, $context) {
   $form_id = $form_state['build_info']['form_id'];
 
+  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  $session = extensions_get_session();
+
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdstdordproduct') {
     // Default this form to the customer and ship to in the user's session.
-    if (isset($_SESSION['rescued']['customer'])) {
-      $customer = $_SESSION['rescued']['customer'];
+    if ($session->getRescued('customer')) {
+      $customer = $session->getRescued('customer');
       $form['customer']['#default_value'] = $customer;
       $form['customer']['#options'] = array($customer => $customer);
     } else {
       $customer = null;
     }
-    if (isset($_SESSION['rescued']['ship_to'])) {
-      $form['shipto']['#default_value'] = $_SESSION['rescued']['ship_to'];
+    if ($session->getRescued('ship_to')) {
+      $form['shipto']['#default_value'] = $session->getRescued('ship_to');
       $form['shipto']['#options'] = xdruple_fields_get_ship_to_list($customer);
     }
   }
@@ -1529,11 +1532,14 @@ function xdruple_commerce_api_customer_item_price($discovery_client = 'xtuple', 
 }
 
 function xdruple_commerce_get_customer_line_item_price($line_item) {
+  /** @var stdClass $user */
   global $user;
 
-  if (!isset($_SESSION['rescued']['customer'], $_SESSION['rescued']['ship_to'], $_SESSION['rescued']['site']) &&
-    $user->uid !== 0) {
-
+  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  $session = extensions_get_session();
+  if ((!$session->getRescued('customer') || !$session->getRescued('ship_to') || !$session->getRescued('site'))
+    && $user->uid !== 0
+  ) {
     // We cannot get a price quote without all of these set.
     return;
   }
@@ -1549,9 +1555,9 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
     $shipto   = null;
     $site     = variable_get('xdruple_commerce_default_warehouse', null);
   } else {
-    $customer = $_SESSION['rescued']['customer'];
-    $shipto   = $_SESSION['rescued']['ship_to'];
-    $site     = $_SESSION['rescued']['site'];
+    $customer = $session->getRescued('customer');
+    $shipto   = $session->getRescued('ship_to');
+    $site     = $session->getRescued('site');
   }
 
   $date = xdruple_rescued_scheduled_date('tomorrow');
