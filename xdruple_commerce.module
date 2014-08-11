@@ -802,6 +802,36 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'description' => t('Product module package weight form element'),
         'weight' => -4,
       ),
+      'prodLength' => array(
+        'label' => t('Length'),
+        'description' => t('Product module length form element'),
+        'weight' => -4,
+      ),
+      'prodWidth' => array(
+        'label' => t('Width'),
+        'description' => t('Product module width form element'),
+        'weight' => -4,
+      ),
+      'prodHeight' => array(
+        'label' => t('Height'),
+        'description' => t('Product module height form element'),
+        'weight' => -4,
+      ),
+      'packLength' => array(
+        'label' => t('Package Length'),
+        'description' => t('Product module package length form element'),
+        'weight' => -4,
+      ),
+      'packWidth' => array(
+        'label' => t('Package Width'),
+        'description' => t('Product module package width form element'),
+        'weight' => -4,
+      ),
+      'packHeight' => array(
+        'label' => t('Package Height'),
+        'description' => t('Product module package height form element'),
+        'weight' => -4,
+      ),
       'classCode' => array(
         'label' => t('Class Code'),
         'description' => t('Product module class code form element'),
@@ -830,6 +860,21 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
       'weightUnit' => array(
         'label' => t('Weight Unit'),
         'description' => t('Product module weight unit form element'),
+        'weight' => -4,
+      ),
+      'dimensionUnit' => array(
+        'label' => t('Dimension Unit'),
+        'description' => t('Product module dimension unit form element'),
+        'weight' => -4,
+      ),
+      'physicalProdUnit' => array(
+        'label' => t('Product Dimensions Unit'),
+        'description' => t('Product module product dimensions unit form element'),
+        'weight' => -4,
+      ),
+      'physicalPackUnit' => array(
+        'label' => t('Package Dimensions Unit'),
+        'description' => t('Product module package dimensions unit form element'),
         'weight' => -4,
       ),
       'notes' => array(
@@ -868,6 +913,42 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'theme' => 'xdruple_commerce_package_weight',
         'weight' => -4,
       ),
+      'prodLength' => array(
+        'label' => t('Length'),
+        'description' => t('Product module length form element'),
+        'theme' => 'xdruple_commerce_length',
+        'weight' => -4,
+      ),
+      'prodWidth' => array(
+        'label' => t('Width'),
+        'description' => t('Product module width form element'),
+        'theme' => 'xdruple_commerce_width',
+        'weight' => -4,
+      ),
+      'prodHeight' => array(
+        'label' => t('Height'),
+        'description' => t('Product module height form element'),
+        'theme' => 'xdruple_commerce_height',
+        'weight' => -4,
+      ),
+      'packLength' => array(
+        'label' => t('Package Length'),
+        'description' => t('Product module package length form element'),
+        'theme' => 'xdruple_commerce_pack_length',
+        'weight' => -4,
+      ),
+      'packWidth' => array(
+        'label' => t('Package Width'),
+        'description' => t('Product module package width form element'),
+        'theme' => 'xdruple_commerce_pack_width',
+        'weight' => -4,
+      ),
+      'packHeight' => array(
+        'label' => t('Package Height'),
+        'description' => t('Product module package height form element'),
+        'theme' => 'xdruple_commerce_pack_height',
+        'weight' => -4,
+      ),
       'classCode' => array(
         'label' => t('Class Code'),
         'description' => t('Class Code the product belongs to'),
@@ -902,6 +983,22 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'label' => t('Weight Unit'),
         'description' => t('Unit of measure used for the weight calculation'),
         'theme' => 'xdruple_commerce_weight_unit',
+        'weight' => -4,
+      ),
+      'dimensionUnit' => array(
+        'label' => t('Dimension Unit'),
+        'description' => t('Product module dimension unit form element'),
+        'theme' => 'xdruple_commerce_dimension_unit',
+        'weight' => -4,
+      ),
+      'physicalProdUnit' => array(
+        'label' => t('Product Dimensions Unit'),
+        'description' => t('Product module product dimensions unit form element'),
+        'weight' => -4,
+      ),
+      'physicalPackUnit' => array(
+        'label' => t('Package Dimensions Unit'),
+        'description' => t('Product module package dimensions unit form element'),
         'weight' => -4,
       ),
       'notes' => array(
@@ -1208,10 +1305,40 @@ function xdruple_commerce_theme() {
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
       'template' => 'xdruple-commerce-product-weight',
     ),
+    'xdruple_commerce_length' => array(
+      'variables' => array('prodLength' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-length',
+    ),
+    'xdruple_commerce_width' => array(
+      'variables' => array('prodWidth' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-width',
+    ),
+    'xdruple_commerce_height' => array(
+      'variables' => array('prodHeight' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-height',
+    ),
     'xdruple_commerce_package_weight' => array(
       'variables' => array('packageWeight' => NULL, 'label' => NULL, 'product' => NULL),
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
       'template' => 'xdruple-commerce-package-weight',
+    ),
+    'xdruple_commerce_pack_length' => array(
+      'variables' => array('packLength' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-pack-length',
+    ),
+    'xdruple_commerce_pack_width' => array(
+      'variables' => array('packWidth' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-pack-width',
+    ),
+    'xdruple_commerce_pack_height' => array(
+      'variables' => array('packHeight' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-pack-height',
     ),
     'xdruple_commerce_class_code' => array(
       'variables' => array('classCode' => NULL, 'label' => NULL, 'product' => NULL),
@@ -1238,10 +1365,25 @@ function xdruple_commerce_theme() {
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
       'template' => 'xdruple-commerce-uom-ratio',
     ),
+    'xdruple_commerce_dimension_unit' => array(
+      'variables' => array('dimensionUnit' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-dimension-unit',
+    ),
     'xdruple_commerce_weight_unit' => array(
       'variables' => array('weightUnit' => NULL, 'label' => NULL, 'product' => NULL),
       'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
       'template' => 'xdruple-commerce-weight-unit',
+    ),
+    'xdruple_commerce_physical_prod_unit' => array(
+      'variables' => array('physicalProdUnit' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-physical-prod-unit',
+    ),
+    'xdruple_commerce_physical_pack_unit' => array(
+      'variables' => array('physicalPackUnit' => NULL, 'label' => NULL, 'product' => NULL),
+      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
+      'template' => 'xdruple-commerce-physical-pack-unit',
     ),
     'xdruple_commerce_notes' => array(
       'variables' => array('notes' => NULL, 'label' => NULL, 'product' => NULL),
@@ -1400,13 +1542,22 @@ function xdruple_commerce_field_attach_submit($entity_type, $entity, $form, $for
     $entity->notes = $form_state['values']['notes'];
     $entity->extDescrip = $form_state['values']['extDescrip'];
     $entity->productWeight = $form_state['values']['productWeight'];
+    $entity->prodLength = $form_state['values']['prodLength'];
+    $entity->prodWidth = $form_state['values']['prodWidth'];
+    $entity->prodHeight = $form_state['values']['prodHeight'];
     $entity->packageWeight = $form_state['values']['packageWeight'];
+    $entity->packLength = $form_state['values']['packLength'];
+    $entity->packWidth = $form_state['values']['packWidth'];
+    $entity->packHeight = $form_state['values']['packHeight'];
     $entity->classCode = $form_state['values']['classCode'];
     $entity->productCategory = $form_state['values']['productCategory'];
     $entity->priceUnit = $form_state['values']['priceUnit'];
     $entity->uomRatio = $form_state['values']['uomRatio'];
     $entity->inventoryUnit = $form_state['values']['inventoryUnit'];
     $entity->weightUnit = $form_state['values']['weightUnit'];
+    $entity->dimensionUnit = $form_state['values']['dimensionUnit'];
+    $entity->physicalProdUnit = $form_state['values']['physicalProdUnit'];
+    $entity->physicalPackUnit = $form_state['values']['physicalPackUnit'];
   }
 }
 
@@ -1934,6 +2085,9 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
       'priceUnit',
       'title',
       'barcode',
+      'prodLength',
+      'prodWidth',
+      'prodHeight',
     );
     foreach ($inline_labels as $field) {
       if (!empty($build[$field])) {
@@ -1948,6 +2102,9 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
       'sku'                => t('Part #'),
       'classCode'          => t('Manufacturer'),
       'priceUnit'          => t('UOM'),
+      'prodLength'         => t('Length'),
+      'prodWidth'          => t('Width'),
+      'prodHeight'         => t('Height'),
       'title'              => t('Description'),
       'substitutes'        => t('Related products'),
     );
