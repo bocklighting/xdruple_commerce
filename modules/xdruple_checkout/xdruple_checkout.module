@@ -313,6 +313,8 @@ function xdruple_checkout_commerce_checkout_complete($order) {
   $sales_order->shiptoPostalCode = $ship_to_address->postalCode;
   $sales_order->shiptoCountry = $ship_to_address->country;
 
+  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  $session = extensions_get_session();
   // Loop over the lines and add new lines.
   foreach ($order_wrapper->commerce_line_items->getIterator() as $delta => $line) {
     // Handle normal "product" lines.
@@ -320,7 +322,7 @@ function xdruple_checkout_commerce_checkout_complete($order) {
       // Set the line defaults.
       $sales_order->lineItems[$delta]['scheduleDate'] = xdruple_rescued_scheduled_date('tomorrow');
       $sales_order->lineItems[$delta]['firm'] = false;
-      $sales_order->lineItems[$delta]['site'] = isset($_SESSION['rescued']['site']) ? $_SESSION['rescued']['site'] : $customer->preferredSite;
+      $sales_order->lineItems[$delta]['site'] = $session->getRescued('site', $customer->preferredSite);
       $sales_order->lineItems[$delta]['taxType'] = 'Taxable';
 
       // TODO: Get Unit and Ratios from item.
@@ -365,8 +367,8 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     if (!user_access('administer rescued entities', $user)) {
       unset($_SESSION['access_token']);
       unset($_SESSION['oauth_user']);
-      $cached_user = $_SESSION['rescued']['user'];
-      $_SESSION['rescued']['user'] = 'admin';
+      $cached_user = $session->getRescued('user');
+      $session->setRescued('user', 'admin');
       $sales_order->save();
 
       // Update the 'xtuple_creditcardpayment' with the final order number and
@@ -377,7 +379,7 @@ function xdruple_checkout_commerce_checkout_complete($order) {
 
       unset($_SESSION['access_token']);
       unset($_SESSION['oauth_user']);
-      $_SESSION['rescued']['user'] = $cached_user;
+      $session->setRescued('user', $cached_user);
     } else {
       // For admin users, we can save directly with their OAauth token.
       $sales_order->save();
@@ -404,7 +406,7 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     if (!user_access('administer rescued entities', $user)) {
       unset($_SESSION['access_token']);
       unset($_SESSION['oauth_user']);
-      $_SESSION['rescued']['user'] = $cached_user;
+      $session->setRescued('user', $cached_user);
     }
 
     // TODO: Reset the order status?
@@ -771,7 +773,9 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
   } else {
     // This is a Custom Ship To. Unset the default value.
     unset($form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value']);
-    $_SESSION['rescued']['custom_ship_to'] = true;
+    /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+    $session = extensions_get_session();
+    $session->setRescued('custom_ship_to', true);
   }
 }
 

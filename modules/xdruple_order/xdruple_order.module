@@ -81,23 +81,25 @@ function xdruple_order_rescued_register_clients_resources_alter(&$rescued_client
 function xdruple_order_views_pre_execute($view) {
   if ($view->name === 'xd_pending_orders') {
     // Query on Customer.
-    if (isset($_SESSION['rescued']['customer'])) {
+    /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+    $session = extensions_get_session();
+    if ($session->getRescued('customer')) {
       $view->query->query->propertyConditions[]              = array(
         'column'   => 'customer',
-        'value'    => $_SESSION['rescued']['customer'],
+        'value'    => $session->getRescued('customer'),
         'operator' => '=',
       );
       $view->build_info['count_query']->propertyConditions[] = array(
         'column'   => 'customer',
-        'value'    => $_SESSION['rescued']['customer'],
+        'value'    => $session->getRescued('customer'),
         'operator' => '=',
       );
     }
 
     // Query on Ship To.
-    if (isset($_SESSION['rescued']['ship_to'])) {
+    if ($session->getRescued('ship_to')) {
       // Get the Ship To Name.
-      $shipto_name = entity_load_single('xtuple_xdshipto', $_SESSION['rescued']['ship_to']);
+      $shipto_name = entity_load_single('xtuple_xdshipto', $session->getRescued('ship_to'));
 
       $view->query->query->propertyConditions[]              = array(
         'column'   => 'shiptoName',
