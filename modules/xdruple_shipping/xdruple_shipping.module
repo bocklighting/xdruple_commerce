@@ -45,9 +45,6 @@ function xdruple_shipping_field_storage_pre_update($entity_type, $entity, &$skip
       // that combines the product and package weights. Therefore, there is
       // nothing to do on insert and updates.
 
-      // TODO: Add support for 'xt_physical_dimension' once there is something
-      // on the xTuple side to map it to.
-
       // Add this field to $skip_fields.
       $skip_fields[$field_info['id']] = $field_info;
     }
