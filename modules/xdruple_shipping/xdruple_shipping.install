@@ -105,7 +105,7 @@ function xdruple_shipping_install() {
         'field_name' => $field_name,
         'entity_type' => 'commerce_product',
         'bundle' => 'product',
-        'label' => 'Product Physical Dimensions',
+        'label' => 'Package Physical Dimensions',
       );
       $instance['widget']['weight'] = -10;
       $instance['display']['default']['weight'] = -10;
