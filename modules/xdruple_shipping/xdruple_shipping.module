@@ -45,9 +45,6 @@ function xdruple_shipping_field_storage_pre_update($entity_type, $entity, &$skip
       // that combines the product and package weights. Therefore, there is
       // nothing to do on insert and updates.
 
-      // TODO: Add support for 'xt_physical_dimension' once there is something
-      // on the xTuple side to map it to.
-
       // Add this field to $skip_fields.
       $skip_fields[$field_info['id']] = $field_info;
     }
@@ -70,10 +67,8 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
     $bundle = $entity_type === 'commerce_product' ? 'product' : $entity_type;
     $instances = field_info_instances($entity_type, $bundle);
     foreach ($instances as $field_name => $instance) {
-      // TODO: Add support for 'xt_physical_dimension' once there is something
-      // on the xTuple side to map it to.
-      //if ($field_name !== 'xt_physical_weight' && $field_name !== 'xt_physical_dimension') {
-      if ($field_name !== 'xt_physical_weight') {
+      // Only act on weight and dimension fields.
+      if ($field_name !== 'xt_physical_weight' && $field_name !== 'xt_physical_dimension') {
         continue;
       }
 
@@ -106,10 +101,40 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
             }
 
             if (!empty($weight)) {
-              // Associate that file with this product entity.
+              // Associate that field with this product entity.
               $entity->xt_physical_weight[LANGUAGE_NONE][0] = array(
                 'weight' => $weight,
                 'unit' => $weightUnit,
+              );
+            }
+          } elseif ($type === 'physical_dimensions') {
+            if (array_key_exists('dimensionUnit', $entity_properties) &&
+              property_exists($entity, 'dimensionUnit') &&
+              !empty($entity->dimensionUnit)) {
+              // Convert unit to commerce_physical.
+              $dimensionUnit = xdruple_shipping_map_physical_dimension_units($entity->dimensionUnit);
+            } else {
+              // Get default UOM.
+              $dimensionUnit = $instances['widget']['settings']['default_unit'];
+            }
+
+            if (property_exists($entity, 'packLength') && !empty($entity->packLength)) {
+              $length = $entity->packLength;
+            }
+            if (property_exists($entity, 'packWidth') && !empty($entity->packWidth)) {
+              $width = $entity->packWidth;
+            }
+            if (property_exists($entity, 'packHeight') && !empty($entity->packHeight)) {
+              $height = $entity->packHeight;
+            }
+
+            if (!empty($length) && !empty($width) && !empty($height)) {
+              // Associate that field with this product entity.
+              $entity->xt_physical_dimension[LANGUAGE_NONE][0] = array(
+                'length' => $length,
+                'width' => $width,
+                'height' => $height,
+                'unit' => $dimensionUnit,
               );
             }
           }
@@ -142,6 +167,30 @@ function xdruple_shipping_map_physical_weight_units($unit) {
     return $unit;
   } else {
     drupal_set_message(t('Weight unit of measure not valid.'), 'warning', false);
+    return false;
+  }
+}
+
+/**
+ * Converts an xTuple UOM to dimension modules unit.
+ * @See: physical_dimension_units()
+ *
+ * @param $unit
+ *   The type of dimension unit whose name should be returned; by default this can
+ *   be in, ft, mm, cm, or m.
+ *
+ * @return
+ *   The valid unit of measurement or FALSE if not found.
+ */
+function xdruple_shipping_map_physical_dimension_units($unit) {
+  $unit = strtolower($unit);
+
+  $valid_units = array_keys(physical_dimension_units());
+
+  if (in_array($unit, $valid_units)) {
+    return $unit;
+  } else {
+    drupal_set_message(t('Dimension unit of measure not valid.'), 'warning', false);
     return false;
   }
 }
