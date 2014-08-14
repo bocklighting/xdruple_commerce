@@ -77,17 +77,6 @@ function xdruple_queries_menu() {
     'type'             => MENU_CALLBACK,
   );
 
-  if (variable_get('xdruple_queries_product_recent_page_enabled', TRUE)) {
-    $items['products/recent'] = array(
-      'title'            => 'Recently ordered',
-      'page callback'    => 'xdruple_queries_products_recent_page',
-      'access callback'  => 'xdruple_access',
-      'access arguments' => array('products/recent', 'view', 'xtuple: access product lists'),
-      'file'             => 'pages/products_recent.inc',
-      'type'             => MENU_LOCAL_TASK,
-    );
-  }
-
   return $items;
 }
 
@@ -115,9 +104,6 @@ function xdruple_queries_rescued_register_clients_resources_alter(&$rescued_clie
   }
   if (!in_array('XdCatalogProduct', $rescued_clients_url_resources['xtuple'])) {
     $rescued_clients_url_resources['xtuple'][] = 'XdCatalogProduct';
-  }
-  if (!in_array('XdCatalogRecentOrd', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'XdCatalogRecentOrd';
   }
 
   return $rescued_clients_url_resources;

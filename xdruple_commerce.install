@@ -32,3 +32,19 @@ function xdruple_commerce_update_7002() {
 
   return t($message);
 }
+
+/**
+ * Recently ordered moved to its own module - xDruple Recent
+ */
+function xdruple_commerce_update_7003() {
+  $message = 'xDruple Recent kept disabled';
+
+  if ($enabled = variable_get('xdruple_queries_product_recent_page_enabled', FALSE)) {
+    module_enable(array('xdruple_recent'));
+    $message = 'xDruple Recent enabled';
+  }
+
+  variable_del('xdruple_queries_product_recent_page_enabled');
+
+  return t($message);
+}

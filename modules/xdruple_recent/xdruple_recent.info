@@ -1,0 +1,6 @@
+name = xDruple Recent
+description = Provides functionality to show recently purchased products
+package = xDruple
+core = 7.x
+
+dependencies[] = xdruple_queries
