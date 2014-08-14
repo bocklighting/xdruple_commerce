@@ -10,7 +10,7 @@
 function xdruple_recent_menu() {
   $items = array();
 
-  $items['products/recent'] = array(
+  $items['user/%user/recent'] = array(
     'title' => 'Recently ordered',
     'page callback' => 'xdruple_recent_products_recent_page',
     'access callback' => 'xdruple_access',
