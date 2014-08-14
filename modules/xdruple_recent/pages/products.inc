@@ -7,7 +7,7 @@
 /**
  * Page callback
  */
-function xdruple_queries_products_recent_page() {
+function xdruple_recent_products_recent_page() {
   $output = '';
 
   $params = array(
