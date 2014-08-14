@@ -1,11 +1,659 @@
 <?php
 
 /**
+ * Implements hook_install()
+ */
+function xdruple_commerce_install() {
+  // Call rescued_field_extra_fields() so all erp fields get created.
+  // Then we set them up below.
+  rescued_field_extra_fields();
+
+  drupal_flush_all_caches();
+  drupal_static_reset();
+
+  // Remove default "Address" fields Drupal Commerce creates.
+  $billing_address = field_info_instance('commerce_customer_profile', 'commerce_customer_address', 'billing');
+  if (isset($billing_address)) {
+    field_delete_instance($billing_address, TRUE);
+  }
+  $shipping_address = field_info_instance('commerce_customer_profile', 'commerce_customer_address', 'shipping');
+  if (isset($shipping_address)) {
+    field_delete_instance($shipping_address, TRUE);
+  }
+
+  // Instead of waiting for cron to run, delete these fields now.
+  field_purge_batch(10);
+
+  if (!field_info_field('xd_customer')) {
+    $field = array(
+      'field_name' => 'xd_customer',
+      'type' => 'entityreference',
+      'cardinality' => 1,
+      'module' => 'entityreference',
+      'settings' => array(
+        'target_type' => 'xtuple_xdcustomerrelation',
+        'handler' => 'efq_views',
+        'handler_settings' => array(
+          'view' => array(
+            'view_name' => 'xd_customer_list',
+            'display_name' => 'entityreference_efq_views_1',
+            'args' => array(),
+          ),
+          'behaviors' => array(
+            'views-select-list' => array(
+              'status' => 0,
+            ),
+            'reference-nkey' => array(
+              'status' => 1,
+            ),
+          ),
+        ),
+      ),
+      'field_permissions' => array(
+        'type' => 2,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_customer_profile', 'xd_customer', 'billing');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_customer',
+        'entity_type' => 'commerce_customer_profile',
+        'bundle' => 'billing',
+        'label' => 'Customer',
+        'required' => TRUE,
+        'widget' => array(
+          'weight' => -30,
+          'type' => 'options_select',
+          'module' => 'options',
+          'active' => 1,
+          'settings' => array(),
+        ),
+        'settings' => array(
+          'behaviors' => array(
+            'prepopulate' => array(
+              'status' => 1,
+              'action' => 'disable',
+              'action_on_edit' => 1,
+              'fallback' => 'none',
+              'skip_perm_add' => '0',
+              'skip_perm_edit' => '0',
+              'og_context' => 0,
+            ),
+          ),
+          'user_register_form' => FALSE,
+        ),
+        'default_value' => NULL,
+        'default_value_function' => 'entityreference_prepopulate_field_default_value',
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'entityreference_label',
+            'weight' => -30,
+            'settings' => array(
+              'link' => FALSE,
+            ),
+            'module' => 'entityreference',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+
+  if (!field_info_field('xd_bill_to_contact')) {
+    //$foo = field_info_field('xd_bill_to_contact');
+    $field = array(
+      'field_name' => 'xd_bill_to_contact',
+      'type' => 'entityreference',
+      'cardinality' => 1,
+      'module' => 'entityreference',
+      'settings' => array(
+        'target_type' => 'xtuple_xdcontact',
+        'handler' => 'efq_views',
+        'handler_settings' => array(
+          'view' => array(
+            'view_name' => 'xd_contact_list',
+            'display_name' => 'entityreference_efq_views_1',
+            'args' => array(),
+          ),
+          'behaviors' => array(
+            'views-select-list' => array(
+              'status' => 0,
+            ),
+            'reference-nkey' => array(
+              'status' => 1,
+            ),
+          ),
+        ),
+      ),
+      'field_permissions' => array(
+        'type' => 2,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_customer_profile', 'xd_bill_to_contact', 'billing');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_bill_to_contact',
+        'entity_type' => 'commerce_customer_profile',
+        'bundle' => 'billing',
+        'label' => 'Bill To Contact',
+        'required' => TRUE,
+        'widget' => array(
+          'weight' => -20,
+          'type' => 'inline_entity_form_single',
+          'module' => 'inline_entity_form',
+          'active' => 1,
+          'settings' => array(
+            'fields' => array(),
+            'type_settings' => array(
+              'allow_existing' => TRUE,
+              'match_operator' => 'CONTAINS',
+              'existing_widget' => 'options_select',
+              'delete_references' => 0,
+              'existing_widget_settings' => array(
+                'module' => 'options',
+                'type' => 'options_select',
+                'multiple_entities' => TRUE,
+                'cardinality' => 1
+              ),
+            ),
+            'match_operator' => 'CONTAINS',
+          ),
+        ),
+        'settings' => array(
+          'behaviors' => array(
+            'prepopulate' => array(
+              'status' => 1,
+              'action' => 'disable',
+              'action_on_edit' => 1,
+              'fallback' => 'none',
+              'skip_perm_add' => 'create personal rescued entities',
+              'skip_perm_edit' => '0',
+              'og_context' => 0,
+            ),
+          ),
+          'user_register_form' => FALSE,
+        ),
+        'default_value' => NULL,
+        'default_value_function' => 'entityreference_prepopulate_field_default_value',
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'entityreference_entity_view',
+            'weight' => -20,
+            'settings' => array(
+              'view_mode' => '',
+              'link' => FALSE,
+            ),
+            'module' => 'entityreference',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+
+  if (!field_info_field('xd_bill_to_address')) {
+    $field = array(
+      'field_name' => 'xd_bill_to_address',
+      'type' => 'entityreference',
+      'cardinality' => 1,
+      'module' => 'entityreference',
+      'settings' => array(
+        'target_type' => 'xtuple_xdaddress',
+        'handler' => 'efq_views',
+        'handler_settings' => array(
+          'view' => array(
+            'view_name' => 'xd_address_list',
+            'display_name' => 'entityreference_efq_views_1',
+            'args' => array(),
+          ),
+          'behaviors' => array(
+            'views-select-list' => array(
+              'status' => 0,
+            ),
+            'reference-nkey' => array(
+              'status' => 1,
+            ),
+          ),
+        ),
+      ),
+      'field_permissions' => array(
+        'type' => 2,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_customer_profile', 'xd_bill_to_address', 'billing');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_bill_to_address',
+        'entity_type' => 'commerce_customer_profile',
+        'bundle' => 'billing',
+        'label' => 'Bill To Address',
+        'required' => TRUE,
+        'widget' => array(
+          'weight' => -10,
+          'type' => 'inline_entity_form_single',
+          'module' => 'inline_entity_form',
+          'active' => 1,
+          'settings' => array(
+            'fields' => array(),
+            'type_settings' => array(
+              'allow_existing' => TRUE,
+              'match_operator' => 'CONTAINS',
+              'existing_widget' => 'options_select',
+              'delete_references' => 0,
+              'existing_widget_settings' => array(
+                'module' => 'options',
+                'type' => 'options_select',
+                'multiple_entities' => TRUE,
+                'cardinality' => 1
+              ),
+            ),
+            'match_operator' => 'CONTAINS',
+          ),
+        ),
+        'settings' => array(
+          'behaviors' => array(
+            'prepopulate' => array(
+              'status' => 1,
+              'action' => 'disable',
+              'action_on_edit' => 1,
+              'fallback' => 'none',
+              'skip_perm_add' => 'create personal rescued entities',
+              'skip_perm_edit' => '0',
+              'og_context' => 0,
+            ),
+          ),
+          'user_register_form' => FALSE,
+        ),
+        'default_value' => NULL,
+        'default_value_function' => 'entityreference_prepopulate_field_default_value',
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'entityreference_entity_view',
+            'weight' => -10,
+            'settings' => array(
+              'view_mode' => '',
+              'link' => FALSE,
+            ),
+            'module' => 'entityreference',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+
+  if (!field_info_field('xd_ship_to')) {
+    $field = array(
+      'field_name' => 'xd_ship_to',
+      'type' => 'entityreference',
+      'cardinality' => 1,
+      'module' => 'entityreference',
+      'settings' => array(
+        'target_type' => 'xtuple_xdshipto',
+        'handler' => 'efq_views',
+        'handler_settings' => array(
+          'view' => array(
+            'view_name' => 'xd_ship_to_list',
+            'display_name' => 'entityreference_efq_views_1',
+            'args' => array(),
+          ),
+          'behaviors' => array(
+            'views-select-list' => array(
+              'status' => 0,
+            ),
+            'reference-nkey' => array(
+              'status' => 1,
+            ),
+          ),
+        ),
+      ),
+      'field_permissions' => array(
+        'type' => 2,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_customer_profile', 'xd_ship_to', 'shipping');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_ship_to',
+        'entity_type' => 'commerce_customer_profile',
+        'bundle' => 'shipping',
+        'label' => 'Ship To',
+        'widget' => array(
+          'weight' => -30,
+          'type' => 'options_select',
+          'module' => 'options',
+          'active' => 1,
+          'settings' => array(),
+        ),
+        'settings' => array(
+          'behaviors' => array(
+            'prepopulate' => array(
+              'status' => 1,
+              'action' => 'disable',
+              'action_on_edit' => 0,
+              'fallback' => 'none',
+              'skip_perm_add' => 'create personal rescued entities',
+              'skip_perm_edit' => 'edit personal rescued entities',
+              'og_context' => 0,
+            ),
+          ),
+          'user_register_form' => FALSE,
+        ),
+        'default_value' => NULL,
+        'default_value_function' => 'entityreference_prepopulate_field_default_value',
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'entityreference_entity_view',
+            'weight' => -30,
+            'settings' => array(
+              'view_mode' => '',
+              'link' => FALSE,
+            ),
+            'module' => 'entityreference',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+
+  if (!field_info_field('xd_ship_to_contact')) {
+    $field = array(
+      'field_name' => 'xd_ship_to_contact',
+      'type' => 'entityreference',
+      'cardinality' => 1,
+      'module' => 'entityreference',
+      'settings' => array(
+        'target_type' => 'xtuple_xdcontact',
+        'handler' => 'efq_views',
+        'handler_settings' => array(
+          'view' => array(
+            'view_name' => 'xd_contact_list',
+            'display_name' => 'entityreference_efq_views_1',
+            'args' => array(),
+          ),
+          'behaviors' => array(
+            'views-select-list' => array(
+              'status' => 0,
+            ),
+            'reference-nkey' => array(
+              'status' => 1,
+            ),
+          ),
+        ),
+      ),
+      'field_permissions' => array(
+        'type' => 2,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_customer_profile', 'xd_ship_to_contact', 'shipping');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_ship_to_contact',
+        'entity_type' => 'commerce_customer_profile',
+        'bundle' => 'shipping',
+        'label' => 'Ship To Contact',
+        'widget' => array(
+          'weight' => -20,
+          'type' => 'inline_entity_form_single',
+          'module' => 'inline_entity_form',
+          'active' => 1,
+          'settings' => array(
+            'fields' => array(),
+            'type_settings' => array(
+              'allow_existing' => TRUE,
+              'match_operator' => 'CONTAINS',
+              'existing_widget' => 'options_select',
+              'delete_references' => 0,
+              'existing_widget_settings' => array(
+                'module' => 'options',
+                'type' => 'options_select',
+                'multiple_entities' => TRUE,
+                'cardinality' => 1
+              ),
+            ),
+            'match_operator' => 'CONTAINS',
+          ),
+        ),
+        'settings' => array(
+          'behaviors' => array(
+            'prepopulate' => array(
+              'status' => 0,
+            ),
+          ),
+          'user_register_form' => FALSE,
+        ),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'entityreference_entity_view',
+            'weight' => -20,
+            'settings' => array(
+              'view_mode' => '',
+              'link' => FALSE,
+            ),
+            'module' => 'entityreference',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+
+  if (!field_info_field('xd_ship_to_address')) {
+    $field = array(
+      'field_name' => 'xd_ship_to_address',
+      'type' => 'entityreference',
+      'cardinality' => 1,
+      'module' => 'entityreference',
+      'settings' => array(
+        'target_type' => 'xtuple_xdaddress',
+        'handler' => 'efq_views',
+        'handler_settings' => array(
+          'view' => array(
+            'view_name' => 'xd_address_list',
+            'display_name' => 'entityreference_efq_views_1',
+            'args' => array(),
+          ),
+          'behaviors' => array(
+            'views-select-list' => array(
+              'status' => 0,
+            ),
+            'reference-nkey' => array(
+              'status' => 1,
+            ),
+          ),
+        ),
+      ),
+      'field_permissions' => array(
+        'type' => 2,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_customer_profile', 'xd_ship_to_address', 'shipping');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_ship_to_address',
+        'entity_type' => 'commerce_customer_profile',
+        'bundle' => 'shipping',
+        'label' => 'Ship To Address',
+        'widget' => array(
+          'weight' => -10,
+          'type' => 'inline_entity_form_single',
+          'module' => 'inline_entity_form',
+          'active' => 1,
+          'settings' => array(
+            'fields' => array(),
+            'type_settings' => array(
+              'allow_existing' => TRUE,
+              'match_operator' => 'CONTAINS',
+              'existing_widget' => 'options_select',
+              'delete_references' => 0,
+              'existing_widget_settings' => array(
+                'module' => 'options',
+                'type' => 'options_select',
+                'multiple_entities' => TRUE,
+                'cardinality' => 1
+              ),
+            ),
+            'match_operator' => 'CONTAINS',
+          ),
+        ),
+        'settings' => array(
+          'behaviors' => array(
+            'prepopulate' => array(
+              'status' => 0,
+            ),
+          ),
+          'user_register_form' => FALSE,
+        ),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'entityreference_entity_view',
+            'weight' => -10,
+            'settings' => array(
+              'view_mode' => '',
+              'link' => FALSE,
+            ),
+            'module' => 'entityreference',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+
+  if (!field_info_field('xd_order_po_number')) {
+    $field = array(
+      'field_name' => 'xd_order_po_number',
+      'type' => 'text',
+      'cardinality' => 1,
+      'module' => 'text',
+      'field_permissions' => array(
+        'type' => 0,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_order', 'xd_order_po_number', 'commerce_order');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_order_po_number',
+        'entity_type' => 'commerce_order',
+        'bundle' => 'commerce_order',
+        'label' => 'PO Number',
+        'widget' => array(
+          'weight' => -5,
+          'type' => 'text_textfield',
+          'module' => 'text',
+          'active' => 1,
+          'settings' => array(
+            'size' => 30,
+          ),
+        ),
+        'settings' => array(
+          'text_processing' => 0,
+          'user_register_form' => FALSE,
+        ),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'text_default',
+            'weight' => -5,
+            'module' => 'text',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+
+  if (!field_info_field('xd_order_notes')) {
+    $field = array(
+      'field_name' => 'xd_order_notes',
+      'type' => 'text_with_summary',
+      'cardinality' => 1,
+      'module' => 'text',
+      'field_permissions' => array(
+        'type' => 0,
+      ),
+    );
+    field_create_field($field);
+
+    $instance = field_info_instance('commerce_order', 'xd_order_notes', 'commerce_order');
+    if (is_null($instance)) {
+      $instance = array(
+        'field_name' => 'xd_order_notes',
+        'entity_type' => 'commerce_order',
+        'bundle' => 'commerce_order',
+        'label' => 'Order Notes',
+        'widget' => array(
+          'weight' => -4,
+          'type' => 'text_textarea_with_summary',
+          'module' => 'text',
+          'active' => 1,
+          'settings' => array(
+            'rows' => 3,
+          ),
+        ),
+        'settings' => array(
+          'display_summary' => 0,
+          'text_processing' => 0,
+          'user_register_form' => FALSE,
+        ),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'text_default',
+            'weight' => -4,
+            'module' => 'text',
+          ),
+        ),
+      );
+      field_create_instance($instance);
+    }
+  }
+}
+
+/**
  * Implements hook_enable().
  */
 function xdruple_commerce_enable() {
   // Clear caches so xdruple_commerce module can override commerce module.
-  cache_clear_all();
+  drupal_flush_all_caches();
+  drupal_static_reset();
+
+  // Remove 'commerce_customer_address' fields on customer profiles. We use
+  // xTuple integrated custom fields for this.
+  $field_name = 'commerce_customer_address';
+  foreach (commerce_customer_profile_types() as $profile_type) {
+    $instance = field_info_instance('commerce_customer_profile', $field_name, $profile_type['type']);
+
+    if (!empty($instance)) {
+      // Delete the instance and field.
+      // TODO: Do we really need to delete the field or just the instance?
+      // This shouldn't be ran on an existing site that could have data in this
+      // field, but that should never really happen. An existing site would
+      // need to be migrated to an xTuple enabled site.
+      field_delete_instance($instance, TRUE);
+    }
+  }
 }
 
 /**
