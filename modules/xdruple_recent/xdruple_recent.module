@@ -11,12 +11,12 @@ function xdruple_recent_menu() {
   $items = array();
 
   $items['products/recent'] = array(
-    'title'            => 'Recently ordered',
-    'page callback'    => 'xdruple_recent_products_recent_page',
-    'access callback'  => 'xdruple_access',
+    'title' => 'Recently ordered',
+    'page callback' => 'xdruple_recent_products_recent_page',
+    'access callback' => 'xdruple_access',
     'access arguments' => array('products/recent', 'view', 'xtuple: access product lists'),
-    'file'             => 'pages/products.inc',
-    'type'             => MENU_LOCAL_TASK,
+    'file' => 'pages/products.inc',
+    'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
