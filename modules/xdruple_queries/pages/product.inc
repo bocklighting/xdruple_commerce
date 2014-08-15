@@ -14,6 +14,8 @@
 function xdruple_queries_product_page($product_id) {
   if (!is_numeric($product_id)) {
     drupal_not_found();
+
+    return MENU_NOT_FOUND;
   }
 
   $output = '';
@@ -59,9 +61,11 @@ function xdruple_queries_product_page($product_id) {
 function xdruple_queries_product_page_title($product_id) {
   $title = '';
 
-  $product = entity_load_single('commerce_product', $product_id);
-  if (!empty($product)) {
-    $title = $product->title;
+  if (is_numeric($product_id)) {
+    $product = entity_load_single('commerce_product', $product_id);
+    if (!empty($product)) {
+      $title = $product->title;
+    }
   }
 
   return $title;

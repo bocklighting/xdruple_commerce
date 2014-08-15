@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @file keeps Drupal core hooks implementation
+ */
+
+/**
+ * Implements hook_menu()
+ */
+function xdruple_recent_menu() {
+  $items = array();
+
+  $items['user/%user/recent'] = array(
+    'title' => 'Recently ordered',
+    'page callback' => 'xdruple_recent_products_recent_page',
+    'access callback' => 'xdruple_access',
+    'access arguments' => array('products/recent', 'view', 'xtuple: access product lists'),
+    'file' => 'pages/products.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_rescued_register_clients_resources_alter().
+ */
+function xdruple_recent_rescued_register_clients_resources_alter(&$rescued_clients_url_resources) {
+  if (!in_array('XdCatalogRecentOrd', $rescued_clients_url_resources['xtuple'])) {
+    $rescued_clients_url_resources['xtuple'][] = 'XdCatalogRecentOrd';
+  }
+
+  return $rescued_clients_url_resources;
+}
