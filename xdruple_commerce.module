@@ -2438,3 +2438,57 @@ function xdruple_commerce_rules_compare_address($order, $address_field, $compone
 
   return FALSE;
 }
+
+/**
+ * Implements hook_module_implements_alter()
+ */
+function xdruple_commerce_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'modules_enabled') {
+    $group = $implementations['xdruple_commerce'];
+    unset($implementations['xdruple_commerce']);
+    $implementations['xdruple_commerce'] = $group;
+  }
+}
+
+/**
+ * Implements hook_modules_enabled()
+ *
+ * - commerce_customer_modules_enabled() calls commerce_customer_configure_customer_fields() to ensure that all
+ * modules that implement hook_commerce_customer_profile_type_info() were invoked and all profile type have
+ * commerce_customer_address field. xDruple Commerce provides own fields to handle that and so this field should
+ * always be removed
+ *
+ * @see commerce_customer_modules_enabled()
+ * @see commerce_customer_configure_customer_fields()
+ * @see commerce_customer_profile_type_info()
+ */
+function xdruple_commerce_modules_enabled($modules) {
+  _xdruple_commerce_remove_commerce_customer_address();
+}
+
+/**
+ * Helper functions. Removes all 'commerce_customer_address' fields.
+ */
+function _xdruple_commerce_remove_commerce_customer_address() {
+  // Clear caches so xdruple_commerce module can override commerce module.
+  drupal_flush_all_caches();
+  drupal_static_reset();
+
+  // Remove 'commerce_customer_address' fields on customer profiles. We use
+  // xTuple integrated custom fields for this.
+  $field_name = 'commerce_customer_address';
+  foreach (commerce_customer_profile_types() as $profile_type) {
+    $instance = field_info_instance('commerce_customer_profile', $field_name, $profile_type['type']);
+
+    if (!empty($instance)) {
+      // Delete the instance and field.
+      // TODO: Do we really need to delete the field or just the instance?
+      // This shouldn't be ran on an existing site that could have data in this
+      // field, but that should never really happen. An existing site would
+      // need to be migrated to an xTuple enabled site.
+      field_delete_instance($instance, TRUE);
+    }
+  }
+
+  field_purge_batch(10);
+}

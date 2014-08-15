@@ -11,19 +11,6 @@ function xdruple_commerce_install() {
   drupal_flush_all_caches();
   drupal_static_reset();
 
-  // Remove default "Address" fields Drupal Commerce creates.
-  $billing_address = field_info_instance('commerce_customer_profile', 'commerce_customer_address', 'billing');
-  if (isset($billing_address)) {
-    field_delete_instance($billing_address, TRUE);
-  }
-  $shipping_address = field_info_instance('commerce_customer_profile', 'commerce_customer_address', 'shipping');
-  if (isset($shipping_address)) {
-    field_delete_instance($shipping_address, TRUE);
-  }
-
-  // Instead of waiting for cron to run, delete these fields now.
-  field_purge_batch(10);
-
   if (!field_info_field('xd_customer')) {
     $field = array(
       'field_name' => 'xd_customer',
@@ -627,31 +614,6 @@ function xdruple_commerce_install() {
         ),
       );
       field_create_instance($instance);
-    }
-  }
-}
-
-/**
- * Implements hook_enable().
- */
-function xdruple_commerce_enable() {
-  // Clear caches so xdruple_commerce module can override commerce module.
-  drupal_flush_all_caches();
-  drupal_static_reset();
-
-  // Remove 'commerce_customer_address' fields on customer profiles. We use
-  // xTuple integrated custom fields for this.
-  $field_name = 'commerce_customer_address';
-  foreach (commerce_customer_profile_types() as $profile_type) {
-    $instance = field_info_instance('commerce_customer_profile', $field_name, $profile_type['type']);
-
-    if (!empty($instance)) {
-      // Delete the instance and field.
-      // TODO: Do we really need to delete the field or just the instance?
-      // This shouldn't be ran on an existing site that could have data in this
-      // field, but that should never really happen. An existing site would
-      // need to be migrated to an xTuple enabled site.
-      field_delete_instance($instance, TRUE);
     }
   }
 }
