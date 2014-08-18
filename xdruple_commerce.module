@@ -1146,6 +1146,8 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
  * the user.
  */
 function xdruple_commerce_user_reg_form_validate(&$element_form, &$form_state, $complete_form) {
+  global $rescued_clients;
+
   // Figure out if create_xtuple_user_association flag is set.
   $create_association = false;
   if (isset($form_state['values']['create_xtuple_user_association'])) {
@@ -1237,9 +1239,10 @@ function xdruple_commerce_user_reg_form_validate(&$element_form, &$form_state, $
   if (isset($element_form['#id']) && $element_form['#id'] === 'edit-xd-contact-association-und-form-xdruple-site') {
     if (!empty($create_association)) {
       $site_parents = $element_form['#parents'];
+      $site_name = $rescued_clients['xtuple']['settings']['discovery']['application_name'];
 
       // Set the site to the default before we save.
-      drupal_array_set_nested_value($form_state['values'], $site_parents, 'b2c');
+      drupal_array_set_nested_value($form_state['values'], $site_parents, $site_name);
     }
   }
 
