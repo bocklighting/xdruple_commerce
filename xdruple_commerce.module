@@ -2451,12 +2451,6 @@ function xdruple_commerce_module_implements_alter(&$implementations, $hook) {
     unset($implementations['xdruple_commerce']);
     $implementations['xdruple_commerce'] = $group;
   }
-  if ($hook == 'views_default_view_alter') {
-    // Disable commerce_cart_views_default_views_alter() call to avoid fix_missing_relationships() error
-    if (!empty($implementations['commerce_cart'])) {
-      unset($implementations['commerce_cart']);
-    }
-  }
 }
 
 /**
@@ -2500,4 +2494,15 @@ function _xdruple_commerce_remove_commerce_customer_address() {
   }
 
   field_purge_batch(10);
+}
+
+/**
+ * Implements hook_views_default_views_alter()
+ */
+function xdruple_commerce_views_default_views_alter(&$views) {
+  $commerce_orders = variable_get('commerce_orders_view_name', 'commerce_orders');
+  if (isset($views[$commerce_orders])) {
+    unset($views[$commerce_orders]->display['shopping_carts']);
+    unset($views[$commerce_orders]->display['default']->display_options['filters']);
+  }
 }
