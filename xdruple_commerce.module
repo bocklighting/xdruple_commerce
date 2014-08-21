@@ -2091,6 +2091,7 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
       'prodLength',
       'prodWidth',
       'prodHeight',
+      'dimensionUnit',
     );
     foreach ($inline_labels as $field) {
       if (!empty($build[$field])) {
