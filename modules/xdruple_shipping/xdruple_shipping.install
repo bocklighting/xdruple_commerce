@@ -40,8 +40,8 @@ function xdruple_shipping_install() {
     $default_unit = $default_unit ? $default_unit : 'oz';
 
     // Add 'commerce_product' instance.
-    $instance = field_info_instance('commerce_product', $field_name, 'product');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_product', $field_name, 'product');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => $field_name,
         'entity_type' => 'commerce_product',
@@ -57,8 +57,8 @@ function xdruple_shipping_install() {
 
     // Add 'xtuple_xdproduct' instance.
     $entity_type = 'xtuple_xdproduct';
-    $instance = field_info_instance($entity_type, $field_name, $entity_type);
-    if (is_null($instance)) {
+    $instance = field_read_instance($entity_type, $field_name, $entity_type);
+    if (empty($instance)) {
       $instance = array(
         'field_name' => $field_name,
         'entity_type' => $entity_type,
@@ -99,8 +99,8 @@ function xdruple_shipping_install() {
   // Add field instances.
   if (field_info_field($field_name)) {
     // Add 'commerce_product' instance.
-    $instance = field_info_instance('commerce_product', $field_name, 'product');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_product', $field_name, 'product');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => $field_name,
         'entity_type' => 'commerce_product',
@@ -114,8 +114,8 @@ function xdruple_shipping_install() {
 
     // Add 'xtuple_xdproduct' instance.
     $entity_type = 'xtuple_xdproduct';
-    $instance = field_info_instance($entity_type, $field_name, $entity_type);
-    if (is_null($instance)) {
+    $instance = field_read_instance($entity_type, $field_name, $entity_type);
+    if (empty($instance)) {
       $instance = array(
         'field_name' => $field_name,
         'entity_type' => $entity_type,

@@ -42,8 +42,8 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_info_instance('commerce_customer_profile', 'xd_customer', 'billing');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_customer_profile', 'xd_customer', 'billing');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_customer',
         'entity_type' => 'commerce_customer_profile',
@@ -121,8 +121,8 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_info_instance('commerce_customer_profile', 'xd_bill_to_contact', 'billing');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_customer_profile', 'xd_bill_to_contact', 'billing');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_bill_to_contact',
         'entity_type' => 'commerce_customer_profile',
@@ -215,8 +215,8 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_info_instance('commerce_customer_profile', 'xd_bill_to_address', 'billing');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_customer_profile', 'xd_bill_to_address', 'billing');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_bill_to_address',
         'entity_type' => 'commerce_customer_profile',
@@ -309,8 +309,8 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_info_instance('commerce_customer_profile', 'xd_ship_to', 'shipping');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_customer_profile', 'xd_ship_to', 'shipping');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_ship_to',
         'entity_type' => 'commerce_customer_profile',
@@ -387,8 +387,8 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_info_instance('commerce_customer_profile', 'xd_ship_to_contact', 'shipping');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_customer_profile', 'xd_ship_to_contact', 'shipping');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_ship_to_contact',
         'entity_type' => 'commerce_customer_profile',
@@ -472,8 +472,8 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_info_instance('commerce_customer_profile', 'xd_ship_to_address', 'shipping');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_customer_profile', 'xd_ship_to_address', 'shipping');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_ship_to_address',
         'entity_type' => 'commerce_customer_profile',
@@ -538,8 +538,8 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_info_instance('commerce_order', 'xd_order_po_number', 'commerce_order');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_order', 'xd_order_po_number', 'commerce_order');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_order_po_number',
         'entity_type' => 'commerce_order',
@@ -583,8 +583,8 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_info_instance('commerce_order', 'xd_order_notes', 'commerce_order');
-    if (is_null($instance)) {
+    $instance = field_read_instance('commerce_order', 'xd_order_notes', 'commerce_order');
+    if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_order_notes',
         'entity_type' => 'commerce_order',
