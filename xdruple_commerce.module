@@ -1,5 +1,9 @@
 <?php
 
+define('LABEL_INLINE', 'inline');
+define('LABEL_ABOVE', 'above');
+define('LABEL_HIDDEN', 'hidden');
+
 /**
  * Implements hook_compass_module()
  */
@@ -2081,53 +2085,7 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
   }
 
   if ($type == 'commerce_product' && $build['#view_mode'] == 'full') {
-    $inline_labels = array(
-      'classCode',
-      'productCategory',
-      'sku',
-      'priceUnit',
-      'title',
-      'barcode',
-      'prodLength',
-      'prodWidth',
-      'prodHeight',
-      'dimensionUnit',
-    );
-    foreach ($inline_labels as $field) {
-      if (!empty($build[$field])) {
-        $build[$field]['#label_display'] = 'inline';
-      }
-    }
-
-    $labels_title = array(
-      'productCategory'    => t('Category'),
-      'extDescrip'         => t('Extended description'),
-      'xt_physical_weight' => t('Weight'),
-      'sku'                => t('Part #'),
-      'classCode'          => t('Manufacturer'),
-      'priceUnit'          => t('UOM'),
-      'prodLength'         => t('Length'),
-      'prodWidth'          => t('Width'),
-      'prodHeight'         => t('Height'),
-      'title'              => t('Description'),
-      'substitutes'        => t('Related products'),
-    );
-    foreach ($labels_title as $field => $title) {
-      $build[$field]['#title'] = $title;
-    }
-
-    if (!empty($build['substitutes']['#items'])) {
-      foreach ($build['substitutes']['#items'] as $i => $product_id) {
-        $build['substitutes'][$i] = array(
-          '#theme' => 'xdruple_commerce_similar_product_link_default',
-          '#product_id' => $product_id,
-          '#style' => 'ft_commerce_product_thumb',
-        );
-      }
-    }
-    else {
-      $build['substitutes']['#access'] = FALSE;
-    }
+    _xdruple_commerce_product_entity_view_alter($build);
   }
 }
 
@@ -2505,5 +2463,163 @@ function xdruple_commerce_views_default_views_alter(&$views) {
   if (isset($views[$commerce_orders])) {
     unset($views[$commerce_orders]->display['shopping_carts']);
     unset($views[$commerce_orders]->display['default']->display_options['filters']);
+  }
+}
+
+/**
+ * Builds configuration for Product entity full display.
+ *
+ * @return array
+ */
+function xdruple_commerce_get_product_display_config() {
+  $config = array(
+    'title' => array(
+      'title' => 'Description',
+      'label' => LABEL_INLINE,
+    ),
+    'classCode' => array(
+      'title' => 'Manufacturer',
+      'label' => LABEL_INLINE,
+    ),
+    'productCategory' => array(
+      'title' => 'Category',
+      'label' => LABEL_INLINE,
+    ),
+    'sku' => array(
+      'title' => 'Part #',
+      'label' => LABEL_INLINE,
+    ),
+    'priceUnit' => array(
+      'title' => 'UOM',
+      'label' => LABEL_INLINE,
+    ),
+    'prodWidth' => array(
+      'title' => 'Width',
+      'label' => LABEL_INLINE,
+    ),
+    'prodLength' => array(
+      'title' => 'Length',
+      'label' => LABEL_INLINE,
+    ),
+    'prodHeight' => array(
+      'title' => 'Height',
+      'label' => LABEL_INLINE,
+    ),
+    'dimensionUnit' => array(
+      'title' => '',
+      'label' => LABEL_INLINE,
+    ),
+    'barcode' => array(
+      'title' => '',
+      'label' => LABEL_INLINE,
+    ),
+    'xt_physical_weight' => array(
+      'title' => 'Weight',
+      'label' => LABEL_INLINE,
+    ),
+    'xt_physical_dimension' => array(
+      'title' => 'Dimension',
+      'label' => LABEL_INLINE,
+    ),
+    'extDescrip' => array(
+      'title' => 'Extended description',
+      'label' => LABEL_ABOVE,
+    ),
+    'xt_url_image_field' => array(
+      'label' => LABEL_HIDDEN,
+    ),
+    'xt_url_file_field' => array(
+      'title' => 'Product files',
+      'label' => LABEL_ABOVE,
+    ),
+    'substitutes' => array(
+      'title' => 'Related products',
+      'label' => LABEL_ABOVE,
+    ),
+  );
+
+  // Add default weight value
+  $weight = 0;
+  foreach ($config as &$item) {
+    $item += array(
+      'title' => '',
+      'label' => LABEL_INLINE,
+      'weight' => $weight,
+    );
+    $weight++;
+  }
+
+  return $config;
+}
+
+/**
+ * Helper function. Process hook_entity_view_alter() for product entity, full mode
+ *
+ * @see xdruple_commerce_entity_view_alter()
+ * @see hook_entity_view_alter()
+ *
+ * @param $build
+ */
+function _xdruple_commerce_product_entity_view_alter(&$build) {
+  $config = xdruple_commerce_get_product_display_config();
+
+  foreach ($build as $key => &$item) {
+    if (is_array($item) && !empty($item['#theme']) && $item['#theme'] == 'field') {
+      $item['#access'] = false;
+
+      if (!empty($config[$key])) {
+        $field_config = $config[$key];
+
+        if (!empty($field_config['title'])) {
+          $item['#title'] = t($field_config['title']);
+        }
+
+        $item['#label_display'] = $field_config['label'];
+        $item['#weight'] = $field_config['weight'];
+
+        $item['#access'] = true;
+      }
+    }
+  }
+
+  // Overriding any current value for xt_url_image_field display
+  if (!empty($build['xt_url_image_field']['#items']) && $build['xt_url_image_field']['#access']) {
+    $img_field = &$build['xt_url_image_field'];
+    $img_field['#formatter'] = 'fancybox';
+    foreach ($img_field['#items'] as $i => $item) {
+      $img_field[$i] = array(
+        '#theme' => 'fancybox_formatter_default',
+        '#settings' => array(
+          'cyclic' => TRUE,
+          'full' => 'large',
+          'preview' => 'ft_commerce_product_page_thumb_small',
+          'title_position' => 'over',
+          'title_show' => TRUE,
+        ),
+        '#item' => array(
+          'path' => $item['uri'],
+          'width' => $item['width'],
+          'height' => $item['height'],
+          'alt' => $item['alt'],
+          'title' => $item['title'],
+        ),
+        '#class' => array('fancybox-commerce-product-product-xt-url-image-field'),
+        '#rel' => 'fancybox-commerce-product-product-xt-url-image-field',
+      );
+    }
+  }
+
+  // Overriding default substitutes property to be themed
+  if (!empty($build['substitutes']['#items'])) {
+    foreach ($build['substitutes']['#items'] as $i => $product_id) {
+      $build['substitutes'][$i] = array(
+        '#theme' => 'xdruple_commerce_similar_product_link_default',
+        '#product_id' => $product_id,
+        '#style' => 'ft_commerce_product_thumb',
+      );
+    }
+  }
+  else {
+    $build['substitutes']['#access'] = FALSE;
   }
 }
