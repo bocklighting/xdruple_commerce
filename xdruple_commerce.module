@@ -301,7 +301,7 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
     $form['drupalUserUuid']['#type'] = 'hidden';
     $form['drupalUserUuid']['#attributes']['disabled'] = TRUE;
     $form['drupalUserUuid']['#required'] = FALSE;
-    $form['drupalUserUuid']['#default_value'] = isset($context['entity']->drupalUserUuid) ? $context['entity']->drupalUserUuid : null;
+    $form['drupalUserUuid']['#default_value'] = isset($context['entity']->drupalUserUuid) ? $context['entity']->drupalUserUuid : xdruple_guidv4();
 
     unset ($form['uuid']);
   }
