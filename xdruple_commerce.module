@@ -19,9 +19,10 @@ function xdruple_commerce_user_login(&$edit, $account) {
     $redirect = variable_get('xdruple_commerce_login_redirect_page', FALSE);
     $frontpage = variable_get('site_frontpage');
 
-    if (!empty($redirect) &&
-       (!isset($_GET['destination']) || $frontpage === $_GET['destination'])) {
-
+    if (!empty($redirect) && !isset($_GET['destination'])) {
+      $edit['redirect'] = $redirect;
+    } elseif (isset($_GET['destination']) && $frontpage === $_GET['destination']) {
+      $_GET['destination'] = $redirect;
       $edit['redirect'] = $redirect;
     }
   }
