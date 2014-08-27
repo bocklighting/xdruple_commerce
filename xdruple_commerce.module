@@ -17,8 +17,11 @@ function xdruple_commerce_compass_module() {
 function xdruple_commerce_user_login(&$edit, $account) {
   if (!isset($_POST['form_id']) || $_POST['form_id'] != 'user_pass_reset') {
     $redirect = variable_get('xdruple_commerce_login_redirect_page', FALSE);
+    $frontpage = variable_get('site_frontpage');
 
-    if (!empty($redirect) && !isset($_GET['destination'])) {
+    if (!empty($redirect) &&
+       (!isset($_GET['destination']) || $frontpage === $_GET['destination'])) {
+
       $edit['redirect'] = $redirect;
     }
   }
