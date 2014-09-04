@@ -2537,6 +2537,10 @@ function xdruple_commerce_get_product_display_config() {
       'title' => 'Product files',
       'label' => LABEL_ABOVE,
     ),
+    'xt_url_link_field' => array(
+      'title' => 'Additional references',
+      'label' => LABEL_ABOVE,
+    ),
     'substitutes' => array(
       'title' => 'Related products',
       'label' => LABEL_ABOVE,
