@@ -852,12 +852,12 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'weight' => -4,
       ),
       'inventoryUnit' => array(
-        'label' => t('Inventory Unit'),
+        'label' => t('Order Quantity UOM'),
         'description' => t('Product module inventory unit form element'),
         'weight' => -4,
       ),
       'priceUnit' => array(
-        'label' => t('Price Unit'),
+        'label' => t('Unit Price UOM'),
         'description' => t('Product module price unit form element'),
         'weight' => -4,
       ),
@@ -971,13 +971,13 @@ function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
         'weight' => -4,
       ),
       'inventoryUnit' => array(
-        'label' => t('Inventory Unit'),
+        'label' => t('Order Quantity UOM'),
         'description' => t('Unit of measure used for inventory'),
         'theme' => 'xdruple_commerce_inventory_unit',
         'weight' => -4,
       ),
       'priceUnit' => array(
-        'label' => t('Price Unit'),
+        'label' => t('Unit Price UOM'),
         'description' => t('Unit of measure used for the price calculation'),
         'theme' => 'xdruple_commerce_price_unit',
         'weight' => -4,
@@ -1698,6 +1698,16 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
   /** @var stdClass $user */
   global $user;
 
+  // Load the product so we can do a UOM conversion to inventoryUnit.
+  $product = entity_load_single('commerce_product', $line_item->commerce_product[LANGUAGE_NONE]['0']['product_id']);
+
+  // Do a conversion to the inventoryUnit.
+  if (!empty($line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'])) {
+    $price = $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'];
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price * $product->uomRatio;
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price * $product->uomRatio;
+  }
+
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
   $session = extensions_get_session();
   if ((!$session->getRescued('customer') || !$session->getRescued('ship_to') || !$session->getRescued('site'))
@@ -1764,8 +1774,10 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
 
   if (isset($price) && $price >= 0) {
     $price = round($price * 100); // Drupal Commerce doesn't use decimals for prices.
-    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
-    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
+
+    // Do a conversion to the inventoryUnit.
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price * $product->uomRatio;
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price * $product->uomRatio;
   }
 }
 
@@ -2495,7 +2507,11 @@ function xdruple_commerce_get_product_display_config() {
       'label' => LABEL_INLINE,
     ),
     'priceUnit' => array(
-      'title' => 'UOM',
+      'title' => 'Unit Price UOM',
+      'label' => LABEL_INLINE,
+    ),
+    'inventoryUnit' => array(
+      'title' => 'Order Quantity UOM',
       'label' => LABEL_INLINE,
     ),
     'prodWidth' => array(
