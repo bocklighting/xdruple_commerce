@@ -203,6 +203,10 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
       $query->propertyCondition('q', urldecode($_GET['search']), 'CONTAINS');
     }
 
+    // Set a default order by so we don't get bogus duplicate results from the xTuple API.
+    // TODO: User a URL query parameter to change 'product_id' it different sort fields.
+    $query->propertyOrderBy('product_id', 'ASC');
+
     $products = $query->execute();
 
     // TODO: The rescued_entity_field_query_builder(EntityFieldQuery $query)
