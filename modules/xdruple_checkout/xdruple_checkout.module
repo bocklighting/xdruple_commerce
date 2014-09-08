@@ -325,14 +325,14 @@ function xdruple_checkout_commerce_checkout_complete($order) {
       $sales_order->lineItems[$delta]['site'] = $session->getRescued('site', $customer->preferredSite);
       $sales_order->lineItems[$delta]['taxType'] = 'Taxable';
 
-      // TODO: Get Unit and Ratios from item.
+      // We use the inventoryUnit for everything. See: xdruple_commerce_get_customer_line_item_price()
       // Set the line details.
       $sales_order->lineItems[$delta]['quantityUnitRatio'] = 1;
       $sales_order->lineItems[$delta]['item'] = $line->line_item_label->value();
       $sales_order->lineItems[$delta]['lineNumber'] = $delta + 1;
       $sales_order->lineItems[$delta]['subNumber'] = 0;
-      $sales_order->lineItems[$delta]['quantityUnit'] = $line->commerce_product->priceUnit->value();
-      $sales_order->lineItems[$delta]['priceUnit'] = $line->commerce_product->priceUnit->value();
+      $sales_order->lineItems[$delta]['quantityUnit'] = $line->commerce_product->inventoryUnit->value();
+      $sales_order->lineItems[$delta]['priceUnit'] = $line->commerce_product->inventoryUnit->value();
       $sales_order->lineItems[$delta]['priceUnitRatio'] = 1;
       $sales_order->lineItems[$delta]['quantity'] = $line->quantity->value();
       $sales_order->lineItems[$delta]['customerPrice'] = ($line->commerce_unit_price->amount->value() / 100);
