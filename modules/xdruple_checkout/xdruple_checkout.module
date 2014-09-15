@@ -99,6 +99,15 @@ function xdruple_checkout_cpanel_alter(&$form, &$form_state) {
       '#rows'          => 2,
     );
   }
+
+  // Manager Email addresses to send order confirmations to.
+  $form['xdruple_commerce_store_settings']['xdruple_checkout_manager_order_confirm_emails'] = array(
+    '#type'          => 'textfield',
+    '#size'          => 60,
+    '#title'         => t('Manager order confirmation emails'),
+    '#description'   => t('A comma seperated list of email addresses that should receive order confirmations. e.g. johndoe@example.com,janedoe@example.com'),
+    '#default_value' => variable_get('xdruple_checkout_manager_order_confirm_emails', null),
+  );
 }
 
 function xdruple_checkout_default_rules_configuration_alter(&$configs) {
@@ -398,6 +407,14 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     // Set email addresses to send order confirmation to.
     if (!empty($ship_to_emails)) {
       $order_wrapper->mail->set($ship_to_emails);
+    }
+
+    // Set email addresses for managers.
+    $manager_emails = variable_get('xdruple_checkout_manager_order_confirm_emails', null);
+    if (!empty($manager_emails)) {
+      $confirm_emails = $order_wrapper->mail->value();
+      $confirm_emails = $confirm_emails . ',' . str_replace(' ', '', $manager_emails);
+      $order_wrapper->mail->set($confirm_emails);
     }
 
     $order_wrapper->save();
