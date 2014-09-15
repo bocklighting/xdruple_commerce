@@ -1744,7 +1744,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
          $site;
   $cache = cache_get($cid, 'cache');
 
-  if (empty($cache)) {
+  if (empty($cache) || xdruple_cache_expired($cache)) {
     $options = array(
       'asOf'      => $date, // The scheduled date for the order.
       'siteId'    => $site,
@@ -1767,7 +1767,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
     // Make the itemPrice service request.
     $price = xdruple_commerce_api_customer_item_price('xtuple', 'Customer', $postBody);
 
-    cache_set($cid, $price, 'cache', CACHE_TEMPORARY);
+    cache_set($cid, $price, 'cache', REQUEST_TIME + 60 * 60 * 10); // Expires 10 hours from now.
   } else {
     $price = $cache->data;
   }
