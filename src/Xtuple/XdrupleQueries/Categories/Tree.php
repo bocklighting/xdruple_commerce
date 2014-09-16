@@ -11,7 +11,7 @@ class Tree {
     $cache = cache_get($cid, 'cache');
     $entity_info = entity_get_info('xtuple_xdcatalog');
 
-    if (empty($cache) && !empty($entity_info)) {
+    if ((empty($cache) || xdruple_cache_expired($cache)) && !empty($entity_info)) {
       $query = new EntityFieldQuery();
       $root_group = $query->entityCondition('entity_type', 'xtuple_xdcatalog')
         ->propertyCondition('catalog', TRUE, '=')
@@ -36,7 +36,7 @@ class Tree {
         }
       }
 
-      cache_set($cid, $catalog, 'cache', CACHE_TEMPORARY);
+      cache_set($cid, $catalog, 'cache', REQUEST_TIME + 60 * 60 * 1); // Expires 1 hour from now.
     }
     else {
       if (!$cache || empty($cache->data)) {
