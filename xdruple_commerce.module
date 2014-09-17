@@ -270,7 +270,7 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
     if (!user_access('administer users')) {
       $form['create_new_customer']['#type'] = 'hidden';
       $form['create_new_customer']['#attributes']['disabled'] = TRUE;
-      $form['create_new_customer']['#default_value'] = TRUE;
+      $form['create_new_customer']['#default_value'] = !isset($context['entity']->is_new) ? $context['entity']->create_new_customer : TRUE;
 
       $form['create_xtuple_user_association']['#type'] = 'hidden';
       $form['create_xtuple_user_association']['#attributes']['disabled'] = TRUE;
