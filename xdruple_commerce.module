@@ -1773,11 +1773,12 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
   }
 
   if (isset($price) && $price >= 0) {
+    // Do a conversion to the inventoryUnit.
+    $price = $price * $product->uomRatio;
     $price = round($price * 100); // Drupal Commerce doesn't use decimals for prices.
 
-    // Do a conversion to the inventoryUnit.
-    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price * $product->uomRatio;
-    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price * $product->uomRatio;
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
   }
 }
 
@@ -2427,6 +2428,15 @@ function xdruple_commerce_module_implements_alter(&$implementations, $hook) {
     unset($implementations['xdruple_commerce']);
     $implementations['xdruple_commerce'] = $group;
   }
+
+  // Moves the xdruple_commerce_commerce_order_load() implementation to the start
+  // of the array so it is invoked before all modules implementing the same hook.
+  if ($hook == 'commerce_order_load') {
+    $xdruple_commerce['xdruple_commerce'] = $implementations['xdruple_commerce'];
+    unset($implementations['xdruple_commerce']);
+    $modules = $implementations;
+    $implementations = array_merge($xdruple_commerce, $modules);
+  }
 }
 
 /**
@@ -2700,3 +2710,69 @@ function xdruple_commerce_form_commerce_checkout_form_review_alter(&$form, $form
   $form['buttons']['back']['#attributes']['class']['btn-danger'] = 'btn-danger';
 }
 
+/**
+ * Implements hook_commerce_order_load().
+ *
+ * Because item could be deactivated in xTuple, we need to make sure the items
+ * in an order (and cart) are valid when loading an order. If they are no
+ * longer valid, we remove them from the order.
+ */
+function xdruple_commerce_commerce_order_load($orders) {
+  $refreshed = &drupal_static(__FUNCTION__, array());
+  $orders_changed = array();
+
+  foreach ($orders as $order) {
+    // Refresh only if this order object represents the latest revision of a
+    // shopping cart order, it hasn't been refreshed already in this request
+    // and it meets the criteria in the shopping cart refresh settings.
+    if (!isset($refreshed[$order->order_id]) &&
+      commerce_cart_order_is_cart($order) &&
+      commerce_order_is_latest_revision($order) &&
+      commerce_cart_order_can_refresh($order)) {
+
+      // Refresh the order and add its ID to the refreshed array.
+      $refreshed[$order->order_id] = TRUE;
+      $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+
+      // Loop over every line item on the order...
+      foreach ($order_wrapper->commerce_line_items as $delta => $line_item_wrapper) {
+        // If the current line item actually no longer exists...
+        if (!$line_item_wrapper->value()) {
+          // Remove the reference from the order and continue to the next value.
+          $order_wrapper->commerce_line_items->offsetUnset($delta);
+          continue;
+        }
+
+        // If the line item is a product line item, not shipping to tax.
+        if (in_array($line_item_wrapper->type->value(), commerce_product_line_item_types())) {
+          // If the current product is no longer active.
+          try {
+            $product_ids[] = $line_item_wrapper->commerce_product->raw();
+            foreach ($product_ids as $id) {
+              // Check if we can load the product.
+              $product = entity_load_single('commerce_product', $id);
+            }
+          } catch (Exception $e) {
+            // Remove the product from this order.
+            $line_item_id = $line_item_wrapper->raw();
+            $order_wrapper->commerce_line_items->offsetUnset($delta);
+            commerce_entity_reference_delete($order, 'commerce_line_items', 'line_item_id', $line_item_id);
+            $orders_changed[] = $order->order_id;
+
+            continue;
+          }
+        }
+      }
+    }
+  }
+
+  if (!empty($orders_changed)) {
+    // Run the commerce_cart_commerce_order_load() version of this hook with
+    // the updated orders data so it does it's thing without having to load
+    // the inactive product and then save the order.
+    commerce_cart_commerce_order_load($orders);
+    foreach ($orders_changed as $order_id) {
+      entity_save('commerce_order', $orders[$order_id]);
+    }
+  }
+}
