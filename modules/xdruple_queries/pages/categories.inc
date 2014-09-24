@@ -13,7 +13,7 @@ function xdruple_queries_categories_page() {
   $output = '';
 
   $cats = \Xtuple\XdrupleQueries\Categories\Tree::getCatalog();
-  $output .= _xdruple_queries_categories_build_html($cats['tree'], $cats['catalog']);
+  $output .= _xdruple_queries_categories_build_html($cats);
 
   return $output;
 }
@@ -58,19 +58,17 @@ function _xdruple_queries_categories_build_list_group_items($tree, $catalog) {
  *
  * @return string The HTML unordered list.
  */
-function _xdruple_queries_categories_build_html($tree, $catalog) {
+function _xdruple_queries_categories_build_html($tree) {
   $html = '';
 
-  foreach ($tree as $id => $groups) {
-    if ($catalog[$id]->catalog !== TRUE) {
-      $html .= '<li>' . l($catalog[$id]->name, "products/categories/$id");
+  foreach ($tree as $id => $category) {
+    /** @var Xtuple\XdrupleQueries\Categories\Category $category */
+    $html .= '<li>' . l($category->getName(), 'products/categories/' . $category->getId());
+    $children = $category->getChildren();
+    if (!empty($children)) {
+      $html .= '<ul>' . _xdruple_queries_categories_build_html($children) . '</ul>';
     }
-    if (!empty($groups)) {
-      $html .= '<ul>' . _xdruple_queries_categories_build_html($groups, $catalog) . '</ul>';
-    }
-    if ($catalog[$id]->catalog !== TRUE) {
-      $html .= '</li>';
-    }
+    $html .= '</li>';
   }
 
   return $html;
