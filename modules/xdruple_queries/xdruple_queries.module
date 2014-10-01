@@ -216,11 +216,33 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     // We can skip this call for now. This is one reason why the entity cache
     // and EntityFieldQuery cache need to work together.
     if (isset($products['commerce_product'])) {
+      global $user;
+
+      /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+      $session = extensions_get_session();
+
+      $customer = $session->getRescued('customer');
+      $shipto = $session->getRescued('ship_to');
+      $site = $session->getRescued('site');
+      $date = xdruple_rescued_scheduled_date('tomorrow');
+
+      $str = '_xdruple_prepare_products_list';
+      $str .= $user->uid . '-' . $customer . '-'  . $shipto . '-'  . $site . '-'  . $date;
+      $cid = sha1($str);
+
       foreach ($products['commerce_product'] as $product) {
-        $list[] = theme($product_item_theme, array(
-          'product' => $product,
-          'params'  => $params,
-        ));
+// TODO: Is this going to break the add to card form?
+        $cache = cache_get($cid . '_' . $product->product_id);
+        if (empty($cache) || xdruple_cache_expired($cache)) {
+          $theme = theme($product_item_theme, array(
+            'product' => $product,
+            'params'  => $params,
+          ));
+          $list[] = $theme;
+          cache_set($cid . '_' . $product->product_id, $theme, 'cache', REQUEST_TIME + 60 * 60 * 1); // Expires 1 hour from now.
+        } else {
+          $list[] = $cache->data;
+        }
       }
     }
   }
