@@ -66,6 +66,9 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
     // Get all the fields attached to this entity.
     $bundle = $entity_type === 'commerce_product' ? 'product' : $entity_type;
     $instances = field_info_instances($entity_type, $bundle);
+    $valid_weights = xdruple_shipping_physical_weight_units();
+    $valid_dimensions = xdruple_shipping_physical_dimension_units();
+
     foreach ($instances as $field_name => $instance) {
       // Only act on weight and dimension fields.
       if ($field_name !== 'xt_physical_weight' && $field_name !== 'xt_physical_dimension') {
@@ -79,15 +82,15 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
       $entity_properties = $entity_info['json-schema'][$resource]['properties'];
 
       // Check the entity for 'urls' property.
-      if (array_key_exists('productWeight', $entity_properties) || array_key_exists('packageWeight', $entity_properties)) {
+      if (isset($entity_properties['productWeight']) || isset($entity_properties['packageWeight'])) {
         foreach ($entities as $entity_id => $entity) {
           if ($type === 'physical_weight') {
             $weight = 0;
-            if (array_key_exists('weightUnit', $entity_properties) &&
+            if (isset($entity_properties['weightUnit']) &&
               property_exists($entity, 'weightUnit') &&
               !empty($entity->weightUnit)) {
               // Convert unit to commerce_physical.
-              $weightUnit = xdruple_shipping_map_physical_weight_units($entity->weightUnit);
+              $weightUnit = xdruple_shipping_map_physical_weight_units($entity->weightUnit, $valid_weights);
             } else {
               // Get default UOM.
               $weightUnit = $instances['widget']['settings']['default_unit'];
@@ -108,11 +111,11 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
               );
             }
           } elseif ($type === 'physical_dimensions') {
-            if (array_key_exists('dimensionUnit', $entity_properties) &&
+            if (isset($entity_properties['dimensionUnit']) &&
               property_exists($entity, 'dimensionUnit') &&
               !empty($entity->dimensionUnit)) {
               // Convert unit to commerce_physical.
-              $dimensionUnit = xdruple_shipping_map_physical_dimension_units($entity->dimensionUnit);
+              $dimensionUnit = xdruple_shipping_map_physical_dimension_units($entity->dimensionUnit, $valid_dimensions);
             } else {
               // Get default UOM.
               $dimensionUnit = $instances['widget']['settings']['default_unit'];
@@ -148,20 +151,57 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
 }
 
 /**
- * Converts an xTuple UOM to physical modules unit.
+ * Gets a list of physical modules valid weight units.
  * @See: physical_weight_units()
  *
- * @param $unit
+ * @return array
+ *   An array of valid weight units of measurement.
+ */
+function xdruple_shipping_physical_weight_units() {
+  // Use drupal_static because this gets calls a lot repeatedly.
+  $valid_units = &drupal_static(__FUNCTION__);
+
+  if (!isset($valid_units)) {
+    $valid_units = array_keys(physical_weight_units());
+  }
+
+  return $valid_units;
+}
+
+/**
+ * Gets a list of physical modules valid dimension units.
+ * @See: physical_dimension_units()
+ *
+ * @return array
+ *   An array of valid dimension units of measurement.
+ */
+function xdruple_shipping_physical_dimension_units() {
+  // Use drupal_static because this gets calls a lot repeatedly.
+  $valid_units = &drupal_static(__FUNCTION__);
+
+  if (!isset($valid_units)) {
+    $valid_units = array_keys(physical_dimension_units());
+  }
+
+  return $valid_units;
+}
+
+/**
+ * Converts an xTuple UOM to physical modules weight unit.
+ * @See: physical_weight_units()
+ *
+ * @param string $unit
  *   The type of weight unit whose name should be returned; by default this can
  *   be lb, oz, kg, or g.
+ *
+ * @param array $valid_units
+ *   An array of valid physical modules weight units.
  *
  * @return
  *   The valid unit of measurement or FALSE if not found.
  */
-function xdruple_shipping_map_physical_weight_units($unit) {
+function xdruple_shipping_map_physical_weight_units($unit, $valid_units) {
   $unit = strtolower($unit);
-
-  $valid_units = array_keys(physical_weight_units());
 
   if (in_array($unit, $valid_units)) {
     return $unit;
@@ -172,20 +212,21 @@ function xdruple_shipping_map_physical_weight_units($unit) {
 }
 
 /**
- * Converts an xTuple UOM to dimension modules unit.
+ * Converts an xTuple UOM to dimension modules dimension unit.
  * @See: physical_dimension_units()
  *
- * @param $unit
+ * @param string $unit
  *   The type of dimension unit whose name should be returned; by default this can
  *   be in, ft, mm, cm, or m.
+ *
+ * @param array $valid_units
+ *   An array of valid physical modules dimension units.
  *
  * @return
  *   The valid unit of measurement or FALSE if not found.
  */
-function xdruple_shipping_map_physical_dimension_units($unit) {
+function xdruple_shipping_map_physical_dimension_units($unit, $valid_units) {
   $unit = strtolower($unit);
-
-  $valid_units = array_keys(physical_dimension_units());
 
   if (in_array($unit, $valid_units)) {
     return $unit;
