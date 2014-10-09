@@ -2537,7 +2537,7 @@ function xdruple_commerce_get_product_display_config() {
       'label' => LABEL_INLINE,
     ),
     'barcode' => array(
-      'title' => '',
+      'title' => 'UPC Code',
       'label' => LABEL_INLINE,
     ),
     'xt_physical_weight' => array(
