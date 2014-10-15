@@ -1,7 +1,7 @@
 {
   "name": "modules/xtuple/xdruple_commerce",
   "description": "xTuple's Drupal Commerce Override Module",
-  "type": "library",
+  "type": "drupal-extension",
   "license": "GPL-2.0",
   "authors": [
     {
