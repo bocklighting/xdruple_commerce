@@ -217,10 +217,15 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     // and EntityFieldQuery cache need to work together.
     if (isset($products['commerce_product'])) {
       foreach ($products['commerce_product'] as $product) {
-        $list[] = theme($product_item_theme, array(
-          'product' => $product,
-          'params'  => $params,
-        ));
+        if ($product_item_theme !== FALSE) {
+          $list[] = theme($product_item_theme, array(
+            'product' => $product,
+            'params' => $params,
+          ));
+        }
+        else {
+          $list[] = $product;
+        }
       }
     }
   }
