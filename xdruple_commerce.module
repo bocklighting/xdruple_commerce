@@ -1667,7 +1667,7 @@ function xdruple_commerce_api_customer_exclusive_item_list($discovery_client = '
 }
 
 /**
- * Helper function to performa Unit of Measure conversions on prices.
+ * Helper function to perform a Unit of Measure conversions on prices.
  *
  * @param float $price The base price to convert.
  * @param float $uom_ratio The UOM ratio.
