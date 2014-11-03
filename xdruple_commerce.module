@@ -1667,6 +1667,21 @@ function xdruple_commerce_api_customer_exclusive_item_list($discovery_client = '
 }
 
 /**
+ * Helper function to perform a Unit of Measure conversions on prices.
+ *
+ * @param float $price The base price to convert.
+ * @param float $uom_ratio The UOM ratio.
+ *
+ * @return float The converted price.
+ */
+function _xdruple_commerce_convert_uom_price($price, $uom_ratio) {
+  $price = $price * $uom_ratio;
+  $price = round($price * 100); // Drupal Commerce doesn't use decimals for prices.
+
+  return $price;
+}
+
+/**
  * XM.Customer.itemPrice POST query.
  *
  * Query the dispatch function XM.Customer.itemPrice to get a item price quote.
@@ -1700,8 +1715,9 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
   // Do a conversion to the inventoryUnit.
   if (!empty($line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'])) {
     $price = $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'];
-    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price * $product->uomRatio;
-    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price * $product->uomRatio;
+    $price = _xdruple_commerce_convert_uom_price($price, $product->uomRatio);
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
   }
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
@@ -1770,8 +1786,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
 
   if (isset($price) && $price >= 0) {
     // Do a conversion to the inventoryUnit.
-    $price = $price * $product->uomRatio;
-    $price = round($price * 100); // Drupal Commerce doesn't use decimals for prices.
+    $price = _xdruple_commerce_convert_uom_price($price, $product->uomRatio);
 
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
