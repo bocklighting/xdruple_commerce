@@ -23,6 +23,26 @@ function template_preprocess_products_page(&$variables) {
     $variables['columns'][] = $column;
     unset($column);
   }
+
+  if (!empty($variables['category'])) {
+    $category = $variables['category'];
+    if (!empty($category->groups)) {
+      $catalog = entity_load('xtuple_xdcatalog');
+      $subcategories = array();
+      foreach ($category->groups as $group_id) {
+        if (!empty($catalog[$group_id])) {
+          $subcategories[$group_id] = array(
+            'data' => l($catalog[$group_id]->name, 'products/categories/' . $group_id),
+            'class' => array('col-lg-4'),
+          );
+        }
+      }
+      $variables['subcategories'] = theme('item_list', array(
+        'items' => $subcategories,
+        'attributes' => array('class' => array('row')),
+      ));
+    }
+  }
 }
 
 /**
