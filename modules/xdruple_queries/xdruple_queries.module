@@ -241,6 +241,11 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     }
 
     // Looping until all processes are done
+
+    $scheduled_date = xdruple_rescued_session_get('scheduled_date');
+    $customer = xdruple_rescued_session_get('customer');
+    $ship_to = xdruple_rescued_session_get('ship_to');
+    $site = xdruple_rescued_session_get('site');
     $finished_processes = array();
     while (sizeof($finished_processes) < sizeof($processes)) {
       foreach ($processes as $product_id => $process) {
@@ -252,10 +257,6 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
           else {
             $out = $process->getOutput();
             $finished_processes[$product_id] = json_decode($out);
-            $scheduled_date = xdruple_rescued_session_get('scheduled_date');
-            $customer = xdruple_rescued_session_get('customer');
-            $ship_to = xdruple_rescued_session_get('ship_to');
-            $site = xdruple_rescued_session_get('site');
 
             $line_item = commerce_product_line_item_new($product, $qty);
             $line_item->data['context']['product_ids'] = array($product->product_id);
