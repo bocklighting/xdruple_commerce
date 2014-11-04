@@ -1761,10 +1761,11 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
  * @param $customer
  * @param $shipto
  * @param $site
+ * @param $cache_only
  *
  * @return array
  */
-function _xdruple_commerce_load_customer_line_item_price($line_item, $customer, $shipto, $site) {
+function _xdruple_commerce_load_customer_line_item_price($line_item, $customer, $shipto, $site, $cache_only = FALSE) {
   $date = xdruple_rescued_scheduled_date('tomorrow');
 
   $cid = 'xdruple_commerce_customer_line_item_price-' .
@@ -1799,11 +1800,16 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $customer, 
     );
 
     // Make the itemPrice service request.
-    $price = xdruple_commerce_api_customer_item_price('xtuple', 'Customer', $postBody);
+    if (!$cache_only) {
+      $price = xdruple_commerce_api_customer_item_price('xtuple', 'Customer', $postBody);
 
-    cache_set($cid, $price, 'cache', REQUEST_TIME + 60 * 60 * 10);
+      cache_set($cid, $price, 'cache', REQUEST_TIME + 60 * 60 * 10);
 
-    return $price; // Expires 10 hours from now.
+      return $price;
+    }
+    else {
+      return NULL;
+    }
   }
   else {
     $price = $cache->data;
