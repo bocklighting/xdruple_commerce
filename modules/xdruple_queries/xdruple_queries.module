@@ -227,7 +227,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
 
     // Creating the list of processes
     foreach ($products_list as $product) {
-      $product_id = $product->sku;
+      $product_id = $product->product_id;
       $qty = 1;
       $curl = _xdruple_queries_prepare_curl($product, $qty);
       if ($curl !== NULL) {
@@ -258,6 +258,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
             $out = $process->getOutput();
             $finished_processes[$product_id] = json_decode($out);
 
+            $product = $products['commerce_product'][$product_id];
             $line_item = commerce_product_line_item_new($product, $qty);
             $line_item->data['context']['product_ids'] = array($product->product_id);
 
