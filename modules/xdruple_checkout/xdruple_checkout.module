@@ -391,7 +391,7 @@ function xdruple_checkout_commerce_checkout_complete($order) {
       unset($_SESSION['oauth_user']);
       $session->setRescued('user', $cached_user);
     } else {
-      // For admin users, we can save directly with their OAauth token.
+      // For admin users, we can save directly with their OAuth token.
       $sales_order->save();
 
       // Update the 'xtuple_creditcardpayment' with the final order number and
