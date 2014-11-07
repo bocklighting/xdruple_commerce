@@ -215,17 +215,76 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     // call entity_load() for the returned ids which will attach fields, etc.
     // We can skip this call for now. This is one reason why the entity cache
     // and EntityFieldQuery cache need to work together.
+    $products_list = array();
     if (isset($products['commerce_product'])) {
       foreach ($products['commerce_product'] as $product) {
-        if ($product_item_theme !== FALSE) {
-          $list[] = theme($product_item_theme, array(
-            'product' => $product,
-            'params' => $params,
-          ));
+        $products_list[] = $product;
+      }
+    }
+
+    /** @var \Symfony\Component\Process\Process[] $processes */
+    $processes = array();
+
+    // Creating the list of processes
+    foreach ($products_list as $product) {
+      $product_id = $product->product_id;
+      $qty = 1;
+      $curl = _xdruple_queries_prepare_curl($product, $qty);
+      if ($curl !== NULL) {
+        $processes[$product_id] = new \Symfony\Component\Process\Process($curl);
+      }
+    }
+
+    // Starting all processes;
+    foreach ($processes as $product_id => $process) {
+      $process->start();
+    }
+
+    // Looping until all processes are done
+
+    $scheduled_date = xdruple_rescued_session_get('scheduled_date');
+    $customer = xdruple_rescued_session_get('customer');
+    $ship_to = xdruple_rescued_session_get('ship_to');
+    $site = xdruple_rescued_session_get('site');
+    $finished_processes = array();
+    while (sizeof($finished_processes) < sizeof($processes)) {
+      foreach ($processes as $product_id => $process) {
+        if (!$process->isRunning() && !array_key_exists($product_id, $finished_processes)) {
+          if (!$process->isSuccessful()) {
+            $out = $process->getErrorOutput();
+            $finished_processes[$product_id] = json_decode($out);
+          }
+          else {
+            $out = $process->getOutput();
+            $finished_processes[$product_id] = json_decode($out);
+
+            $product = $products['commerce_product'][$product_id];
+            $line_item = commerce_product_line_item_new($product, $qty);
+            $line_item->data['context']['product_ids'] = array($product->product_id);
+
+            // Cache the price
+            $cid = 'xdruple_commerce_customer_line_item_price-' .
+              $customer . '-' .
+              $line_item->line_item_label . '-' .
+              strval($line_item->quantity) . '-' .
+              strval($scheduled_date) . '-' .
+              $ship_to . '-' .
+              $site;
+            cache_set($cid, $finished_processes[$product_id]->data->price, 'cache', REQUEST_TIME + 60 * 60 * 10);
+          }
         }
-        else {
-          $list[] = $product;
-        }
+      }
+    }
+
+    foreach ($products_list as $product) {
+      if ($product_item_theme !== FALSE) {
+        $list[] = theme($product_item_theme, array(
+          'product' => $product,
+          'params' => $params,
+        ));
+      }
+      else {
+        $list[] = $product;
       }
     }
   }
@@ -279,4 +338,45 @@ function _xdruple_queries_price($product, $qty = 1, $order_id = 0, $format = TRU
   }
 
   return $price;
+}
+
+function _xdruple_queries_prepare_curl($product, $qty) {
+  $product_id = $product->sku;
+
+  $scheduled_date = xdruple_rescued_session_get('scheduled_date');
+  $access_token = json_decode($_SESSION['access_token']);
+
+  $line_item = commerce_product_line_item_new($product, $qty);
+  $line_item->data['context']['product_ids'] = array($product->product_id);
+  $price = _xdruple_commerce_load_customer_line_item_price($line_item, TRUE);
+  if ($price === NULL) {
+    $customer = xdruple_rescued_session_get('customer');
+    $ship_to = xdruple_rescued_session_get('ship_to');
+    $site = xdruple_rescued_session_get('site');
+    $d_array = array(
+      'attributes' => array(
+        $customer,
+        $product_id,
+        $qty,
+        array(
+          'asOf' => $scheduled_date,
+          'siteId' => $site,
+          'effective' => date('Y-m-d'),
+          'shiptoId' => $ship_to,
+        ),
+      ),
+    );
+    $d = json_encode($d_array);
+
+    global $rescued_clients;
+
+    $uri = $rescued_clients['xtuple']['api_url'] . '/services/customer/item-price';
+    $debug_flag = variable_get('rescued_debug_mode', FALSE) ? ' -k' : '';
+    $curl = "curl$debug_flag -X POST -H \"Content-Type: application/json\" -d '$d' $uri?access_token={$access_token->access_token}";
+
+    return $curl;
+  }
+  else {
+    return NULL;
+  }
 }
