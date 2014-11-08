@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * @file
+ * Create a Drupal Commerce Shipping Service for Delivery
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function xdruple_delivery_menu() {
+  // xDruple Commerce Delivery Shipping Service settings page.
+  $items['admin/commerce/config/shipping/methods/xdruple_delivery/edit'] = array(
+    'title' => 'Edit',
+    'description' => 'xDruple Commerce Delivery Shipping Service method settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('xdruple_delivery_settings_form'),
+    'access arguments' => array('administer shipping'),
+    'file' => 'xdruple_delivery.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_INLINE,
+    'weight' => 0,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_commerce_shipping_method_info().
+ */
+function xdruple_delivery_commerce_shipping_method_info() {
+  $shipping_methods = array();
+
+  $shipping_methods['xdruple_delivery'] = array(
+    'title' => t('Delivery Service'),
+    'description' => t('Allows you to define Delivery Service for customers to choose during checkout.'),
+  );
+
+  return $shipping_methods;
+}
+
+/**
+ * Implements hook_commerce_shipping_service_info().
+ */
+function xdruple_delivery_commerce_shipping_service_info() {
+  $shipping_services = array();
+
+  $shipping_services['xdruple_delivery'] = array(
+    'title' => t('Delivery Service'),
+    'description' => t('Have this order delivered by our delivery service to your ship to address.'),
+    'display_title' => t('Request Delivery Service'),
+    'shipping_method' => 'xdruple_delivery',
+    'price_component' => 'shipping',
+    'callbacks' => array(
+      'rate' => 'xdruple_delivery_service_rate',
+    )
+  );
+
+  return $shipping_services;
+}
+
+/**
+ * Shipping service callback: returns a base price array for a shipping service
+ * calculated for the given order.
+ */
+function xdruple_delivery_service_rate($shipping_service, $order) {
+  return array(
+    'amount' => variable_get('xdruple_delivery_service_amount', 0) * 100,
+    'currency_code' => commerce_default_currency(),
+    'data' => array(),
+  );
+}

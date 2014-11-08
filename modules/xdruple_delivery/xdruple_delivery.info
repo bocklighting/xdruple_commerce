@@ -1,0 +1,9 @@
+name = xDruple Commerce Delivery Shipping Service
+description = Create a Drupal Commerce Shipping Service for Delivery
+core = 7.x
+package = xDruple
+
+dependencies[] = commerce
+dependencies[] = commerce_line_item
+dependencies[] = commerce_order
+dependencies[] = commerce_shipping

@@ -457,3 +457,90 @@ function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_servic
     }
   }
 }
+
+/**
+ * Implements hook_rules_condition_info().
+ */
+function xdruple_shipping_rules_condition_info() {
+  $conditions = array();
+
+  $conditions['xdruple_shipping_contains_freight_class_product'] = array(
+    'label' => t('Order contains a product with a particular freight class'),
+    'parameter' => array(
+      'commerce_order' => array(
+        'type' => 'commerce_order',
+        'label' => t('Order'),
+        'description' => t('The order whose line items should be checked for the specified product. If the specified order does not exist, the comparison will act as if it is against a quantity of 0.'),
+      ),
+      'freightClass' => array(
+        'type' => 'list<text>',
+        'label' => t('Freight Class'),
+        'description' => t('The Freight Class of the product to look for on the order.'),
+        'options list' => 'xdruple_fields_get_freight_class_list',
+      ),
+      'operator' => array(
+        'type' => 'text',
+        'label' => t('Operator'),
+        'description' => t('The operator used with the quantity value below to compare the quantity of the specified product on the order.'),
+        'default value' => '>=',
+        'options list' => 'commerce_numeric_comparison_operator_options_list',
+        'restriction' => 'input',
+      ),
+      'value' => array(
+        'type' => 'text',
+        'label' => t('Quantity'),
+        'default value' => '1',
+        'description' => t('The value to compare against the quantity of the specified product on the order.'),
+      ),
+    ),
+    'group' => t('Commerce Order'),
+    'callbacks' => array(
+      'execute' => 'xdruple_shipping_rules_contains_freight_class',
+    ),
+  );
+
+  return $conditions;
+}
+
+/**
+ * Condition callback: checks to see if one or more particular Freight Classes
+ * exist for any products on an order in the specified quantity.
+ */
+function xdruple_shipping_rules_contains_freight_class($order, $freight_classes, $operator, $value) {
+  $quantity = 0;
+
+  // If we actually received a valid order...
+  if (!empty($order)) {
+    $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+
+    // Look for product line items on the order whose products match the
+    // specified Freight Classes and increment the quantity count accordingly.
+    foreach ($order_wrapper->commerce_line_items as $line_item_wrapper) {
+      if (in_array($line_item_wrapper->type->value(), commerce_product_line_item_types())) {
+        // Extract the Freight Class from the line item.
+        $line_item_freight_class = $line_item_wrapper->commerce_product->freightClass->value();
+
+        // If the line item Freight Class matches, update the total quantity.
+        if (in_array($line_item_freight_class, $freight_classes)) {
+          $quantity += $line_item_wrapper->quantity->value();
+        }
+      }
+    }
+  }
+
+  // Make a quantity comparison based on the operator.
+  switch ($operator) {
+    case '<':
+      return $quantity < $value;
+    case '<=':
+      return $quantity <= $value;
+    case '=':
+      return $quantity == $value;
+    case '>=':
+      return $quantity >= $value;
+    case '>':
+      return $quantity > $value;
+  }
+
+  return FALSE;
+}
