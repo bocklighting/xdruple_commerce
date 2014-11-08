@@ -1705,7 +1705,7 @@ function xdruple_commerce_api_customer_item_price($discovery_client = 'xtuple', 
   return $result['price'];
 }
 
-function xdruple_commerce_get_customer_line_item_price($line_item) {
+function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only = FALSE) {
   /** @var stdClass $user */
   global $user;
 
@@ -1726,15 +1726,15 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
     && $user->uid !== 0
   ) {
     // We cannot get a price quote without all of these set.
-    return;
+    return $price;
   }
 
   if ($user->uid === 0 && !variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE)) {
     // Do not get price quote from guest customer price schedule.
-    return;
+    return $price;
   }
 
-  $price = _xdruple_commerce_load_customer_line_item_price($line_item);
+  $price = _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only);
 
   if (isset($price) && $price >= 0) {
     // Do a conversion to the inventoryUnit.
@@ -1754,7 +1754,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
 function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only = FALSE) {
   /** @var stdClass $user */
   global $user;
-  
+
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
   $session = extensions_get_session();
 

@@ -348,7 +348,7 @@ function _xdruple_queries_prepare_curl($product, $qty) {
 
   $line_item = commerce_product_line_item_new($product, $qty);
   $line_item->data['context']['product_ids'] = array($product->product_id);
-  $price = _xdruple_commerce_load_customer_line_item_price($line_item, TRUE);
+  $price = xdruple_commerce_get_customer_line_item_price($line_item, TRUE);
   if ($price === NULL) {
     $customer = xdruple_rescued_session_get('customer');
     $ship_to = xdruple_rescued_session_get('ship_to');
