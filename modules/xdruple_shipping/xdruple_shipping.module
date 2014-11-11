@@ -1,6 +1,12 @@
 <?php
 
 /**
+ * @keeps theme callback
+ */
+
+use Xtuple\Xdruple\Theme\PrintAddressInfoHandler;
+
+/**
  * Implements hook_rescued_register_clients_resources_alter().
  */
 function  xdruple_shipping_rescued_register_clients_resources_alter(&$rescued_clients_url_resources) {
@@ -12,6 +18,31 @@ function  xdruple_shipping_rescued_register_clients_resources_alter(&$rescued_cl
   }
 
   return $rescued_clients_url_resources;
+}
+/**
+ * Implements hook_cpanel_alter()
+ */
+function xdruple_shipping_cpanel_alter(&$form, &$form_state) {
+  if (module_exists('commerce_pickup')) {
+    $sites = entity_load('xtuple_site');
+
+    $options =  array();
+    foreach ($sites as $key => $site) {
+      $options[$key] = $site->description;
+    }
+    if (count($sites) > 1) {
+      $form['xdruple_commerce_store_settings']['xdruple_shipping_allowed_pickup_sites'] = array(
+        '#type'          => 'checkboxes',
+        '#options'       => $options,
+        '#title'         => t('Allowed Pickup Sites'),
+        '#description'   => t('Limit the Sites customers are allowed to pickup from. If checked, a Customer can choose to pickup their order from this Site location.'),
+        '#required'      => true,
+        '#default_value' => variable_get('xdruple_shipping_allowed_pickup_sites', array()),
+      );
+    } else {
+      drupal_set_message(t('Cannot find any Sites to set as allowed pickup locations.'), 'warning');
+    }
+  }
 }
 
 /**
@@ -248,7 +279,7 @@ function xdruple_shipping_map_physical_dimension_units($unit, $valid_units) {
  *    'UPS 2nd Day Air',
  *    etc.
  *
- * @return
+ * @return string
  *   The matching xTuple's Ship Via code or pass through $ship_label if not found.
  */
 function xdruple_shipping_map_ship_via($ship_label) {
@@ -391,4 +422,125 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
     drupal_set_message($e->getMessage(), 'error');
     watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
   }
+}
+
+/**
+ * Implements hook_commerce_shipping_service_info_alter().
+ */
+function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_services) {
+  $allowed_pickup_sites = variable_get('xdruple_shipping_allowed_pickup_sites', array());
+
+  foreach ($shipping_services as $key => $service) {
+    if ($service['module'] === 'commerce_pickup') {
+      // Extract the xTuple Site Code.
+      $service_parts = explode('__', $service['name']);
+
+      if (count($service_parts) === 3) {
+        if (isset($allowed_pickup_sites[$service_parts[2]]) && $allowed_pickup_sites[$service_parts[2]] !== 0) {
+          // Load the site.
+          $site = entity_load_single('xtuple_site', $service_parts[2]);
+
+          // Extract the address.
+          $address = xdruple_addr_array_to_addr_info_obj($site->address);
+
+          // Add the address to the description.
+// TODO: This theme call produces some weird results on the checkout page.
+          $shipping_services[$key]['description'] .= '<br />' . theme('xdruple_print_address_info', array(
+              'printAddressInfoHandler' => new PrintAddressInfoHandler($address, ''),
+              //'title'                   => t('Address:'),
+            ));
+        } else {
+          // This site is not an allowed pickup site. Unset it from the shipping services.
+          unset($shipping_services[$key]);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_rules_condition_info().
+ */
+function xdruple_shipping_rules_condition_info() {
+  $conditions = array();
+
+  $conditions['xdruple_shipping_contains_freight_class_product'] = array(
+    'label' => t('Order contains a product with a particular freight class'),
+    'parameter' => array(
+      'commerce_order' => array(
+        'type' => 'commerce_order',
+        'label' => t('Order'),
+        'description' => t('The order whose line items should be checked for the specified product. If the specified order does not exist, the comparison will act as if it is against a quantity of 0.'),
+      ),
+      'freightClass' => array(
+        'type' => 'list<text>',
+        'label' => t('Freight Class'),
+        'description' => t('The Freight Class of the product to look for on the order.'),
+        'options list' => 'xdruple_fields_get_freight_class_list',
+      ),
+      'operator' => array(
+        'type' => 'text',
+        'label' => t('Operator'),
+        'description' => t('The operator used with the quantity value below to compare the quantity of the specified product on the order.'),
+        'default value' => '>=',
+        'options list' => 'commerce_numeric_comparison_operator_options_list',
+        'restriction' => 'input',
+      ),
+      'value' => array(
+        'type' => 'text',
+        'label' => t('Quantity'),
+        'default value' => '1',
+        'description' => t('The value to compare against the quantity of the specified product on the order.'),
+      ),
+    ),
+    'group' => t('Commerce Order'),
+    'callbacks' => array(
+      'execute' => 'xdruple_shipping_rules_contains_freight_class',
+    ),
+  );
+
+  return $conditions;
+}
+
+/**
+ * Condition callback: checks to see if one or more particular Freight Classes
+ * exist for any products on an order in the specified quantity.
+ */
+function xdruple_shipping_rules_contains_freight_class($order, $freight_classes, $operator, $value) {
+  $quantity = 0;
+
+  // If we actually received a valid order...
+  if (!empty($order)) {
+    $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+
+    // Look for product line items on the order whose products match the
+    // specified Freight Classes and increment the quantity count accordingly.
+    foreach ($order_wrapper->commerce_line_items as $line_item_wrapper) {
+      if (in_array($line_item_wrapper->type->value(), commerce_product_line_item_types())) {
+        // Extract the Freight Class from the line item.
+        $line_item_freight_class = $line_item_wrapper->commerce_product->freightClass->value();
+
+        // If the line item Freight Class matches, update the total quantity.
+        if (in_array($line_item_freight_class, $freight_classes)) {
+          $quantity += $line_item_wrapper->quantity->value();
+        }
+      }
+    }
+  }
+
+  // Make a quantity comparison based on the operator.
+  switch ($operator) {
+    case '<':
+      return $quantity < $value;
+    case '<=':
+      return $quantity <= $value;
+    case '=':
+      return $quantity == $value;
+    case '>=':
+      return $quantity >= $value;
+    case '>':
+      return $quantity > $value;
+  }
+
+  return FALSE;
 }

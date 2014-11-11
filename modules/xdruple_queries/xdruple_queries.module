@@ -197,9 +197,26 @@ function _xdruple_queries_load_products_by_order_type($order_type) {
  * @return array
  */
 function _xdruple_prepare_products_list($product_ids = NULL, array $params = array(), $product_item_theme = 'products_page_item') {
+  /** @var stdClass $user */
+  global $user;
+
   $list = array();
 
   if ($product_ids === NULL || !empty($product_ids)) {
+    if ($user->uid === 0 && variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE)) {
+      // Get anonymous checkout defaults from control panel.
+      $customer = variable_get('xdruple_checkout_guest_customer', null);
+      $ship_to  = null;
+      $site     = variable_get('xdruple_commerce_default_warehouse', null);
+    } else {
+      /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+      $session  = extensions_get_session();
+      $customer = $session->getRescued('customer');
+      $ship_to  = $session->getRescued('ship_to');
+      $site     = $session->getRescued('site');
+    }
+    $scheduled_date = xdruple_rescued_session_get('scheduled_date');
+
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'commerce_product');
     $query->pager(20);
@@ -236,7 +253,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
 
     // Creating the list of processes
     foreach ($products_list as $product) {
-      $product_id = $product->sku;
+      $product_id = $product->product_id;
       $qty = 1;
       $curl = _xdruple_queries_prepare_curl($product, $qty);
       if ($curl !== NULL) {
@@ -249,13 +266,9 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
       $process->start();
     }
 
-    // Looping until all processes are done
-
-    $scheduled_date = xdruple_rescued_session_get('scheduled_date');
-    $customer = xdruple_rescued_session_get('customer');
-    $ship_to = xdruple_rescued_session_get('ship_to');
-    $site = xdruple_rescued_session_get('site');
     $finished_processes = array();
+
+    // Looping until all processes are done
     while (sizeof($finished_processes) < sizeof($processes)) {
       foreach ($processes as $product_id => $process) {
         if (!$process->isRunning() && !array_key_exists($product_id, $finished_processes)) {
@@ -267,6 +280,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
             $out = $process->getOutput();
             $finished_processes[$product_id] = json_decode($out);
 
+            $product = $products['commerce_product'][$product_id];
             $line_item = commerce_product_line_item_new($product, $qty);
             $line_item->data['context']['product_ids'] = array($product->product_id);
 
@@ -349,6 +363,9 @@ function _xdruple_queries_price($product, $qty = 1, $order_id = 0, $format = TRU
 }
 
 function _xdruple_queries_prepare_curl($product, $qty) {
+  /** @var stdClass $user */
+  global $user;
+
   $product_id = $product->sku;
 
   $scheduled_date = xdruple_rescued_session_get('scheduled_date');
@@ -356,11 +373,31 @@ function _xdruple_queries_prepare_curl($product, $qty) {
 
   $line_item = commerce_product_line_item_new($product, $qty);
   $line_item->data['context']['product_ids'] = array($product->product_id);
-  $price = _xdruple_commerce_load_customer_line_item_price($line_item, TRUE);
+  $price = xdruple_commerce_get_customer_line_item_price($line_item, TRUE);
   if ($price === NULL) {
-    $customer = xdruple_rescued_session_get('customer');
-    $ship_to = xdruple_rescued_session_get('ship_to');
-    $site = xdruple_rescued_session_get('site');
+    if ($user->uid === 0 && variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE)) {
+      // Get anonymous checkout defaults from control panel.
+      $customer = variable_get('xdruple_checkout_guest_customer', null);
+      $ship_to  = null;
+      $site     = variable_get('xdruple_commerce_default_warehouse', null);
+    } else {
+      /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+      $session  = extensions_get_session();
+      $customer = $session->getRescued('customer');
+      $ship_to  = $session->getRescued('ship_to');
+      $site     = $session->getRescued('site');
+    }
+
+    if (empty($customer)) {
+      drupal_set_message('Cannot get a price quote without a Customer selected. Please set your order defaults.', 'warning');
+    }
+    if (empty($site)) {
+      drupal_set_message('Cannot get a price quote without a Warehouse/Site selected. Please set your order defaults.', 'warning');
+    }
+    if (empty($scheduled_date)) {
+      drupal_set_message('Cannot get a price quote without a Scheduled Date selected. Please set your order defaults.', 'warning');
+    }
+
     $d_array = array(
       'attributes' => array(
         $customer,
@@ -370,10 +407,14 @@ function _xdruple_queries_prepare_curl($product, $qty) {
           'asOf' => $scheduled_date,
           'siteId' => $site,
           'effective' => date('Y-m-d'),
-          'shiptoId' => $ship_to,
         ),
       ),
     );
+
+    if (!empty($ship_to)) {
+      $d_array['attributes'][3]['shiptoId'] = $ship_to;
+    }
+
     $d = json_encode($d_array);
 
     global $rescued_clients;
