@@ -1734,6 +1734,30 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
     return;
   }
 
+  $price = _xdruple_commerce_load_customer_line_item_price($line_item);
+
+  if (isset($price) && $price >= 0) {
+    // Do a conversion to the inventoryUnit.
+    $price = _xdruple_commerce_convert_uom_price($price, $product->uomRatio);
+
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
+    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
+  }
+}
+
+/**
+ * @param $line_item
+ * @param $cache_only
+ *
+ * @return array
+ */
+function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only = FALSE) {
+  /** @var stdClass $user */
+  global $user;
+  
+  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  $session = extensions_get_session();
+
   if ($user->uid === 0) {
     // Get anonymous checkout defaults from control panel.
     $customer = variable_get('xdruple_checkout_guest_customer', null);
@@ -1748,19 +1772,21 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
   $date = xdruple_rescued_scheduled_date('tomorrow');
 
   $cid = 'xdruple_commerce_customer_line_item_price-' .
-         $customer . '-' .
-         $line_item->line_item_label . '-' .
-         strval($line_item->quantity) . '-' .
-         strval($date) . '-' .
-         $shipto . '-' .
-         $site;
+    $customer . '-' .
+    $line_item->line_item_label . '-' .
+    strval($line_item->quantity) . '-' .
+    strval($date) . '-' .
+    $shipto . '-' .
+    $site;
   $cache = cache_get($cid, 'cache');
 
   if (empty($cache) || xdruple_cache_expired($cache)) {
     $options = array(
-      'asOf'      => $date, // The scheduled date for the order.
-      'siteId'    => $site,
-      'effective' => format_date(REQUEST_TIME, 'custom', 'Y-m-d'), // Always today.
+      'asOf' => $date,
+      // The scheduled date for the order.
+      'siteId' => $site,
+      'effective' => format_date(REQUEST_TIME, 'custom', 'Y-m-d'),
+      // Always today.
     );
 
     if (!empty($shipto)) {
@@ -1777,19 +1803,21 @@ function xdruple_commerce_get_customer_line_item_price($line_item) {
     );
 
     // Make the itemPrice service request.
-    $price = xdruple_commerce_api_customer_item_price('xtuple', 'Customer', $postBody);
+    if (!$cache_only) {
+      $price = xdruple_commerce_api_customer_item_price('xtuple', 'Customer', $postBody);
 
-    cache_set($cid, $price, 'cache', REQUEST_TIME + 60 * 60 * 10); // Expires 10 hours from now.
-  } else {
-    $price = $cache->data;
+      cache_set($cid, $price, 'cache', REQUEST_TIME + 60 * 60 * 10);
+
+      return $price;
+    }
+    else {
+      return NULL;
+    }
   }
+  else {
+    $price = $cache->data;
 
-  if (isset($price) && $price >= 0) {
-    // Do a conversion to the inventoryUnit.
-    $price = _xdruple_commerce_convert_uom_price($price, $product->uomRatio);
-
-    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
-    $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
+    return $price;
   }
 }
 
