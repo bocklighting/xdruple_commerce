@@ -139,7 +139,7 @@ function xdruple_queries_theme() {
  * 
  * @return array
  */
-function xdruple_queries_theme_objects() {
+function xdruple_queries_extensions_theme() {
   return array(
     'Xtuple\XdrupleQueries\Theme\CategoriesDropdown',
   );
