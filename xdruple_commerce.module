@@ -1746,6 +1746,8 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
 
+    return $price;
+  } else {
     return NULL;
   }
 }
