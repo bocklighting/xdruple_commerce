@@ -1713,7 +1713,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
   $product = entity_load_single('commerce_product', $line_item->commerce_product[LANGUAGE_NONE]['0']['product_id']);
 
   // Do a conversion to the inventoryUnit.
-  if (!empty($line_item->commerce_unit_price[LANGUAGE_NONE]['0']) && !isset($line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'])) {
+  if (!empty($line_item->commerce_unit_price[LANGUAGE_NONE]['0']) && isset($line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'])) {
     $price = $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'];
     $price = _xdruple_commerce_convert_uom_price($price, $product->uomRatio);
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
