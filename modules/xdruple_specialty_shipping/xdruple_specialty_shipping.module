@@ -26,6 +26,30 @@ function xdruple_specialty_shipping_menu() {
 }
 
 /**
+ * Implements hook_cpanel_alter()
+ */
+function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
+  $classes = entity_load('xtuple_freightclass');
+
+  $options =  array();
+  foreach ($classes as $key => $freight_class) {
+    $options[$key] = $freight_class->description;
+  }
+  if (count($classes) > 1) {
+    $form['xdruple_commerce_store_settings']['xdruple_specialty_shipping_freight_classes'] = array(
+      '#type'          => 'checkboxes',
+      '#options'       => $options,
+      '#title'         => t('Freight Classes that require Specialty Shipping'),
+      '#description'   => t('If checked, products with these freight classes will not show UPS Shipping Available icons.'),
+      '#required'      => true,
+      '#default_value' => variable_get('xdruple_specialty_shipping_freight_classes', array()),
+    );
+  } else {
+    drupal_set_message(t('Cannot find any Freight Classes.'), 'warning');
+  }
+}
+
+/**
  * Implements hook_commerce_shipping_method_info().
  */
 function xdruple_specialty_shipping_commerce_shipping_method_info() {

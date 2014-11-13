@@ -19,6 +19,7 @@ function  xdruple_shipping_rescued_register_clients_resources_alter(&$rescued_cl
 
   return $rescued_clients_url_resources;
 }
+
 /**
  * Implements hook_cpanel_alter()
  */
