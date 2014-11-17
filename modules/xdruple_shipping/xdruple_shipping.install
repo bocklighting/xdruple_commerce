@@ -36,7 +36,8 @@ function xdruple_shipping_install() {
     $query->entityCondition('entity_type', 'xtuple_unit');
     $query->propertyCondition('isItemWeight', TRUE, 'EQUALS');
     $units = $query->execute();
-    $default_unit = xdruple_shipping_map_physical_weight_units(key($units['xtuple_unit']));
+    $valid_weights = xdruple_shipping_physical_weight_units();
+    $default_unit = xdruple_shipping_map_physical_weight_units(key($units['xtuple_unit']), $valid_weights);
     $default_unit = $default_unit ? $default_unit : 'oz';
 
     // Add 'commerce_product' instance.
