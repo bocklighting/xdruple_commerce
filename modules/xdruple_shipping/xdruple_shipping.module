@@ -436,10 +436,10 @@ function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_servic
       // Extract the xTuple Site Code.
       $service_parts = explode('__', $service['name']);
 
-      if (count($service_parts) === 3) {
-        if (isset($allowed_pickup_sites[$service_parts[2]]) && $allowed_pickup_sites[$service_parts[2]] !== 0) {
+      if (count($service_parts) === 2) {
+        if (isset($allowed_pickup_sites[$service_parts[1]]) && $allowed_pickup_sites[$service_parts[1]] !== 0) {
           // Load the site.
-          $site = entity_load_single('xtuple_site', $service_parts[2]);
+          $site = entity_load_single('xtuple_site', $service_parts[1]);
 
           // Extract the address.
           $address = xdruple_addr_array_to_addr_info_obj($site->address);
