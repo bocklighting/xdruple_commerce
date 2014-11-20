@@ -1,4 +1,4 @@
-<div class="xdruple-print xdruple-print-order">
+<div class="xdruple-print xdruple-print-order row">
   <?php if (!empty($logo)): ?>
     <?php print $logo; ?>
   <?php endif; ?>
