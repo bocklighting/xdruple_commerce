@@ -250,7 +250,17 @@ function xdruple_checkout_commerce_checkout_complete($order) {
   }
 
   $po_number = property_exists($order, 'xd_order_po_number') ? $order_wrapper->xd_order_po_number->value() : '';
-  $order_notes = property_exists($order, 'xd_order_notes') ? $order_wrapper->xd_order_notes->value() : '';
+
+  if (property_exists($order, 'xd_order_notes')) {
+    $notes = $order_wrapper->xd_order_notes->value();
+    if (!empty($notes)) {
+      $order_notes = $notes['safe_value'];
+    } else {
+      $order_notes = '';
+    }
+  } else {
+    $order_notes = '';
+  }
 
   // Create a new Sales Order entity.
   // TODO: Assuming 'xtuple' here. Get setting.
