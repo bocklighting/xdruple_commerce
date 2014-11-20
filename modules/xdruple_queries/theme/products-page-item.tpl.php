@@ -1,6 +1,6 @@
 <?php if (isset($img)): ?>
   <div class="views-field views-field-xt-url-image-field">
-    <span class="field-content"><?php print $img ?></span>
+    <span class="field-content thumbnail"><?php print $img ?></span>
   </div>
 <?php endif; ?>
 <?php if (!empty($title)): ?>
@@ -14,9 +14,9 @@
   </div>
 <?php endif; ?>
 <?php if (!empty($price)): ?>
-  <div class="views-field views-field-commerce-price">
+  <h4 class="views-field views-field-commerce-price">
     <span class="field-content"><?php print $price ?></span>
-  </div>
+  </h4>
 <?php endif; ?>
 <?php if (!empty($read_more)): ?>
   <div class="views-field views-field-nothing">
