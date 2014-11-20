@@ -2103,6 +2103,9 @@ function xdruple_commerce_field_display_alter(&$display, $context) {
   }
 }
 
+// @TODO This code is trash. It's used to "theme" checkout review page, which is extremely hard to do due to the 
+// fact, that the page itself build poorly (hard to theme) and the structure of the entity to render is enormous due
+// to usage of entity references
 function xdruple_commerce_entity_view_alter(&$build, $type) {
   if ($type == 'commerce_customer_profile') {
     if ($build['#bundle'] == 'shipping') {
@@ -2134,7 +2137,7 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
         }
 
         $markup = '';
-        $markup .= '<div class="field field-name-xd-ship-to field-type-entityreference field-label-above">';
+        $markup .= '<div class="field field-name-xd-ship-to field-type-entityreference field-label-above col-lg-4">';
         if ($name) {
           $markup .= '<div class="field-label">'. t('Ship to') .':&nbsp;</div>';
           $markup .= '<div class="field-items"><div class="field-item even">'. $name . '</div></div>';
