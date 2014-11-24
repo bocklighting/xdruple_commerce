@@ -908,3 +908,18 @@ function xdruple_checkout_items_in_cart(){
 
   return $line_items;
 }
+
+/**
+ * Implements hook_features_exclude()
+ * 
+ * @return array
+ */
+function xdruple_checkout_features_exclude() {
+  return array(
+    'variable' => array(
+      'xdruple_checkout_manager_order_confirm_emails',
+      'xdruple_checkout_message',
+      'xdruple_checkout_reset_password_message',
+    ),
+  );
+}

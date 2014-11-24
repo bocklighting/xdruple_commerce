@@ -2863,3 +2863,20 @@ function xdruple_commerce_commerce_order_load($orders) {
   }
 }
 
+/**
+ * Implements hook_features_exclude()
+ * 
+ * @return array
+ */
+function xdruple_commerce_features_exclude() {
+  return array(
+    'variable' => array(
+      // Commerce UPS
+      'commerce_ups_access_key',
+      'commerce_ups_account_id',
+      'commerce_ups_log',
+      'commerce_ups_password',
+      'commerce_ups_user_id',
+    ),
+  );
+}
