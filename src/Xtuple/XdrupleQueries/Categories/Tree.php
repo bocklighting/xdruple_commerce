@@ -13,17 +13,45 @@ class Tree {
 
     if ((empty($cache) || xdruple_cache_expired($cache)) && !empty($entity_info)) {
       $query = new EntityFieldQuery();
-      $root_group = $query->entityCondition('entity_type', 'xtuple_xdcatalog')
-        ->propertyCondition('catalog', TRUE, '=')
+      $count = $query->entityCondition('entity_type', 'xtuple_xdcatalog')
+        ->count()
         ->execute();
 
-      if (empty($root_group['xtuple_xdcatalog'])) {
+      if ($count <= 100) {
+        $xdcatalogs = entity_load('xtuple_xdcatalog');
+      } else {
+        // Paginate through all catalogs.
+        $pages = ceil($count / 100);
+        $xdcatalogs = array();
+
+        $i = 0;
+        while($i < $pages) {
+          $page_query = new EntityFieldQuery();
+          $catalogs = $page_query->entityCondition('entity_type', 'xtuple_xdcatalog')
+            ->range($i * 100, 100)
+            ->propertyOrderBy('id', 'ASC')
+            ->execute();
+
+          $xdcatalogs = $xdcatalogs + $catalogs['xtuple_xdcatalog'];
+          $i++;
+        }
+      }
+
+      $root_key = null;
+
+      // Find root group.
+      foreach ($xdcatalogs as $key => $catalog) {
+        if ($catalog->catalog) {
+          $root_key = $key;
+          $root_group = $catalog;
+        }
+      }
+
+      if (empty($root_group) || empty($root_key)) {
         drupal_set_message(t('Catalog structure not set. Contact the site administrator.'), 'warning');
 
         return array();
       }
-
-      $root_key = key($root_group['xtuple_xdcatalog']);
 
       $tree = array(
         $root_key => array(),
@@ -56,6 +84,9 @@ class Tree {
    * @return Category
    */
   static public function buildCategory($entityId) {
+    // This relies on the entity static cache to be fast. The calling function
+    // getCatalog() called entity_load('xtuple_xdcatalog'), so entity_load_single()
+    // will hit it's static cache instead of the REST API.
     $group = entity_load_single('xtuple_xdcatalog', $entityId);
     $category = new Category($entityId, $group->name);
     if (!empty($group->groups)) {
