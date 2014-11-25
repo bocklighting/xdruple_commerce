@@ -445,10 +445,9 @@ function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_servic
           $address = xdruple_addr_array_to_addr_info_obj($site->address);
 
           // Add the address to the description.
-// TODO: This theme call produces some weird results on the checkout page.
           $shipping_services[$key]['description'] .= '<br />' . theme('xdruple_print_address_info', array(
               'printAddressInfoHandler' => new PrintAddressInfoHandler($address, ''),
-              //'title'                   => t('Address:'),
+              'class' => 'xdruple-print-address-info',
             ));
         } else {
           // This site is not an allowed pickup site. Unset it from the shipping services.
