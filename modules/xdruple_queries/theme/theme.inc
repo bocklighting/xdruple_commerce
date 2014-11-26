@@ -56,8 +56,7 @@ function template_preprocess_products_page_item(&$variables) {
   $variables['price'] = _xdruple_queries_price($product);
 
   $units = xdruple_fields_get_uom_list();
-  $unit = $units[$product->inventoryUnit];
-  $variables['unit'] = $unit->description;
+  $variables['unit'] = $units[$product->inventoryUnit];
   $variables['title'] = l($product->title, "products/{$product->product_id}");
   $variables['subtitle'] = $product->subTitle;
   $variables['img'] = _xdruple_queries_product_image($product, 'ft_commerce_product_thumb');
