@@ -28,9 +28,10 @@ function template_preprocess_xdruple_commerce_similar_product_link_default(&$var
       ));
     }
 
-    $unit = entity_load_single('xtuple_unit', $product->inventoryUnit);
+    $units = xdruple_fields_get_uom_list();
+    $unit = $units[$product->inventoryUnit];
     $variables['unit'] = $unit->description;
-    
+
     $variables['attributes_array']['class'][] = 'b-product--teaser';
     $variables['title_attributes_array']['class'] = 'b-product-title';
     $variables['thumbnail_attributes_array'] = array(
