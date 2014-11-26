@@ -6,52 +6,52 @@
 function xdruple_checkout_cpanel_alter(&$form, &$form_state) {
   if (empty($form['xdruple_commerce_store_settings'])) {
     $form['xdruple_commerce_store_settings'] = array(
-      '#type'  => 'fieldset',
+      '#type' => 'fieldset',
       '#title' => t('Store settings'),
       '#group' => 'system_settings',
     );
   }
 
   $form['xdruple_commerce_store_settings']['xdruple_checkout_message'] = array(
-    '#type'          => 'textarea',
-    '#title'         => t('Anonymous user checkout redirect login message'),
-    '#description'   => t('The message that should be displayed on the login page ' .
-                          'in the checkout process.'),
+    '#type' => 'textarea',
+    '#title' => t('Anonymous user checkout redirect login message'),
+    '#description' => t('The message that should be displayed on the login page ' .
+      'in the checkout process.'),
     '#default_value' => variable_get('xdruple_checkout_message',
-                          t('You need to be logged in to be able to checkout.')
-                        ),
-    '#rows'          => 2,
+      t('You need to be logged in to be able to checkout.')
+    ),
+    '#rows' => 2,
   );
   $form['xdruple_commerce_store_settings']['xdruple_checkout_anonymous'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t('Continue without register'),
-    '#description'   => t('Allow anonymous checkout. This will also provide an Anonymous ' .
-                          'Checkout option as an alternative to logging in on the login ' .
-                          'form when a user has initiated the checkout process.'),
+    '#type' => 'checkbox',
+    '#title' => t('Continue without register'),
+    '#description' => t('Allow anonymous checkout. This will also provide an Anonymous ' .
+      'Checkout option as an alternative to logging in on the login ' .
+      'form when a user has initiated the checkout process.'),
     '#default_value' => variable_get('xdruple_checkout_anonymous', FALSE),
   );
 
   $customers = xdruple_fields_get_customer_list();
   if (count($customers) > 0) {
     $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer'] = array(
-      '#type'          => 'select',
-      '#options'       => $customers,
+      '#type' => 'select',
+      '#options' => $customers,
       '#default_value' => variable_get('xdruple_checkout_guest_customer', '- None -'),
-      '#empty_option'  => '- None -',
-      '#title'         => t('Guest Customer'),
-      '#description'   => t('Select the Customer to use for guest checkout orders ' .
-                            'and/or anonymous user price quotes. All anonymous ' .
-                            'guest checkout orders will be created under this ' .
-                            'Customer in xTuple.'),
-      '#required'      => TRUE,
+      '#empty_option' => '- None -',
+      '#title' => t('Guest Customer'),
+      '#description' => t('Select the Customer to use for guest checkout orders ' .
+        'and/or anonymous user price quotes. All anonymous ' .
+        'guest checkout orders will be created under this ' .
+        'Customer in xTuple.'),
+      '#required' => TRUE,
     );
 
     // The xTuple API only returns 100 results by default. If there are more
     // than 98 customers, switch to a text field.
     if (count($customers) > 98) {
-      $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#type']          = 'textfield';
+      $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#type'] = 'textfield';
       $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#default_value'] = variable_get('xdruple_checkout_guest_customer', NULL);
-      $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#description']   =
+      $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#description'] =
         t('Enter the Customer Number of the Customer to use for all guest checkout orders. ' .
           'All anonymous guest checkout orders will be created under this Customer in xTuple.');
 
@@ -60,42 +60,42 @@ function xdruple_checkout_cpanel_alter(&$form, &$form_state) {
     }
   }
   $form['xdruple_commerce_store_settings']['xdruple_checkout_use_guest_customer_price_schedule'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t("Use Guest Customer's price schedule for anonymous users"),
-    '#description'   => t('When checked, anonymous users will not see the Item List Price. ' .
-                          'Instead a price quote will be fetched and whatever pricing schdule ' .
-                          'the Guest Customer above is assigned to will adjust prices accordingly.'),
+    '#type' => 'checkbox',
+    '#title' => t("Use Guest Customer's price schedule for anonymous users"),
+    '#description' => t('When checked, anonymous users will not see the Item List Price. ' .
+      'Instead a price quote will be fetched and whatever pricing schdule ' .
+      'the Guest Customer above is assigned to will adjust prices accordingly.'),
     '#default_value' => variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE),
   );
 
   // Chekout button help text for e-mail verification when a visitor creates an account.
   if (variable_get('user_email_verification', TRUE)) {
     $form['xdruple_commerce_store_settings']['xdruple_checkout_reset_password_message'] = array(
-      '#type'          => 'textarea',
-      '#title'         => t('Reset password checkout redirect message'),
-      '#description'   => t('The message that should be displayed on the reset ' .
-                            'password page for new accounts during the checkout process. ' .
-                            'When an anonymous users checks out and chooses to create ' .
-                            'a new account, they will be sent a one time login link to ' .
-                            'their email address. After clicking on it, they will be sent ' .
-                            'to the Reset Password page to create a password. This message ' .
-                            'will display on that page so they know they can continue ' .
-                            'their order after setting a password.'),
+      '#type' => 'textarea',
+      '#title' => t('Reset password checkout redirect message'),
+      '#description' => t('The message that should be displayed on the reset ' .
+        'password page for new accounts during the checkout process. ' .
+        'When an anonymous users checks out and chooses to create ' .
+        'a new account, they will be sent a one time login link to ' .
+        'their email address. After clicking on it, they will be sent ' .
+        'to the Reset Password page to create a password. This message ' .
+        'will display on that page so they know they can continue ' .
+        'their order after setting a password.'),
       '#default_value' => variable_get('xdruple_checkout_reset_password_message',
-                            t('Enter and save a new password and then you can continue ' .
-                              'with the checkout process.')
-                          ),
-      '#rows'          => 2,
+        t('Enter and save a new password and then you can continue ' .
+          'with the checkout process.')
+      ),
+      '#rows' => 2,
     );
   }
 
   // Manager Email addresses to send order confirmations to.
   $form['xdruple_commerce_store_settings']['xdruple_checkout_manager_order_confirm_emails'] = array(
-    '#type'          => 'textfield',
-    '#size'          => 60,
-    '#title'         => t('Manager order confirmation emails'),
-    '#description'   => t('A comma seperated list of email addresses that should receive order confirmations. e.g. johndoe@example.com,janedoe@example.com'),
-    '#default_value' => variable_get('xdruple_checkout_manager_order_confirm_emails', null),
+    '#type' => 'textfield',
+    '#size' => 60,
+    '#title' => t('Manager order confirmation emails'),
+    '#description' => t('A comma seperated list of email addresses that should receive order confirmations. e.g. johndoe@example.com,janedoe@example.com'),
+    '#default_value' => variable_get('xdruple_checkout_manager_order_confirm_emails', NULL),
   );
 }
 
@@ -114,17 +114,17 @@ function xdruple_checkout_default_rules_configuration_alter(&$configs) {
  */
 function xdruple_checkout_commerce_checkout_router($order, $checkout_page) {
   // Get the id of the first and last checkout page
-  $checkout_pages      = commerce_checkout_pages();
+  $checkout_pages = commerce_checkout_pages();
   $first_checkout_page = key($checkout_pages);
   end($checkout_pages);
-  $last_checkout_page  = key($checkout_pages);
+  $last_checkout_page = key($checkout_pages);
 
   // Check if the user's shopping cart order exists with something in the cart
   if (commerce_cart_order_load() && xdruple_checkout_items_in_cart()) {
     if (($checkout_page['page_id'] == $first_checkout_page)) {
       if (user_is_anonymous() && empty($_SESSION['xdruple_checkout_bypass'])) {
         $_SESSION['xdruple_checkout_anonymous'] = TRUE;
-        $checkout_message                       = variable_get('xdruple_checkout_message', t('You need to be logged in to be able to checkout.'));
+        $checkout_message = variable_get('xdruple_checkout_message', t('You need to be logged in to be able to checkout.'));
 
         if (!empty($checkout_message)) {
           drupal_set_message($checkout_message);
@@ -148,7 +148,7 @@ function xdruple_checkout_commerce_checkout_pane_info_alter(&$checkout_panes) {
 
   // Disable the Account Information pane if the for anonymous users.
   if ($user->uid === 0) {
-    $checkout_panes['account']['page']    = 'disabled';
+    $checkout_panes['account']['page'] = 'disabled';
     $checkout_panes['account']['enabled'] = FALSE;
   }
 }
@@ -166,7 +166,8 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     if (!$cust_key) {
       drupal_set_message(t('Guest customer is not setup. Please contact the site administrator.'), 'warning');
     }
-  } else {
+  }
+  else {
     $cust_key = $order_wrapper->commerce_customer_billing->xd_customer->number->value();
   }
   // Load the full customer so we get Terms, Tax, etc. we normally do not expose.
@@ -183,7 +184,7 @@ function xdruple_checkout_commerce_checkout_complete($order) {
 
   // Get the Ship To from checkout.
   $ship_to = $order_wrapper->commerce_customer_shipping->xd_ship_to->value();
-  $full_ship_to = false;
+  $full_ship_to = FALSE;
 
   if (isset($ship_to)) {
     $ship_to_contact = json_decode(json_encode($ship_to->contact), FALSE);
@@ -204,7 +205,8 @@ function xdruple_checkout_commerce_checkout_complete($order) {
         break;
       }
     }
-  } else {
+  }
+  else {
     // Get the Ship To Contact details from checkout.
     $ship_to_contact = $order_wrapper->commerce_customer_shipping->xd_ship_to_contact->value();
 
@@ -259,10 +261,12 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     $notes = $order_wrapper->xd_order_notes->value();
     if (!empty($notes)) {
       $order_notes = $notes['safe_value'];
-    } else {
+    }
+    else {
       $order_notes = '';
     }
-  } else {
+  }
+  else {
     $order_notes = '';
   }
 
@@ -274,13 +278,13 @@ function xdruple_checkout_commerce_checkout_complete($order) {
   $sales_order = new $so_class(array(), $so_entityType);
 
   // Set all the defaults on the Sales Order.
-  $sales_order->is_new = true;
+  $sales_order->is_new = TRUE;
   $sales_order->status = 'O';
   $sales_order->saleType = 'INT';
-  $sales_order->calculateFreight = true;
+  $sales_order->calculateFreight = TRUE;
   $sales_order->freight = 0;
   $sales_order->orderDate = date("Y-m-d");
-  $sales_order->wasQuote = false;
+  $sales_order->wasQuote = FALSE;
   //$sales_order->number = $order->order_number;
   $sales_order->orderNotes = $order_notes;
   $sales_order->customerPurchaseOrderNumber = $po_number;
@@ -288,14 +292,14 @@ function xdruple_checkout_commerce_checkout_complete($order) {
   // Set the Customer details on the Sales Order.
   $sales_order->site = $customer->preferredSite;
   $sales_order->customer = $customer->number;
-  $sales_order->terms = !empty($order->data['xdruple_terms']) ? $order->data['xdruple_terms'] : null;
+  $sales_order->terms = !empty($order->data['xdruple_terms']) ? $order->data['xdruple_terms'] : NULL;
   $sales_order->salesRep = $full_ship_to ? $full_ship_to->salesRep : $customer->salesRep;
   $sales_order->taxZone = $full_ship_to ? $full_ship_to->taxZone : $customer->taxZone;
   $sales_order->billtoContact = $bill_to_contact->number;
-  $sales_order->shipto = $ship_to['uuid'] ? $ship_to['uuid'] : null;
+  $sales_order->shipto = $ship_to['uuid'] ? $ship_to['uuid'] : NULL;
   $sales_order->shiptoContact = $ship_to_contact->number;
   $sales_order->currency = $customer->currency;
-  $sales_order->shipZone = $full_ship_to ? $full_ship_to->shipZone : null;
+  $sales_order->shipZone = $full_ship_to ? $full_ship_to->shipZone : NULL;
   $sales_order->shipCharge = $full_ship_to ? $full_ship_to->shipCharge : $customer->shipCharge;
   $sales_order->commission = $full_ship_to ? $full_ship_to->commission : $customer->commission;
   $sales_order->shipVia = $full_ship_to ? $full_ship_to->shipVia : $customer->shipVia;
@@ -311,8 +315,8 @@ function xdruple_checkout_commerce_checkout_complete($order) {
   $sales_order->billtoState = $bill_to_address->state;
   $sales_order->billtoPostalCode = $bill_to_address->postalCode;
   $sales_order->billtoCountry = $bill_to_address->country;
-  $sales_order->shiptoName = $full_ship_to ? $full_ship_to->name : null;
-  $sales_order->shipNotes = $full_ship_to ? $full_ship_to->notes : null;
+  $sales_order->shiptoName = $full_ship_to ? $full_ship_to->name : NULL;
+  $sales_order->shipNotes = $full_ship_to ? $full_ship_to->notes : NULL;
   $sales_order->shiptoContactFirstName = $ship_to_contact->firstName;
   $sales_order->shiptoContactLastName = $ship_to_contact->lastName;
   $sales_order->shiptoContactPhone = $ship_to_contact->phone;
@@ -334,7 +338,7 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     if (isset($property_info['commerce_product'])) {
       // Set the line defaults.
       $sales_order->lineItems[$delta]['scheduleDate'] = xdruple_rescued_scheduled_date('tomorrow');
-      $sales_order->lineItems[$delta]['firm'] = false;
+      $sales_order->lineItems[$delta]['firm'] = FALSE;
       $sales_order->lineItems[$delta]['site'] = $session->getRescued('site', $customer->preferredSite);
       $sales_order->lineItems[$delta]['taxType'] = 'Taxable';
 
@@ -350,13 +354,15 @@ function xdruple_checkout_commerce_checkout_complete($order) {
       $sales_order->lineItems[$delta]['quantity'] = $line->quantity->value();
       $sales_order->lineItems[$delta]['customerPrice'] = ($line->commerce_unit_price->amount->value() / 100);
       $sales_order->lineItems[$delta]['price'] = ($line->commerce_unit_price->amount->value() / 100);
-    } elseif (isset($property_info['commerce_shipping_service'])) {
+    }
+    elseif (isset($property_info['commerce_shipping_service'])) {
       $sales_order->freight = ($line->commerce_unit_price->amount->value() / 100);
-      $sales_order->calculateFreight = false;
+      $sales_order->calculateFreight = FALSE;
       $sales_order->shipVia = xdruple_shipping_map_ship_via($line->line_item_label->value());
-    } else {
+    }
+    else {
       // TODO - Handle tax lines.
-      $foo = true;
+      $foo = TRUE;
     }
   }
 
@@ -365,10 +371,12 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     isset($order->data['xdruple_auth_aim_trans_id'], $order->data['xdruple_auth_aim_payment_id'], $order->data['xdruple_auth_aim_amount']) &&
     !empty($order->data['xdruple_auth_aim_trans_id']) &&
     !empty($order->data['xdruple_auth_aim_payment_id']) &&
-    !empty($order->data['xdruple_auth_aim_amount'])) {
+    !empty($order->data['xdruple_auth_aim_amount'])
+  ) {
 
     $finalize_auth_aim_order_payment = TRUE;
-  } else {
+  }
+  else {
     $finalize_auth_aim_order_payment = FALSE;
   }
 
@@ -393,7 +401,8 @@ function xdruple_checkout_commerce_checkout_complete($order) {
       unset($_SESSION['access_token']);
       unset($_SESSION['oauth_user']);
       $session->setRescued('user', $cached_user);
-    } else {
+    }
+    else {
       // For admin users, we can save directly with their OAuth token.
       $sales_order->save();
 
@@ -414,7 +423,7 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     }
 
     // Set email addresses for managers.
-    $manager_emails = variable_get('xdruple_checkout_manager_order_confirm_emails', null);
+    $manager_emails = variable_get('xdruple_checkout_manager_order_confirm_emails', NULL);
     if (!empty($manager_emails)) {
       $confirm_emails = $order_wrapper->mail->value();
       $confirm_emails = $confirm_emails . ',' . str_replace(' ', '', $manager_emails);
@@ -480,49 +489,52 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
         if (variable_get('xdruple_checkout_anonymous', FALSE)) {
           $form_state['#order'] = $order;
           $form['actions']['continue_button'] = array(
-            '#name'                    => 'continue_button',
-            '#type'                    => 'submit',
-            '#value'                   => 'Checkout without an account',
+            '#name' => 'continue_button',
+            '#type' => 'submit',
+            '#value' => 'Checkout without an account',
             '#limit_validation_errors' => array(),
-            '#submit'                  => array('xdruple_checkout_anonymous_continue_checkout'),
-            '#states'                  => array (
+            '#submit' => array('xdruple_checkout_anonymous_continue_checkout'),
+            '#states' => array(
               'visible' => array(
-               ':input[name="have_pass"]' => array('value' => 0),
+                ':input[name="have_pass"]' => array('value' => 0),
               ),
             ),
           );
           // Anonymous checkout as alternative to login form.
           $form['have_pass'] = array(
-            '#type'          => 'radios',
-            '#title'         => t('Do you have an account?'),
-            '#description'   => t('Choose %yes to login, %no to checkout as a guest or you can ', array('%yes' => t('Yes'), '%no' => t('No'))) . l(t('create a new account'), 'user/register') . '.',
-            '#options'       => array(0 => t('Yes'), 1 => t('No')),
-            '#weight'        => -10,
+            '#type' => 'radios',
+            '#title' => t('Do you have an account?'),
+            '#description' => t('Choose %yes to login, %no to checkout as a guest or you can ', array(
+                  '%yes' => t('Yes'),
+                  '%no' => t('No')
+                )) . l(t('create a new account'), 'user/register') . '.',
+            '#options' => array(0 => t('Yes'), 1 => t('No')),
+            '#weight' => -10,
             '#default_value' => 0,
           );
           $form['pass']['#states'] = array(
             'visible' => array(
-             ':input[name="have_pass"]' => array('value' => 0),
+              ':input[name="have_pass"]' => array('value' => 0),
             ),
           );
           $form['actions']['submit']['#states'] = array(
             'visible' => array(
-             ':input[name="have_pass"]' => array('value' => 0),
+              ':input[name="have_pass"]' => array('value' => 0),
             ),
           );
           //$form['pass']['#weight'] = 10;
-          $form['actions']['continue_button']['#value']  = t('Checkout without an account');
-          $form['actions']['continue_button']['#states'] = array (
+          $form['actions']['continue_button']['#value'] = t('Checkout without an account');
+          $form['actions']['continue_button']['#states'] = array(
             'visible' => array(
-             ':input[name="have_pass"]' => array('value' => 1),
+              ':input[name="have_pass"]' => array('value' => 1),
             ),
           );
 
           // Use the username as order email.
           // Email validation for the username form element
-          $form['name']['#title']                                         = t('Email');
+          $form['name']['#title'] = t('Email');
           $form['actions']['continue_button']['#limit_validation_errors'] = array(array('name'));
-          $form['actions']['continue_button']['#validate'][]              = 'xdruple_checkout_username_as_order_email_form_validate';
+          $form['actions']['continue_button']['#validate'][] = 'xdruple_checkout_username_as_order_email_form_validate';
         }
       }
       // Resert password form
@@ -539,7 +551,7 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
 
         // "Continue with checkout" submit button.
         $form['actions']['checkout'] = array(
-          '#type'  => 'submit',
+          '#type' => 'submit',
           '#value' => t('Continue with checkout'),
         );
 
@@ -568,15 +580,18 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     if (isset($form_state['values']['customer_profile_shipping'])) {
       $form_state_shipping = &$form_state['values']['customer_profile_shipping'];
     }
-  } else if ($form_id === 'commerce_order_ui_order_form') {
-    $form_billing = &$form['commerce_customer_billing'][LANGUAGE_NONE]['profiles'][0];
-    $form_shipping = &$form['commerce_customer_shipping'][LANGUAGE_NONE]['profiles'][0];
+  }
+  else {
+    if ($form_id === 'commerce_order_ui_order_form') {
+      $form_billing = &$form['commerce_customer_billing'][LANGUAGE_NONE]['profiles'][0];
+      $form_shipping = &$form['commerce_customer_shipping'][LANGUAGE_NONE]['profiles'][0];
 
-    if (isset($form_state['values']['xd_customer'])) {
-      $form_state_billing = &$form_state['values'];
-    }
-    if (isset($form_state['values']['xd_ship_to'])) {
-      $form_state_shipping = &$form_state['values'];
+      if (isset($form_state['values']['xd_customer'])) {
+        $form_state_billing = &$form_state['values'];
+      }
+      if (isset($form_state['values']['xd_ship_to'])) {
+        $form_state_shipping = &$form_state['values'];
+      }
     }
   }
 
@@ -638,17 +653,21 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
   // Remove the Ship Tos that are not for this customer. Reset the #options array.
   if (isset($form_billing['xd_customer'][LANGUAGE_NONE]['#default_value'][0]) &&
     (!isset($form_state['values']) || empty($form_state['values'])) &&
-    $default_customer = $form_billing['xd_customer'][LANGUAGE_NONE]['#default_value'][0]) {
+    $default_customer = $form_billing['xd_customer'][LANGUAGE_NONE]['#default_value'][0]
+  ) {
     // This is the first load of an edit form, use the default.
 
     $shiptos = xdruple_fields_get_ship_to_list($default_customer);
-  } elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value']) &&
+  }
+  elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value']) &&
     (!isset($form_state['values']) || empty($form_state['values'])) &&
-    preg_match("/.+\(([\w\+@\.]+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches)) {
+    preg_match("/.+\(([\w\+@\.]+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches)
+  ) {
     // This is the first load of an edit form, use the default from autocomplete.
 
     $shiptos = xdruple_fields_get_ship_to_list($matches[1]);
-  } else {
+  }
+  else {
     // This is the second or more Ajax load, get it from the saved order.
 
     if ($form_id === 'commerce_order_ui_order_form') {
@@ -659,10 +678,12 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     }
     if ($form_id === 'commerce_checkout_form_checkout') {
       if (isset($form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) &&
-        $default_customer = $form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) {
+        $default_customer = $form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']
+      ) {
 
         $shiptos = xdruple_fields_get_ship_to_list($default_customer);
-      } elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
+      }
+      elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
         preg_match("/.+\((.+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches);
         // This is the first load of an edit form, use the default from autocomplete.
 
@@ -687,9 +708,12 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
   if (isset($form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value'][0]) && (!isset($form_state['values']) || empty($form_state['values']))) {
     // First time loading form with a default set.
     $shipto_id = $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value'][0];
-  } else if (isset($form_state_shipping['xd_ship_to'][LANGUAGE_NONE][0]['target_id'])) {
-    // After first load with target_id set.
-    $shipto_id = $form_state_shipping['xd_ship_to'][LANGUAGE_NONE][0]['target_id'];
+  }
+  else {
+    if (isset($form_state_shipping['xd_ship_to'][LANGUAGE_NONE][0]['target_id'])) {
+      // After first load with target_id set.
+      $shipto_id = $form_state_shipping['xd_ship_to'][LANGUAGE_NONE][0]['target_id'];
+    }
   }
 
   // If a default Ship To is set on first load of the form OR the Ship To
@@ -699,7 +723,7 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     // and Address will be blank if the user flips back to it.
     $contact_ief_id = $form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['#ief_id'];
     $address_ief_id = $form_shipping['xd_ship_to_address'][LANGUAGE_NONE]['#ief_id'];
-    foreach($form_state['inline_entity_form'] as $ief_key => $ief_child) {
+    foreach ($form_state['inline_entity_form'] as $ief_key => $ief_child) {
       if (strncmp($ief_key, $contact_ief_id, strlen($contact_ief_id)) === 0) {
         unset($form_state['inline_entity_form'][$ief_key]);
       }
@@ -719,12 +743,14 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     }
     if (isset($form_state_shipping['xd_ship_to_contact'])) {
       unset($form_state_shipping['xd_ship_to_contact']);
-    } else {
+    }
+    else {
       // TODO
     }
     if (isset($form_state_shipping['xd_ship_to_address'])) {
       unset($form_state_shipping['xd_ship_to_address']);
-    } else {
+    }
+    else {
       // TODO
     }
     unset($form_state['input']['customer_profile_shipping']['xd_ship_to_contact']);
@@ -741,25 +767,25 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
         '#type' => 'textfield',
         '#title' => t('First Name'),
         '#default_value' => isset($shipto->contact['firstName']) ? $shipto->contact['firstName'] : '',
-        '#disabled' => true,
+        '#disabled' => TRUE,
       ),
       'last_name' => array(
         '#type' => 'textfield',
         '#title' => t('Last Name'),
         '#default_value' => isset($shipto->contact['lastName']) ? $shipto->contact['lastName'] : '',
-        '#disabled' => true,
+        '#disabled' => TRUE,
       ),
       'email' => array(
         '#type' => 'textfield',
         '#title' => t('Primary Email'),
         '#default_value' => isset($shipto->contact['primaryEmail']) ? $shipto->contact['primaryEmail'] : '',
-        '#disabled' => true,
+        '#disabled' => TRUE,
       ),
       'phone' => array(
         '#type' => 'textfield',
         '#title' => t('Phone'),
         '#default_value' => isset($shipto->contact['phone']) ? $shipto->contact['phone'] : '',
-        '#disabled' => true,
+        '#disabled' => TRUE,
       ),
     );
     $form_shipping['ship_to_address_wrapper'] = array(
@@ -769,34 +795,35 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
         '#type' => 'textfield',
         '#title' => t('Line1'),
         '#default_value' => isset($shipto->address['line1']) ? $shipto->address['line1'] : '',
-        '#disabled' => true,
+        '#disabled' => TRUE,
       ),
       'line2' => array(
         '#type' => 'textfield',
         '#title' => t('Line2'),
         '#default_value' => isset($shipto->address['line2']) ? $shipto->address['line2'] : '',
-        '#disabled' => true,
+        '#disabled' => TRUE,
       ),
       'city' => array(
         '#type' => 'textfield',
         '#title' => t('City'),
         '#default_value' => isset($shipto->address['city']) ? $shipto->address['city'] : '',
-        '#disabled' => true,
+        '#disabled' => TRUE,
       ),
       'state' => array(
         '#type' => 'select',
         '#title' => t('State'),
         '#options' => array(isset($shipto->address['state']) ? $shipto->address['state'] : ''),
         '#default_value' => isset($shipto->address['state']) ? $shipto->address['state'] : '',
-        '#disabled' => true,
+        '#disabled' => TRUE,
       ),
     );
-  } else {
+  }
+  else {
     // This is a Custom Ship To. Unset the default value.
     unset($form_shipping['xd_ship_to'][LANGUAGE_NONE]['#default_value']);
     /** @var Xtuple\Xdruple\Session\RescuedSession $session */
     $session = extensions_get_session();
-    $session->setRescued('custom_ship_to', true);
+    $session->setRescued('custom_ship_to', TRUE);
   }
 }
 
@@ -816,13 +843,13 @@ function xdruple_checkout_anonymous_submit($form, &$form_state) {
       // @see user_pass_reset()
       if ($form_state['clicked_button']['#id'] == 'edit-checkout') {
         global $user;
-        $users           = user_load_multiple(array($form_state['build_info']['args'][0]), array('status' => '1'));
-        $user            = reset($users);
+        $users = user_load_multiple(array($form_state['build_info']['args'][0]), array('status' => '1'));
+        $user = reset($users);
         $GLOBALS['user'] = $user;
         // User login with user_login_finalize().
         user_login_finalize();
         // Let the user's password be changed without the current password check.
-        $token           = drupal_random_key();
+        $token = drupal_random_key();
         $_SESSION['pass_reset_' . $GLOBALS['user']->uid] = $token;
       }
       // Continue the reset password process.
@@ -840,7 +867,7 @@ function xdruple_checkout_anonymous_submit($form, &$form_state) {
 
 /**
  * Form validation handler for login form for using username as order email.
-*/
+ */
 function xdruple_checkout_username_as_order_email_form_validate($form, &$form_state) {
   $mail = trim($form_state['values']['name']);
   form_set_value($form['name'], $mail, $form_state);
@@ -863,7 +890,10 @@ function xdruple_checkout_username_as_order_email_form_validate($form, &$form_st
         form_set_error('mail', t('The e-mail address %email is already taken.', array('%email' => $form_state['values']['name'])));
       }
       else {
-        form_set_error('mail', t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array('%email' => $form_state['values']['name'], '@password' => url('user/password'))));
+        form_set_error('mail', t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array(
+              '%email' => $form_state['values']['name'],
+              '@password' => url('user/password')
+            )));
       }
     }
   }
@@ -876,13 +906,13 @@ function xdruple_checkout_anonymous_continue_checkout($form, &$form_state) {
   // If the user chooses to continue without an account, set this variable so user
   // is only redirected once per order (or once per session if the session expires first).
   $_SESSION['xdruple_checkout_bypass'] = TRUE;
-  $order                               = $form_state['#order'];
+  $order = $form_state['#order'];
 
   // Using the username as order email.
-  $order->mail                         = $form_state['values']['name'];
+  $order->mail = $form_state['values']['name'];
   commerce_order_save($order);
 
-  $form_state['redirect']              = 'checkout/';
+  $form_state['redirect'] = 'checkout/';
 }
 
 /**
@@ -900,18 +930,18 @@ function xdruple_checkout_form_cancel_submit($form, &$form_state) {
 /**
  * Helper function to check if the cart contains any items.
  */
-function xdruple_checkout_items_in_cart(){
+function xdruple_checkout_items_in_cart() {
   global $user;
 
-  $cart       = commerce_cart_order_load($user->uid);
-  $line_items = count($cart->commerce_line_items) ? true : false;
+  $cart = commerce_cart_order_load($user->uid);
+  $line_items = count($cart->commerce_line_items) ? TRUE : FALSE;
 
   return $line_items;
 }
 
 /**
  * Implements hook_features_exclude()
- * 
+ *
  * @return array
  */
 function xdruple_checkout_features_exclude() {

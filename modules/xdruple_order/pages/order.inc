@@ -30,7 +30,7 @@ function xdruple_order_page($order_number) {
     // TODO: Add Sales Rep, Employee and Owner query filters.
 
     $query_remitto = new EntityFieldQuery();
-    $remitto       = $query_remitto->entityCondition('entity_type', 'xtuple_remitto')->execute();
+    $remitto = $query_remitto->entityCondition('entity_type', 'xtuple_remitto')->execute();
 
     // TODO: The rescued_entity_field_query_builder(EntityFieldQuery $query)
     // function runs through entity_load to do the actual query. In theory,
@@ -44,8 +44,8 @@ function xdruple_order_page($order_number) {
       $currency = entity_load_single('xtuple_currency', $order->currency['abbreviation']);
 
       $params = array(
-        'order'    => $order,
-        'remitto'  => $remitto['xtuple_remitto'][key($remitto['xtuple_remitto'])],
+        'order' => $order,
+        'remitto' => $remitto['xtuple_remitto'][key($remitto['xtuple_remitto'])],
         'currency' => $currency,
       );
 

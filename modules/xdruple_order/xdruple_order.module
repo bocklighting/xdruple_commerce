@@ -7,7 +7,7 @@ include_once __DIR__ . '/pages/order.inc';
  */
 function xdruple_order_views_api() {
   return array(
-    'api'  => 3,
+    'api' => 3,
     'path' => drupal_get_path('module', 'xdruple_order') . '/includes/views',
   );
 }
@@ -25,13 +25,13 @@ function xdruple_order_menu() {
   $items = array();
 
   $items['user/%user/pending-orders/%'] = array(
-    'title'            => 'Order',
-    'title callback'   => 'xdruple_order_page_title',
-    'title arguments'  => array(3),
-    'page callback'    => 'xdruple_order_page',
-    'page arguments'   => array(3),
+    'title' => 'Order',
+    'title callback' => 'xdruple_order_page_title',
+    'title arguments' => array(3),
+    'page callback' => 'xdruple_order_page',
+    'page arguments' => array(3),
     'access arguments' => array('access content'),
-    'file'             => 'pages/order.inc',
+    'file' => 'pages/order.inc',
   );
 
   return $items;
@@ -52,9 +52,9 @@ function xdruple_order_opencdd_body_classes_alter(&$classes, $path) {
 function xdruple_order_menu_get_item_alter(&$router_item) {
   if ($router_item['path'] == 'user/%/pending-orders/%') {
     $router_item['tab_parent'] = 'user/%';
-    $router_item['tab_root']   = 'user/%';
-    $router_item['type']       = "132";
-    $router_item['context']    = 1;
+    $router_item['tab_root'] = 'user/%';
+    $router_item['type'] = "132";
+    $router_item['context'] = 1;
   }
 }
 
@@ -84,14 +84,14 @@ function xdruple_order_views_pre_execute($view) {
     /** @var Xtuple\Xdruple\Session\RescuedSession $session */
     $session = extensions_get_session();
     if ($session->getRescued('customer')) {
-      $view->query->query->propertyConditions[]              = array(
-        'column'   => 'customer',
-        'value'    => $session->getRescued('customer'),
+      $view->query->query->propertyConditions[] = array(
+        'column' => 'customer',
+        'value' => $session->getRescued('customer'),
         'operator' => '=',
       );
       $view->build_info['count_query']->propertyConditions[] = array(
-        'column'   => 'customer',
-        'value'    => $session->getRescued('customer'),
+        'column' => 'customer',
+        'value' => $session->getRescued('customer'),
         'operator' => '=',
       );
     }
@@ -101,14 +101,14 @@ function xdruple_order_views_pre_execute($view) {
       // Get the Ship To Name.
       $shipto_name = entity_load_single('xtuple_xdshipto', $session->getRescued('ship_to'));
 
-      $view->query->query->propertyConditions[]              = array(
-        'column'   => 'shiptoName',
-        'value'    => $shipto_name->name,
+      $view->query->query->propertyConditions[] = array(
+        'column' => 'shiptoName',
+        'value' => $shipto_name->name,
         'operator' => '=',
       );
       $view->build_info['count_query']->propertyConditions[] = array(
-        'column'   => 'shiptoName',
-        'value'    => $shipto_name->name,
+        'column' => 'shiptoName',
+        'value' => $shipto_name->name,
         'operator' => '=',
       );
     }
@@ -125,8 +125,8 @@ function xdruple_order_theme() {
     'variables' => array(
       'order' => array(),
     ),
-    'template'  => 'theme/order-page',
-    'file'      => 'theme/theme.inc',
+    'template' => 'theme/order-page',
+    'file' => 'theme/theme.inc',
   );
 
   return $items;

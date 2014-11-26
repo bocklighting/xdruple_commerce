@@ -2103,7 +2103,7 @@ function xdruple_commerce_checkout_review($variables) {
     }
 
     $fieldset = theme('fieldset', $vars);
-    
+
     $rows[] = theme('html_tag', array(
       'element' => array(
         '#tag' => 'div',
@@ -2169,7 +2169,7 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
           $tid = $build['xd_ship_to_contact']['#items'][0]['target_id'];
           $name = $build['xd_ship_to_contact'][0]['xtuple_xdcontact'][$tid]['firstName'][0]['#markup'];
         }
-        
+
         $markup = '';
         $markup .= '<div class="field field-name-xd-ship-to field-type-entityreference field-label-above col-lg-4">';
         if ($name) {
@@ -2865,7 +2865,7 @@ function xdruple_commerce_commerce_order_load($orders) {
 
 /**
  * Implements hook_features_exclude()
- * 
+ *
  * @return array
  */
 function xdruple_commerce_features_exclude() {

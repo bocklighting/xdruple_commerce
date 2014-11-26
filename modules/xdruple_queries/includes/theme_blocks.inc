@@ -2,7 +2,7 @@
 
 function template_preprocess_block_categories_tree(&$variables) {
   if (!empty($variables['name'])) {
-    $base_class     = 'b-block';
+    $base_class = 'b-block';
     $instance_class = drupal_clean_css_identifier($base_class . '-' . $variables['name']);
 
     $variables['attributes_array'] += array(

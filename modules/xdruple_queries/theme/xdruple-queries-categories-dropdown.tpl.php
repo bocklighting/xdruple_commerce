@@ -1,8 +1,8 @@
 <?php
 /**
  * @var \Xtuple\XdrupleQueries\Categories\Category[] $catalog
- * @var string $content_attributes
- * @var string $attributes
+ * @var string                                       $content_attributes
+ * @var string                                       $attributes
  */
 ?>
 <?php if (!empty($catalog)): ?>

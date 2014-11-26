@@ -42,7 +42,10 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_customer_profile', 'xd_customer', 'billing', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_customer_profile', 'xd_customer', 'billing', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_customer',
@@ -121,7 +124,10 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_customer_profile', 'xd_bill_to_contact', 'billing', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_customer_profile', 'xd_bill_to_contact', 'billing', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_bill_to_contact',
@@ -215,7 +221,10 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_customer_profile', 'xd_bill_to_address', 'billing', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_customer_profile', 'xd_bill_to_address', 'billing', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_bill_to_address',
@@ -309,7 +318,10 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_customer_profile', 'xd_ship_to', 'shipping', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_customer_profile', 'xd_ship_to', 'shipping', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_ship_to',
@@ -387,7 +399,10 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_customer_profile', 'xd_ship_to_contact', 'shipping', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_customer_profile', 'xd_ship_to_contact', 'shipping', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_ship_to_contact',
@@ -472,7 +487,10 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_customer_profile', 'xd_ship_to_address', 'shipping', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_customer_profile', 'xd_ship_to_address', 'shipping', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_ship_to_address',
@@ -538,7 +556,10 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_order', 'xd_order_po_number', 'commerce_order', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_order', 'xd_order_po_number', 'commerce_order', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_order_po_number',
@@ -583,7 +604,10 @@ function xdruple_commerce_install() {
     );
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_order', 'xd_order_notes', 'commerce_order', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_order', 'xd_order_notes', 'commerce_order', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_order_notes',

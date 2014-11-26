@@ -9,7 +9,7 @@
  */
 function xdruple_favorites_add_to_favorites_form($form, &$form_state, $product_id, $customer, $ship_to) {
   $form = _xdruple_favorites_prepare_add_remove_form(XDRUPLE_FAVORITES_REMOVE, $form, $form_state, $product_id, $customer, $ship_to);
-  
+
   return $form;
 }
 

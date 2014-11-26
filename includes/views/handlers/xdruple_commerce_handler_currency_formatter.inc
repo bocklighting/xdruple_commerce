@@ -30,8 +30,8 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
     // same table this handler is used on.
     'currency_code_table' => NULL,
     'type' => 'decimal',
-    'float' => true,
-    'click sortable' => true,
+    'float' => TRUE,
+    'click sortable' => TRUE,
   );
 
   /**
