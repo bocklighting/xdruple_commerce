@@ -2326,9 +2326,11 @@ function xdruple_commerce_checkout_purchased_items_pane_checkout_form($form, &$f
   $pane_form = array();
 
   module_load_include('inc', 'commerce_cart', 'includes/commerce_cart.checkout_pane');
-  $pane_form['cart_contents'] = array(
-    '#markup' => commerce_cart_contents_pane_review($form, $form_state, $checkout_pane, $order),
-  );
+  if (user_access('view own commerce_order entities')) {
+    $pane_form['cart_contents'] = array(
+      '#markup' => commerce_cart_contents_pane_review($form, $form_state, $checkout_pane, $order),
+    );
+  }
 
   return $pane_form;
 }
