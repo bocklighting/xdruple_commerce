@@ -687,7 +687,9 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
         preg_match("/.+\((.+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches);
         // This is the first load of an edit form, use the default from autocomplete.
 
-        $shiptos = xdruple_fields_get_ship_to_list($matches[1]);
+        if (!empty($matches[1])) {
+          $shiptos = xdruple_fields_get_ship_to_list($matches[1]);
+        }
       }
     }
   }
