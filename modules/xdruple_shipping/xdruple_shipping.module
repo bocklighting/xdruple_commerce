@@ -27,20 +27,21 @@ function xdruple_shipping_cpanel_alter(&$form, &$form_state) {
   if (module_exists('commerce_pickup')) {
     $sites = entity_load('xtuple_site');
 
-    $options =  array();
+    $options = array();
     foreach ($sites as $key => $site) {
       $options[$key] = $site->description;
     }
     if (count($sites) > 1) {
       $form['xdruple_commerce_store_settings']['xdruple_shipping_allowed_pickup_sites'] = array(
-        '#type'          => 'checkboxes',
-        '#options'       => $options,
-        '#title'         => t('Allowed Pickup Sites'),
-        '#description'   => t('Limit the Sites customers are allowed to pickup from. If checked, a Customer can choose to pickup their order from this Site location.'),
-        '#required'      => true,
+        '#type' => 'checkboxes',
+        '#options' => $options,
+        '#title' => t('Allowed Pickup Sites'),
+        '#description' => t('Limit the Sites customers are allowed to pickup from. If checked, a Customer can choose to pickup their order from this Site location.'),
+        '#required' => TRUE,
         '#default_value' => variable_get('xdruple_shipping_allowed_pickup_sites', array()),
       );
-    } else {
+    }
+    else {
       drupal_set_message(t('Cannot find any Sites to set as allowed pickup locations.'), 'warning');
     }
   }
@@ -120,10 +121,12 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
             $weight = 0;
             if (isset($entity_properties['weightUnit']) &&
               property_exists($entity, 'weightUnit') &&
-              !empty($entity->weightUnit)) {
+              !empty($entity->weightUnit)
+            ) {
               // Convert unit to commerce_physical.
               $weightUnit = xdruple_shipping_map_physical_weight_units($entity->weightUnit, $valid_weights);
-            } else {
+            }
+            else {
               // Get default UOM.
               $weightUnit = $instances['widget']['settings']['default_unit'];
             }
@@ -142,13 +145,16 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
                 'unit' => $weightUnit,
               );
             }
-          } elseif ($type === 'physical_dimensions') {
+          }
+          elseif ($type === 'physical_dimensions') {
             if (isset($entity_properties['dimensionUnit']) &&
               property_exists($entity, 'dimensionUnit') &&
-              !empty($entity->dimensionUnit)) {
+              !empty($entity->dimensionUnit)
+            ) {
               // Convert unit to commerce_physical.
               $dimensionUnit = xdruple_shipping_map_physical_dimension_units($entity->dimensionUnit, $valid_dimensions);
-            } else {
+            }
+            else {
               // Get default UOM.
               $dimensionUnit = $instances['widget']['settings']['default_unit'];
             }
@@ -184,6 +190,7 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
 
 /**
  * Gets a list of physical modules valid weight units.
+ *
  * @See: physical_weight_units()
  *
  * @return array
@@ -202,6 +209,7 @@ function xdruple_shipping_physical_weight_units() {
 
 /**
  * Gets a list of physical modules valid dimension units.
+ *
  * @See: physical_dimension_units()
  *
  * @return array
@@ -220,13 +228,14 @@ function xdruple_shipping_physical_dimension_units() {
 
 /**
  * Converts an xTuple UOM to physical modules weight unit.
+ *
  * @See: physical_weight_units()
  *
  * @param string $unit
  *   The type of weight unit whose name should be returned; by default this can
  *   be lb, oz, kg, or g.
  *
- * @param array $valid_units
+ * @param array  $valid_units
  *   An array of valid physical modules weight units.
  *
  * @return
@@ -237,21 +246,24 @@ function xdruple_shipping_map_physical_weight_units($unit, $valid_units) {
 
   if (in_array($unit, $valid_units)) {
     return $unit;
-  } else {
-    drupal_set_message(t('Weight unit of measure not valid.'), 'warning', false);
-    return false;
+  }
+  else {
+    drupal_set_message(t('Weight unit of measure not valid.'), 'warning', FALSE);
+
+    return FALSE;
   }
 }
 
 /**
  * Converts an xTuple UOM to dimension modules dimension unit.
+ *
  * @See: physical_dimension_units()
  *
  * @param string $unit
  *   The type of dimension unit whose name should be returned; by default this can
  *   be in, ft, mm, cm, or m.
  *
- * @param array $valid_units
+ * @param array  $valid_units
  *   An array of valid physical modules dimension units.
  *
  * @return
@@ -262,19 +274,22 @@ function xdruple_shipping_map_physical_dimension_units($unit, $valid_units) {
 
   if (in_array($unit, $valid_units)) {
     return $unit;
-  } else {
-    drupal_set_message(t('Dimension unit of measure not valid.'), 'warning', false);
-    return false;
+  }
+  else {
+    drupal_set_message(t('Dimension unit of measure not valid.'), 'warning', FALSE);
+
+    return FALSE;
   }
 }
 
 /**
  * Converts a Commerce Shipping Service to xTuple's Ship Via code-description.
+ *
  * @See: xdruple_commerce_commerce_checkout_complete()
  * @See: _commerce_ups_service_list()
  *
  * @param $ship_label
- *   The commerce line_item_label; by default this can be:
+ *    The commerce line_item_label; by default this can be:
  *    'UPS Ground',
  *    'UPS Next Day Air',
  *    'UPS 2nd Day Air',
@@ -293,7 +308,7 @@ function xdruple_shipping_map_ship_via($ship_label) {
     $stripped_description = str_replace(array(' ', '-', '_'), '', $value->description);
 
     // Compare the two and return the code-description if they match.
-    if ($stripped_label ===  $stripped_description) {
+    if ($stripped_label === $stripped_description) {
       return $code . '-' . $value->description;
     }
   }
@@ -330,31 +345,34 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
       $country_match = array_keys($countries, $xd_ship_to_address->country);
       if (count($country_match) === 1) {
         $country_code = $country_match[0];
-      } else {
+      }
+      else {
         $country_code = 'US';
       }
 
-      $ship_to_address['thoroughfare']        = $xd_ship_to_address->line1;
-      $ship_to_address['premise']             = $xd_ship_to_address->line2;
-      $ship_to_address['locality']            = $xd_ship_to_address->city;
+      $ship_to_address['thoroughfare'] = $xd_ship_to_address->line1;
+      $ship_to_address['premise'] = $xd_ship_to_address->line2;
+      $ship_to_address['locality'] = $xd_ship_to_address->city;
       $ship_to_address['administrative_area'] = $xd_ship_to_address->state;
-      $ship_to_address['postal_code']         = $xd_ship_to_address->postalCode;
-      $ship_to_address['country']             = $country_code;
-    } elseif ($xd_ship_to = $order_wrapper->commerce_customer_shipping->xd_ship_to->value()) {
+      $ship_to_address['postal_code'] = $xd_ship_to_address->postalCode;
+      $ship_to_address['country'] = $country_code;
+    }
+    elseif ($xd_ship_to = $order_wrapper->commerce_customer_shipping->xd_ship_to->value()) {
       $countries = country_get_list();
       $country_match = array_keys($countries, $xd_ship_to->address['country']);
       if (count($country_match) === 1) {
         $country_code = $country_match[0];
-      } else {
+      }
+      else {
         $country_code = 'US';
       }
 
-      $ship_to_address['thoroughfare']        = $xd_ship_to->address['line1'];
-      $ship_to_address['premise']             = $xd_ship_to->address['line2'];
-      $ship_to_address['locality']            = $xd_ship_to->address['city'];
+      $ship_to_address['thoroughfare'] = $xd_ship_to->address['line1'];
+      $ship_to_address['premise'] = $xd_ship_to->address['line2'];
+      $ship_to_address['locality'] = $xd_ship_to->address['city'];
       $ship_to_address['administrative_area'] = $xd_ship_to->address['state'];
-      $ship_to_address['postal_code']         = $xd_ship_to->address['postalCode'];
-      $ship_to_address['country']             = $country_code;
+      $ship_to_address['postal_code'] = $xd_ship_to->address['postalCode'];
+      $ship_to_address['country'] = $country_code;
     }
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
@@ -364,7 +382,7 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
   try {
     if ($ship_to_contact = $order_wrapper->commerce_customer_shipping->xd_ship_to_contact->value()) {
       $ship_to_address['first_name'] = $ship_to_contact->firstName;
-      $ship_to_address['last_name']  = $ship_to_contact->lastName;
+      $ship_to_address['last_name'] = $ship_to_contact->lastName;
     }
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
@@ -391,15 +409,16 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
   $session = extensions_get_session();
 
-  $id          = $session->getRescued('site');
+  $id = $session->getRescued('site');
   $entity_type = 'xtuple_site';
 
   if (!empty($id)) {
-    $site        = entity_load_single($entity_type, $id);
-  } else {
+    $site = entity_load_single($entity_type, $id);
+  }
+  else {
     // Default site from control panel to support anonymous checkout.
-    $id          = variable_get('xdruple_commerce_default_warehouse', null);
-    $site        = entity_load_single($entity_type, $id);
+    $id = variable_get('xdruple_commerce_default_warehouse', NULL);
+    $site = entity_load_single($entity_type, $id);
   }
 
   try {
@@ -408,16 +427,17 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
       $country_match = array_keys($countries, $site_address['country']);
       if (count($country_match) === 1) {
         $country_code = $country_match[0];
-      } else {
+      }
+      else {
         $country_code = 'US';
       }
 
-      $ship_from_address['thoroughfare']        = $site_address['line1'];
-      $ship_from_address['premise']             = $site_address['line2'];
-      $ship_from_address['locality']            = $site_address['city'];
+      $ship_from_address['thoroughfare'] = $site_address['line1'];
+      $ship_from_address['premise'] = $site_address['line2'];
+      $ship_from_address['locality'] = $site_address['city'];
       $ship_from_address['administrative_area'] = $site_address['state'];
-      $ship_from_address['postal_code']         = $site_address['postalCode'];
-      $ship_from_address['country']             = $country_code;
+      $ship_from_address['postal_code'] = $site_address['postalCode'];
+      $ship_from_address['country'] = $country_code;
     }
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
@@ -449,7 +469,8 @@ function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_servic
               'printAddressInfoHandler' => new PrintAddressInfoHandler($address, ''),
               'class' => 'xdruple-print-address-info',
             ));
-        } else {
+        }
+        else {
           // This site is not an allowed pickup site. Unset it from the shipping services.
           unset($shipping_services[$key]);
         }

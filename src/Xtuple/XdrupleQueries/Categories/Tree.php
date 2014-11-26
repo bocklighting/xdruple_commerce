@@ -19,13 +19,14 @@ class Tree {
 
       if ($count <= 100) {
         $xdcatalogs = entity_load('xtuple_xdcatalog');
-      } else {
+      }
+      else {
         // Paginate through all catalogs.
         $pages = ceil($count / 100);
         $xdcatalogs = array();
 
         $i = 0;
-        while($i < $pages) {
+        while ($i < $pages) {
           $page_query = new EntityFieldQuery();
           $catalogs = $page_query->entityCondition('entity_type', 'xtuple_xdcatalog')
             ->range($i * 100, 100)
@@ -37,7 +38,7 @@ class Tree {
         }
       }
 
-      $root_key = null;
+      $root_key = NULL;
 
       // Find root group.
       foreach ($xdcatalogs as $key => $catalog) {

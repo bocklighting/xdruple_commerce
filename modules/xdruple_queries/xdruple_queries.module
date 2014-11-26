@@ -31,50 +31,50 @@ function xdruple_queries_menu() {
   $items = array();
 
   $items['products'] = array(
-    'title'            => 'Products',
-    'page callback'    => 'xdruple_queries_products_page',
-    'page arguments'   => array(1),
-    'access callback'  => 'xdruple_access',
+    'title' => 'Products',
+    'page callback' => 'xdruple_queries_products_page',
+    'page arguments' => array(1),
+    'access callback' => 'xdruple_access',
     'access arguments' => array('products', 'view', 'xtuple: access product lists'),
-    'file'             => 'pages/products.inc',
-    'type'             => MENU_NORMAL_ITEM,
+    'file' => 'pages/products.inc',
+    'type' => MENU_NORMAL_ITEM,
   );
 
   $items['products/list'] = array(
-    'title'  => 'Products',
-    'type'   => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'Products',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
 
   $items['products/%'] = array(
-    'title'            => 'Product',
-    'title callback'   => 'xdruple_queries_product_page_title',
-    'title arguments'  => array(1),
-    'page callback'    => 'xdruple_queries_product_page',
-    'page arguments'   => array(1),
-    'access callback'  => 'xdruple_access',
+    'title' => 'Product',
+    'title callback' => 'xdruple_queries_product_page_title',
+    'title arguments' => array(1),
+    'page callback' => 'xdruple_queries_product_page',
+    'page arguments' => array(1),
+    'access callback' => 'xdruple_access',
     'access arguments' => array('products/%', 'view', 'xtuple: access product lists'),
-    'file'             => 'pages/product.inc',
-    'type'             => MENU_CALLBACK,
+    'file' => 'pages/product.inc',
+    'type' => MENU_CALLBACK,
   );
 
   $items['products/categories'] = array(
-    'title'            => 'Categories',
-    'page callback'    => 'xdruple_queries_categories_page',
-    'access callback'  => 'xdruple_access',
+    'title' => 'Categories',
+    'page callback' => 'xdruple_queries_categories_page',
+    'access callback' => 'xdruple_access',
     'access arguments' => array('products/categories', 'view', 'xtuple: access product lists'),
-    'file'             => 'pages/categories.inc',
-    'type'             => MENU_LOCAL_TASK,
+    'file' => 'pages/categories.inc',
+    'type' => MENU_LOCAL_TASK,
   );
 
   $items['products/categories/%'] = array(
-    'title'            => 'Products by category',
-    'page callback'    => 'xdruple_queries_products_by_category_page',
-    'page arguments'   => array(2),
-    'access callback'  => 'xdruple_access',
+    'title' => 'Products by category',
+    'page callback' => 'xdruple_queries_products_by_category_page',
+    'page arguments' => array(2),
+    'access callback' => 'xdruple_access',
     'access arguments' => array('products/categories/%', 'view', 'xtuple: access product lists'),
-    'file'             => 'pages/products_by_category.inc',
-    'type'             => MENU_CALLBACK,
+    'file' => 'pages/products_by_category.inc',
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
@@ -86,7 +86,7 @@ function xdruple_queries_menu() {
 function xdruple_queries_permission() {
   return array(
     'xtuple: access product lists' => array(
-      'title'       => t('Access xTuple Product Lists'),
+      'title' => t('Access xTuple Product Lists'),
       'description' => t('Allow users to view lists of products.'),
     ),
   );
@@ -119,16 +119,16 @@ function xdruple_queries_theme() {
     'variables' => array(
       'products' => array(),
     ),
-    'template'  => 'theme/products-page',
-    'file'      => 'theme/theme.inc',
+    'template' => 'theme/products-page',
+    'file' => 'theme/theme.inc',
   );
 
   $items['products_page_item'] = array(
     'variables' => array(
       'product' => NULL,
     ),
-    'template'  => 'theme/products-page-item',
-    'file'      => 'theme/theme.inc',
+    'template' => 'theme/products-page-item',
+    'file' => 'theme/theme.inc',
   );
 
   return $items;
@@ -136,7 +136,7 @@ function xdruple_queries_theme() {
 
 /**
  * Implements hook_theme_objects()
- * 
+ *
  * @return array
  */
 function xdruple_queries_extensions_theme() {
@@ -154,7 +154,7 @@ function _xdruple_queries_load_orders($entity_type) {
   $orders = array();
 
   if ($ship_to = xdruple_rescued_session_get('ship_to')) {
-    $cid   = "xtuple_{$entity_type}-$ship_to";
+    $cid = "xtuple_{$entity_type}-$ship_to";
     $cache = cache_get($cid, 'cache');
 
     if (empty($cache) || xdruple_cache_expired($cache)) {
@@ -205,15 +205,16 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
   if ($product_ids === NULL || !empty($product_ids)) {
     if ($user->uid === 0 && variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE)) {
       // Get anonymous checkout defaults from control panel.
-      $customer = variable_get('xdruple_checkout_guest_customer', null);
-      $ship_to  = null;
-      $site     = variable_get('xdruple_commerce_default_warehouse', null);
-    } else {
+      $customer = variable_get('xdruple_checkout_guest_customer', NULL);
+      $ship_to = NULL;
+      $site = variable_get('xdruple_commerce_default_warehouse', NULL);
+    }
+    else {
       /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-      $session  = extensions_get_session();
+      $session = extensions_get_session();
       $customer = $session->getRescued('customer');
-      $ship_to  = $session->getRescued('ship_to');
-      $site     = $session->getRescued('site');
+      $ship_to = $session->getRescued('ship_to');
+      $site = $session->getRescued('site');
     }
     $scheduled_date = xdruple_rescued_session_get('scheduled_date');
 
@@ -319,10 +320,10 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
  */
 function _xdruple_queries_add_to_cart_button($product, $show_qty = FALSE, $context = array(), $qty = 1, $order_id = 0) {
   $product_ids = array($product->product_id);
-  $form_id     = commerce_cart_add_to_cart_form_id($product_ids);
+  $form_id = commerce_cart_add_to_cart_form_id($product_ids);
 
-  $line_item                                         = commerce_product_line_item_new($product, $qty, $order_id, array());
-  $line_item->data['context']['product_ids']         = $product_ids;
+  $line_item = commerce_product_line_item_new($product, $qty, $order_id, array());
+  $line_item->data['context']['product_ids'] = $product_ids;
   $line_item->data['context']['add_to_cart_combine'] = TRUE;
 
   $form = drupal_get_form($form_id, $line_item, $show_qty, $context);
@@ -336,7 +337,7 @@ function _xdruple_queries_add_to_cart_button($product, $show_qty = FALSE, $conte
 function _xdruple_queries_product_image($product, $style = '') {
   $img = !empty($product->xt_url_image_field[LANGUAGE_NONE][0]['uri']) ? l(theme('image_style', array(
     'style_name' => $style,
-    'path'       => $product->xt_url_image_field[LANGUAGE_NONE][0]['uri'],
+    'path' => $product->xt_url_image_field[LANGUAGE_NONE][0]['uri'],
   )), "products/{$product->product_id}", array(
     'html' => TRUE,
   )) : '';
@@ -377,15 +378,16 @@ function _xdruple_queries_prepare_curl($product, $qty) {
   if ($price === NULL) {
     if ($user->uid === 0 && variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE)) {
       // Get anonymous checkout defaults from control panel.
-      $customer = variable_get('xdruple_checkout_guest_customer', null);
-      $ship_to  = null;
-      $site     = variable_get('xdruple_commerce_default_warehouse', null);
-    } else {
+      $customer = variable_get('xdruple_checkout_guest_customer', NULL);
+      $ship_to = NULL;
+      $site = variable_get('xdruple_commerce_default_warehouse', NULL);
+    }
+    else {
       /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-      $session  = extensions_get_session();
+      $session = extensions_get_session();
       $customer = $session->getRescued('customer');
-      $ship_to  = $session->getRescued('ship_to');
-      $site     = $session->getRescued('site');
+      $ship_to = $session->getRescued('ship_to');
+      $site = $session->getRescued('site');
     }
 
     if (empty($customer)) {

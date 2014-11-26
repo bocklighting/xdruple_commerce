@@ -16,7 +16,7 @@ use Xtuple\Xdruple\Theme\PrintRemitToAddress;
  * Preprocess variables for order-page.tpl.php
  */
 function template_preprocess_order_page(&$variables) {
-  $order    = $variables['order'];
+  $order = $variables['order'];
   $currency = $variables['currency'];
   $remit_to = $variables['remitto'];
 
@@ -38,23 +38,23 @@ function template_preprocess_order_page(&$variables) {
 
   $variables['header_table'] = theme('xdruple_print_order_information', array(
     'printOrderInformation' => new PrintOrderInformation($order, NULL, $currency, 'Y-m-d', array(
-        PrintOrderInformation::SALES_ORDER_NUMBER    => t('Sales Order #'),
-        PrintOrderInformation::ORDER_DATE            => t('Order date'),
-        PrintOrderInformation::ACCOUNT_NUMBER        => t('Account #'),
-        PrintOrderInformation::PURCHASE_ORDER_NUMBER => t('PO #'),
-        PrintOrderInformation::ORDER_SCHEDULE_DATE   => t('Scheduled date'),
-        PrintOrderInformation::TOTAL_DUE             => t('Total due'),
-      )),
+      PrintOrderInformation::SALES_ORDER_NUMBER => t('Sales Order #'),
+      PrintOrderInformation::ORDER_DATE => t('Order date'),
+      PrintOrderInformation::ACCOUNT_NUMBER => t('Account #'),
+      PrintOrderInformation::PURCHASE_ORDER_NUMBER => t('PO #'),
+      PrintOrderInformation::ORDER_SCHEDULE_DATE => t('Scheduled date'),
+      PrintOrderInformation::TOTAL_DUE => t('Total due'),
+    )),
   ));
 
   $variables['billing_info'] = theme('xdruple_print_address_info', array(
     'printAddressInfoHandler' => new PrintAddressInfoHandler($order, PrintAddressInfoHandler::BILL_TO),
-    'title'                   => t('Billing information'),
+    'title' => t('Billing information'),
   ));
 
   $variables['shipping_info'] = theme('xdruple_print_address_info', array(
     'printAddressInfoHandler' => new PrintAddressInfoHandler($order, PrintAddressInfoHandler::SHIP_TO),
-    'title'                   => t('Shipping information'),
+    'title' => t('Shipping information'),
   ));
 
   $variables['line_items_table'] = theme('xdruple_print_line_items', array(

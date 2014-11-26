@@ -41,7 +41,10 @@ function xdruple_shipping_install() {
     $default_unit = $default_unit ? $default_unit : 'oz';
 
     // Add 'commerce_product' instance.
-    $instance = field_read_instance('commerce_product', $field_name, 'product', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_product', $field_name, 'product', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => $field_name,
@@ -58,7 +61,10 @@ function xdruple_shipping_install() {
 
     // Add 'xtuple_xdproduct' instance.
     $entity_type = 'xtuple_xdproduct';
-    $instance = field_read_instance($entity_type, $field_name, $entity_type, array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance($entity_type, $field_name, $entity_type, array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => $field_name,
@@ -100,7 +106,10 @@ function xdruple_shipping_install() {
   // Add field instances.
   if (field_info_field($field_name)) {
     // Add 'commerce_product' instance.
-    $instance = field_read_instance('commerce_product', $field_name, 'product', array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance('commerce_product', $field_name, 'product', array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => $field_name,
@@ -115,7 +124,10 @@ function xdruple_shipping_install() {
 
     // Add 'xtuple_xdproduct' instance.
     $entity_type = 'xtuple_xdproduct';
-    $instance = field_read_instance($entity_type, $field_name, $entity_type, array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    $instance = field_read_instance($entity_type, $field_name, $entity_type, array(
+        'include_inactive' => TRUE,
+        'include_deleted' => TRUE
+      ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => $field_name,
