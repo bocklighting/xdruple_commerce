@@ -54,6 +54,9 @@ function template_preprocess_products_page_item(&$variables) {
 
   $variables['id'] = $product->product_id;
   $variables['price'] = _xdruple_queries_price($product);
+
+  $unit = entity_load_single('xtuple_unit', $product->inventoryUnit);
+  $variables['unit'] = $unit->description;
   $variables['title'] = l($product->title, "products/{$product->product_id}");
   $variables['subtitle'] = $product->subTitle;
   $variables['img'] = _xdruple_queries_product_image($product, 'ft_commerce_product_thumb');
