@@ -18,13 +18,19 @@ function xdruple_commerce_user_login(&$edit, $account) {
   if (!isset($_POST['form_id']) || $_POST['form_id'] != 'user_pass_reset') {
     $redirect = variable_get('xdruple_commerce_login_redirect_page', FALSE);
     $frontpage = variable_get('site_frontpage');
-
-    if (!empty($redirect) && !isset($_GET['destination'])) {
-      $edit['redirect'] = $redirect;
-    }
-    elseif (isset($_GET['destination']) && $frontpage === $_GET['destination']) {
-      $_GET['destination'] = $redirect;
-      $edit['redirect'] = $redirect;
+    
+    // Altering behavior only if redirect is set.
+    // Redirect has to be not empty, as drupal_goto() used for redirect uses $_GET['destination'] as higher priority,
+    // so if it is FALSE, but exists, than no redirect is happening.
+    if (!empty($redirect)) {
+      // In some cases Drupal adds destination to the login form automatically
+      if (!isset($_GET['destination'])) {
+        $edit['redirect'] = $redirect;
+      }
+      elseif ($frontpage === $_GET['destination']) {
+        $_GET['destination'] = $redirect;
+        $edit['redirect'] = $redirect;
+      }
     }
   }
 }
