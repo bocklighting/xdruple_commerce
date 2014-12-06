@@ -26,7 +26,7 @@ function xdruple_commerce_user_login(&$edit, $account) {
       $edit['redirect'] = $redirect;
       
       // In some cases Drupal adds destination to the login form automatically
-      if ($frontpage === $_GET['destination']) {
+      if (!empty($_GET['destination']) && $frontpage === $_GET['destination']) {
         $_GET['destination'] = $redirect;
       }
     }
