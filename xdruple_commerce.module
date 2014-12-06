@@ -23,13 +23,11 @@ function xdruple_commerce_user_login(&$edit, $account) {
     // Redirect has to be not empty, as drupal_goto() used for redirect uses $_GET['destination'] as higher priority,
     // so if it is FALSE, but exists, than no redirect is happening.
     if (!empty($redirect)) {
+      $edit['redirect'] = $redirect;
+      
       // In some cases Drupal adds destination to the login form automatically
-      if (!isset($_GET['destination'])) {
-        $edit['redirect'] = $redirect;
-      }
-      elseif ($frontpage === $_GET['destination']) {
+      if ($frontpage === $_GET['destination']) {
         $_GET['destination'] = $redirect;
-        $edit['redirect'] = $redirect;
       }
     }
   }
