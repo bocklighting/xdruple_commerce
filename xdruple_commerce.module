@@ -1741,6 +1741,9 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
   ) {
 
     $price = $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'];
+    // Drupal Commerce doesn't use decimals. When getting the price from the
+    // line_item, convert to decimal first.
+    $price = $price / 100;
     $price = _xdruple_commerce_convert_uom_price($price, $product->uomRatio);
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
@@ -2137,7 +2140,7 @@ function xdruple_commerce_field_display_alter(&$display, $context) {
   }
 }
 
-// @TODO This code is trash. It's used to "theme" checkout review page, which is extremely hard to do due to the 
+// @TODO This code is trash. It's used to "theme" checkout review page, which is extremely hard to do due to the
 // fact, that the page itself build poorly (hard to theme) and the structure of the entity to render is enormous due
 // to usage of entity references
 function xdruple_commerce_entity_view_alter(&$build, $type) {
