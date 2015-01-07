@@ -871,31 +871,32 @@ function xdruple_checkout_anonymous_submit($form, &$form_state) {
  * Form validation handler for login form for using username as order email.
  */
 function xdruple_checkout_username_as_order_email_form_validate($form, &$form_state) {
-  $mail = trim($form_state['values']['name']);
-  form_set_value($form['name'], $mail, $form_state);
+  $name = trim($form_state['values']['name']);
+  form_set_value($form['name'], $name, $form_state);
 
   // Validate the e-mail address, and check if it is taken by an existing user.
-  if ($error = user_validate_mail($form_state['values']['name'])) {
+  if ($error = user_validate_mail($form_state['values']['email'])) {
     form_set_error('name', $error);
   }
   else {
     $mail_taken = (bool) db_select('users')
       ->fields('users', array('uid'))
       ->condition('uid', $GLOBALS['user']->uid, '<>')
-      ->condition('mail', db_like($form_state['values']['name']), 'LIKE')
+      ->condition('mail', db_like($form_state['values']['email']), 'LIKE')
       ->range(0, 1)
       ->execute()
       ->fetchField();
     if ($mail_taken) {
       // Format error message dependent on whether the user is logged in or not.
+      // TODO: I'm not sure how this could be called by a user that is logged in.
       if ($GLOBALS['user']->uid) {
-        form_set_error('mail', t('The e-mail address %email is already taken.', array('%email' => $form_state['values']['name'])));
+        form_set_error('name', t('The e-mail address %email is already taken.', array('%email' => $form_state['values']['email'])));
       }
       else {
-        form_set_error('mail', t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array(
-              '%email' => $form_state['values']['name'],
-              '@password' => url('user/password')
-            )));
+        form_set_error('name', t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array(
+          '%email' => $form_state['values']['email'],
+          '@password' => url('user/password')
+        )));
       }
     }
   }
