@@ -16,21 +16,66 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
     $this->additional_fields['uid'] = 'uid';
   }
 
-  function render($values) {
-    // Ensure the user has access to this order.
+  /**
+   * @return bool
+   */
+  protected function hasAccess() {
+    return user_access('view own commerce_order entities');
+  }
+
+  /**
+   * @param $values
+   * @return mixed
+   */
+  protected function createOrder($values) {
     $order = commerce_order_new();
     $order->order_id = $this->get_value($values, 'order_id');
     $order->uid = $this->get_value($values, 'uid');
 
-    if (!user_access('view own commerce_order entities')) {
+    return $order;
+  }
+
+  /**
+   * @return null|string
+   */
+  protected function getLinkText() {
+    $text = !empty($this->options['text']) ? $this->options['text'] : t('Make active cart');
+
+    return $text;
+  }
+
+  /**
+   * @param $values
+   * @return string
+   */
+  protected function getLinkPath($values) {
+    $order = $this->createOrder($values);
+    $link = 'admin/commerce/orders/' . $order->order_id . '/move';
+
+    return $link;
+  }
+
+  /**
+   * @return array
+   */
+  protected function getLinkOptions() {
+    $destination = array('destination' => 'cart');
+    $options = array(
+      'query' => $destination,
+    );
+
+    return $options;
+  }
+
+  /**
+   * @param $values
+   * @return string
+   */
+  function render($values) {
+    if (!$this->hasAccess()) {
       return;
     }
 
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('Make active cart');
-
-    $destination = array('destination' => 'cart');
-
-    // TODO: Do we really want this action to be mixed in with the other order ui operations?
-    return l($text, 'admin/commerce/orders/' . $order->order_id . '/move', array('query' => $destination));
+    return l($this->getLinkText(), $this->getLinkPath($values), $this->getLinkOptions());
   }
 }
