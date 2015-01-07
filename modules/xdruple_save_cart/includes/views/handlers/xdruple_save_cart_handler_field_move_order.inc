@@ -36,7 +36,7 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
   }
 
   /**
-   * @return null|string
+   * @return string
    */
   protected function getLinkText() {
     $text = !empty($this->options['text']) ? $this->options['text'] : t('Make active cart');
