@@ -27,29 +27,44 @@ function template_preprocess_products_page(&$variables) {
   if (!empty($variables['category'])) {
     $category = $variables['category'];
     if (!empty($category->groups)) {
-      $query = new EntityFieldQuery();
-      $count = $query->entityCondition('entity_type', 'xtuple_xdcatalog')
-        ->count()
-        ->execute();
+      $cid = 'xtuple_xdcatalog-flat';
+      $cache = cache_get($cid, 'cache');
+      $entity_info = entity_get_info('xtuple_xdcatalog');
 
-      if ($count <= 100) {
-        $xdcatalogs = entity_load('xtuple_xdcatalog');
+      if ((empty($cache) || xdruple_cache_expired($cache)) && !empty($entity_info)) {
+        $query = new EntityFieldQuery();
+        $count = $query->entityCondition('entity_type', 'xtuple_xdcatalog')
+          ->count()
+          ->execute();
+
+        if ($count <= 100) {
+          $xdcatalogs = entity_load('xtuple_xdcatalog');
+        }
+        else {
+          // Paginate through all catalogs.
+          $pages = ceil($count / 100);
+          $xdcatalogs = array();
+
+          $i = 0;
+          while ($i < $pages) {
+            $page_query = new EntityFieldQuery();
+            $catalogs = $page_query->entityCondition('entity_type', 'xtuple_xdcatalog')
+              ->range($i * 100, 100)
+              ->propertyOrderBy('id', 'ASC')
+              ->execute();
+
+            $xdcatalogs = $xdcatalogs + $catalogs['xtuple_xdcatalog'];
+            $i++;
+          }
+        }
+        cache_set($cid, $xdcatalogs, 'cache', REQUEST_TIME + 60 * 60 * 1);
       }
       else {
-        // Paginate through all catalogs.
-        $pages = ceil($count / 100);
-        $xdcatalogs = array();
-
-        $i = 0;
-        while ($i < $pages) {
-          $page_query = new EntityFieldQuery();
-          $catalogs = $page_query->entityCondition('entity_type', 'xtuple_xdcatalog')
-            ->range($i * 100, 100)
-            ->propertyOrderBy('id', 'ASC')
-            ->execute();
-
-          $xdcatalogs = $xdcatalogs + $catalogs['xtuple_xdcatalog'];
-          $i++;
+        if (!$cache || empty($cache->data)) {
+          $xdcatalogs = array();
+        }
+        else {
+          $xdcatalogs = $cache->data;
         }
       }
       
