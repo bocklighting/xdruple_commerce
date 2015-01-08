@@ -37,10 +37,12 @@ function template_preprocess_products_page(&$variables) {
           );
         }
       }
-      $variables['subcategories'] = theme('item_list', array(
-        'items' => $subcategories,
-        'attributes' => array('class' => array('row')),
-      ));
+      if (!empty($subcategories)) {
+        $variables['subcategories'] = theme('item_list', array(
+          'items' => $subcategories,
+          'attributes' => array('class' => array('row')),
+        ));
+      }
     }
   }
 }
