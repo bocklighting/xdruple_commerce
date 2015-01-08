@@ -370,6 +370,9 @@ function _xdruple_queries_prepare_curl($product, $qty) {
   $product_id = $product->sku;
 
   $scheduled_date = xdruple_rescued_session_get('scheduled_date');
+  if (empty($scheduled_date)) {
+    $scheduled_date = xdruple_rescued_scheduled_date('tomorrow');
+  }
   $access_token = json_decode($_SESSION['access_token']);
 
   $line_item = commerce_product_line_item_new($product, $qty);
