@@ -505,9 +505,9 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
             '#type' => 'radios',
             '#title' => t('Do you have an account?'),
             '#description' => t('Choose %yes to login, %no to checkout as a guest or you can ', array(
-                  '%yes' => t('Yes'),
-                  '%no' => t('No')
-                )) . l(t('create a new account'), 'user/register') . '.',
+                '%yes' => t('Yes'),
+                '%no' => t('No')
+              )) . l(t('create a new account'), 'user/register') . '.',
             '#options' => array(0 => t('Yes'), 1 => t('No')),
             '#weight' => -10,
             '#default_value' => 0,
