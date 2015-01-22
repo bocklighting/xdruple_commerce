@@ -1,5 +1,5 @@
 name = xTuple's Drupal Commerce Checkout Integration Module
-description = Add custom xTuple fields and other checkout integration.
+description = Adds custom xTuple fields and other checkout integration.
 core = 7.x
 package = xDruple
 
