@@ -425,9 +425,7 @@ function xdruple_checkout_form_alter(&$form, &$form_state, $form_id) {
     _xdruple_checkout_alter_user_forms($form, $form_state, $form_id);
   }
 
-  if ($form_id === 'commerce_checkout_form_checkout'
-    || $form_id === 'commerce_order_ui_order_form'
-  ) {
+  if ($form_id === 'commerce_checkout_form_checkout') {
     _xdruple_checkout_alter_order_checkout_forms($form, $form_state, $form_id);
   }
 
@@ -556,17 +554,6 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
       $form_state_shipping = &$form_state['values']['customer_profile_shipping'];
     }
   }
-  elseif ($form_id === 'commerce_order_ui_order_form') {
-    $form_billing = &$form['commerce_customer_billing'][LANGUAGE_NONE]['profiles'][0];
-    $form_shipping = &$form['commerce_customer_shipping'][LANGUAGE_NONE]['profiles'][0];
-
-    if (isset($form_state['values']['xd_customer'])) {
-      $form_state_billing = &$form_state['values'];
-    }
-    if (isset($form_state['values']['xd_ship_to'])) {
-      $form_state_shipping = &$form_state['values'];
-    }
-  }
 
   // Add ajax call back to the Ship To select so we can dynamically add the
   // Contact and Address fields if no Ship To is set.
@@ -577,15 +564,6 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     'effect' => 'fade',
   );
 
-  if ($form_id === 'commerce_order_ui_order_form') {
-    // Limit validation to skip the 'commerce_customer_billing' and 'commerce_customer_shipping' fields.
-    // @See: commerce_customer_profile_manager_validate()
-    foreach ($form_state['field'] as $field_name => $field) {
-      if ($field_name !== 'commerce_customer_billing' && $field_name !== 'commerce_customer_shipping') {
-        $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
-      }
-    }
-  }
   if ($form_id === 'commerce_checkout_form_checkout') {
     foreach ($form_state['field']['#parents'] as $field_name => $field) {
       $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
@@ -642,12 +620,6 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
   else {
     // This is the second or more Ajax load, get it from the saved order.
 
-    if ($form_id === 'commerce_order_ui_order_form') {
-      $order = commerce_order_load_by_number($form_state['commerce_order']->order_number);
-      $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
-      $cust_key = $order_wrapper->commerce_customer_billing->xd_customer->number->value();
-      $shiptos = xdruple_fields_get_ship_to_list($cust_key);
-    }
     if ($form_id === 'commerce_checkout_form_checkout') {
       if (isset($form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) &&
         $default_customer = $form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']
