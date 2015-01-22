@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Install/uninstall implementation.
@@ -8,21 +9,15 @@
  * Implements hook_enable().
  */
 function xdruple_checkout_enable() {
-  // Set default Control Panel variable settings.
-  variable_set('xdruple_checkout_message',
-    t('You need to be logged in to be able to checkout.')
-  );
+  variable_set('xdruple_checkout_message', t('You need to be logged in to be able to checkout.'));
   variable_set('xdruple_checkout_anonymous', FALSE);
-  variable_set('xdruple_checkout_reset_password_message',
-    t('Enter and save a new password and then you can continue with the checkout process.')
-  );
+  variable_set('xdruple_checkout_reset_password_message', t('Enter and save a new password and then you can continue with the checkout process.'));
 }
 
 /**
  * Implements hook_uninstall().
  */
 function xdruple_checkout_uninstall() {
-  // Clean up variables used by module.
   variable_del('xdruple_checkout_message');
   variable_del('xdruple_checkout_anonymous');
   variable_del('xdruple_checkout_guest_customer');
