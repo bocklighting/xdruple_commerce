@@ -64,6 +64,7 @@ class Tree {
           $catalog[] = self::buildCategory($entityId);
         }
       }
+      self::buildPath($catalog[0]);
 
       cache_set($cid, $catalog, 'cache', REQUEST_TIME + 60 * 60 * 1); // Expires 1 hour from now.
     }
@@ -97,5 +98,65 @@ class Tree {
     }
 
     return $category;
+  }
+
+  /**
+   * @param $catalog_name
+   *
+   * @return Category
+   */
+  static public function findChildByName($catalog, $catalog_name) {
+    foreach ($catalog->getChildren() as $branch) {
+      if ($branch->getName() === $catalog_name) {
+        return $branch;
+      } else {
+        // Recurse into children.
+        $found = self::findChildByName($branch, $catalog_name);
+        if (!empty($found)) {
+          return $found;
+        }
+      }
+    }
+  }
+
+  /**
+   * Builds the tree path used for breadcrumbs from the root of the catalog tree
+   * by setting the $category->path array on each Category branch of the tree.
+   *
+   * @param Category $category The Category that is the root of the catalog tree.
+   */
+  static public function buildPath($category) {
+    foreach ($category->getChildren() as $child) {
+      // We allow a many-to-many tree, so there is no one true path for breadcrumbs.
+      // Instead, we alpha sort the parent names and grab the first parent to use
+      // for setting the breadcrumb path.
+      $parent_names = array();
+      $parents = $child->getParents();
+      foreach ($parents as $parent) {
+        $parent_names[$parent->getName()] = $parent;
+      }
+
+      if (!empty($parent_names)) {
+        // Alpha sort on parent name key and get first parent.
+        ksort($parent_names);
+        $first_parent = array_shift($parent_names);
+        $parent_paths = $first_parent->getPath();
+
+        // Add parent tree paths to the child path.
+        foreach($parent_paths as $parent_path) {
+          $child->addPath($parent_path);
+        }
+
+        // Then add the new immediate parent to the child path.
+        $path = array(
+          'id' => $first_parent->getId(),
+          'name' => $first_parent->getName(),
+        );
+        $child->addPath($path);
+      }
+
+      // Recurse into children.
+      self::buildPath($child);
+    }
   }
 }
