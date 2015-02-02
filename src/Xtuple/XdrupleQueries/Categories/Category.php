@@ -20,6 +20,8 @@ class Category {
    * @var Category[]
    */
   private $children = array();
+  private $parents = array();
+  private $path = array();
 
   /**
    * @param integer    $id
@@ -37,6 +39,21 @@ class Category {
    */
   public function addChild(Category $category) {
     $this->children[] = $category;
+    $category->addParent($this);
+  }
+
+  /**
+   * @param Category $category
+   */
+  public function addParent(Category $category) {
+    $this->parents[] = $category;
+  }
+
+  /**
+   * @param array $path
+   */
+  public function addPath($path) {
+    $this->path[] = $path;
   }
 
   /**
@@ -47,10 +64,38 @@ class Category {
   }
 
   /**
+   * @return Category[]
+   */
+  public function getParents() {
+    return $this->parents;
+  }
+
+  /**
+   * @return Category[]
+   */
+  public function getPath() {
+    return $this->path;
+  }
+
+  /**
    * @param Category[] $children
    */
   public function setChildren($children) {
     $this->children = $children;
+  }
+
+  /**
+   * @param Category[] $parents
+   */
+  public function setParents($parents) {
+    $this->parents = $parents;
+  }
+
+  /**
+   * @param array $path
+   */
+  public function setPath($path) {
+    $this->path = $path;
   }
 
   /**
