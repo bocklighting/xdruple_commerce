@@ -296,6 +296,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
             cache_set($cid, $finished_processes[$product_id]->data->price, 'cache', REQUEST_TIME + 60 * 60 * 10);
           }
         }
+        usleep(20000);
       }
     }
 
