@@ -888,3 +888,18 @@ function xdruple_checkout_features_exclude() {
     ),
   );
 }
+
+/**
+ * Ajax callback to return the Ship To select list when the Customer list is populated.
+ */
+function xdruple_fields_checkout_shipto_ajax_callback($form, $form_state) {
+  if (isset($form['customer_profile_shipping'])) {
+    return $form['customer_profile_shipping'];
+  }
+  else {
+    if ($form['commerce_customer_shipping']) {
+      return $form['commerce_customer_shipping'][LANGUAGE_NONE]['profiles'][0];
+    }
+  }
+}
+
