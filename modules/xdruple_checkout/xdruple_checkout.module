@@ -131,10 +131,7 @@ function xdruple_checkout_commerce_checkout_router($order, $checkout_page) {
  * @param $checkout_panes
  */
 function xdruple_checkout_commerce_checkout_pane_info_alter(&$checkout_panes) {
-  global $user;
-
-  /** @var stdClass $user */
-  if ($user->uid === 0) {
+  if (user_is_anonymous()) {
     $checkout_panes['account']['page'] = 'disabled';
     $checkout_panes['account']['enabled'] = FALSE;
   }
@@ -142,6 +139,8 @@ function xdruple_checkout_commerce_checkout_pane_info_alter(&$checkout_panes) {
 
 /**
  * Implements hook_commerce_checkout_complete().
+ *
+ * @param $order
  */
 function xdruple_checkout_commerce_checkout_complete($order) {
   global $user;
@@ -416,15 +415,6 @@ function xdruple_checkout_commerce_checkout_complete($order) {
 }
 
 /**
- * Implements hook_commerce_checkout_complete().
- *
- * @param $order
- */
-function xdruple_checkout_commerce_order_update($order) {
-  // TODO: Placeholder.
-}
-
-/**
  * Implements hook_form_alter().
  *
  * @param $form
@@ -434,12 +424,6 @@ function xdruple_checkout_commerce_order_update($order) {
 function xdruple_checkout_form_alter(&$form, &$form_state, $form_id) {
   if (in_array($form_id, array('user_login', 'user_login_block', 'user_profile_form', 'user_pass_reset'))) {
     _xdruple_checkout_alter_user_forms($form, $form_state, $form_id);
-  }
-
-  if ($form_id === 'commerce_checkout_form_checkout'
-    || $form_id === 'commerce_order_ui_order_form'
-  ) {
-    _xdruple_checkout_alter_order_checkout_forms($form, $form_state, $form_id);
   }
 
   // For resetting the session variables for back to cart checkout button.
@@ -461,9 +445,10 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
   // Check if user has an active cart order.
   if ($checkout_anonymous && $order = commerce_cart_order_load()) {
     // Check if there's anything in the cart and if user has not yet selected checkout method.
-    if (xdruple_checkout_items_in_cart() 
-      && empty($_SESSION['xdruple_checkout_bypass']) 
-      && !empty($_SESSION['xdruple_checkout_anonymous'])) {
+    if (xdruple_checkout_items_in_cart()
+      && empty($_SESSION['xdruple_checkout_bypass'])
+      && !empty($_SESSION['xdruple_checkout_anonymous'])
+    ) {
       if (in_array($form_id, array('user_login', 'user_login_block', 'user_profile_form'))) {
         // Append the checkout redirect function on user's forms.
         $form['#submit'][] = 'xdruple_checkout_anonymous_submit';
@@ -547,37 +532,19 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
 }
 
 /**
- * Private helper function to do hook_form_alter() to order checkout forms.
+ * Implements hook_form_FORM_ID_alter() for commerce_checkout_form_checkout
  *
  * @param $form
  * @param $form_state
- * @param $form_id
  */
-function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $form_id) {
-  global $user;
-
-  if ($form_id === 'commerce_checkout_form_checkout') {
-    $form_billing = &$form['customer_profile_billing'];
-    $form_shipping = &$form['customer_profile_shipping'];
-    if (isset($form_state['values']['customer_profile_billing'])) {
-      $form_state_billing = &$form_state['values']['customer_profile_billing'];
-    }
-    if (isset($form_state['values']['customer_profile_shipping'])) {
-      $form_state_shipping = &$form_state['values']['customer_profile_shipping'];
-    }
+function xdruple_checkout_form_commerce_checkout_form_checkout_alter(&$form, &$form_state) {
+  $form_billing = &$form['customer_profile_billing'];
+  $form_shipping = &$form['customer_profile_shipping'];
+  if (isset($form_state['values']['customer_profile_billing'])) {
+    $form_state_billing = &$form_state['values']['customer_profile_billing'];
   }
-  else {
-    if ($form_id === 'commerce_order_ui_order_form') {
-      $form_billing = &$form['commerce_customer_billing'][LANGUAGE_NONE]['profiles'][0];
-      $form_shipping = &$form['commerce_customer_shipping'][LANGUAGE_NONE]['profiles'][0];
-
-      if (isset($form_state['values']['xd_customer'])) {
-        $form_state_billing = &$form_state['values'];
-      }
-      if (isset($form_state['values']['xd_ship_to'])) {
-        $form_state_shipping = &$form_state['values'];
-      }
-    }
+  if (isset($form_state['values']['customer_profile_shipping'])) {
+    $form_state_shipping = &$form_state['values']['customer_profile_shipping'];
   }
 
   // Add ajax call back to the Ship To select so we can dynamically add the
@@ -589,19 +556,8 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     'effect' => 'fade',
   );
 
-  if ($form_id === 'commerce_order_ui_order_form') {
-    // Limit validation to skip the 'commerce_customer_billing' and 'commerce_customer_shipping' fields.
-    // @See: commerce_customer_profile_manager_validate()
-    foreach ($form_state['field'] as $field_name => $field) {
-      if ($field_name !== 'commerce_customer_billing' && $field_name !== 'commerce_customer_shipping') {
-        $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
-      }
-    }
-  }
-  if ($form_id === 'commerce_checkout_form_checkout') {
-    foreach ($form_state['field']['#parents'] as $field_name => $field) {
-      $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
-    }
+  foreach ($form_state['field']['#parents'] as $field_name => $field) {
+    $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
   }
 
   $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#submit'] = array('');
@@ -618,13 +574,12 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     unset($form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['erp_xdcontactaddress']);
   }
 
-  // Hide entity reference fields for anonymous users.
-  if ($user->uid === 0) {
+  if (user_is_anonymous()) {
     $form_billing['xd_bill_to_contact'][LANGUAGE_NONE]['form']['entity_id']['#attributes']['disabled'] = TRUE;
     $form_billing['xd_bill_to_address'][LANGUAGE_NONE]['form']['entity_id']['#attributes']['disabled'] = TRUE;
 
     // TODO: Cannot disable 'xd_ship_to' or it doesn't pass entityreference validation. Leave as empty.
-    //$form_shipping['xd_ship_to'][LANGUAGE_NONE]['#attributes']['disabled']                             = TRUE;
+//    $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#attributes']['disabled']                             = TRUE;
 
     if (isset($form_shipping['xd_ship_to_contact'])) {
       $form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['form']['entity_id']['#attributes']['disabled'] = TRUE;
@@ -634,7 +589,7 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     }
   }
 
-  $shiptos = array();
+  $ship_tos = array();
   // Remove the Ship Tos that are not for this customer. Reset the #options array.
   if (isset($form_billing['xd_customer'][LANGUAGE_NONE]['#default_value'][0]) &&
     (!isset($form_state['values']) || empty($form_state['values'])) &&
@@ -642,7 +597,7 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
   ) {
     // This is the first load of an edit form, use the default.
 
-    $shiptos = xdruple_fields_get_ship_to_list($default_customer);
+    $ship_tos = xdruple_fields_get_ship_to_list($default_customer);
   }
   elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value']) &&
     (!isset($form_state['values']) || empty($form_state['values'])) &&
@@ -650,44 +605,36 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
   ) {
     // This is the first load of an edit form, use the default from autocomplete.
 
-    $shiptos = xdruple_fields_get_ship_to_list($matches[1]);
+    $ship_tos = xdruple_fields_get_ship_to_list($matches[1]);
   }
   else {
     // This is the second or more Ajax load, get it from the saved order.
 
-    if ($form_id === 'commerce_order_ui_order_form') {
-      $order = commerce_order_load_by_number($form_state['commerce_order']->order_number);
-      $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
-      $cust_key = $order_wrapper->commerce_customer_billing->xd_customer->number->value();
-      $shiptos = xdruple_fields_get_ship_to_list($cust_key);
+    if (isset($form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) &&
+      $default_customer = $form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']
+    ) {
+
+      $ship_tos = xdruple_fields_get_ship_to_list($default_customer);
     }
-    if ($form_id === 'commerce_checkout_form_checkout') {
-      if (isset($form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) &&
-        $default_customer = $form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']
-      ) {
+    elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
+      preg_match("/.+\((.+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches);
+      // This is the first load of an edit form, use the default from autocomplete.
 
-        $shiptos = xdruple_fields_get_ship_to_list($default_customer);
-      }
-      elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
-        preg_match("/.+\((.+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches);
-        // This is the first load of an edit form, use the default from autocomplete.
-
-        if (!empty($matches[1])) {
-          $shiptos = xdruple_fields_get_ship_to_list($matches[1]);
-        }
+      if (!empty($matches[1])) {
+        $ship_tos = xdruple_fields_get_ship_to_list($matches[1]);
       }
     }
   }
 
-  if (count($shiptos) > 0) {
-    // Add $shiptos to options list.
-    $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] = $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] + $shiptos;
+  if (count($ship_tos) > 0) {
+    // Add $ship_tos to options list.
+    $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] = $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#options'] + $ship_tos;
   }
   // Reset the '#empty_option' => '- None -' to be more descriptive.
   $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#empty_option'] = '- Custom Ship To -';
   $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#empty_value'] = '_none';
 
-  // Add wapper to 'customer_profile_shipping' fieldset so changing Ship To can do an ajax
+  // Add wrapper to 'customer_profile_shipping' fieldset so changing Ship To can do an ajax
   // replace to update that section of the form.
   $form_shipping['#prefix'] = '<div id="xtuple-ship-to-wrapper">';
   $form_shipping['#suffix'] = '</div>';
@@ -705,7 +652,7 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
 
   // If a default Ship To is set on first load of the form OR the Ship To
   // select list was changed and a Ship To was selected, remove Contact and Address.
-  if (!empty($shipto_id) && array_key_exists($shipto_id, $shiptos)) {
+  if (!empty($shipto_id) && array_key_exists($shipto_id, $ship_tos)) {
     // Remove the Inline Entity Form entities so the Custom Ship To Contact
     // and Address will be blank if the user flips back to it.
     $contact_ief_id = $form_shipping['xd_ship_to_contact'][LANGUAGE_NONE]['#ief_id'];
