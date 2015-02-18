@@ -550,7 +550,7 @@ function xdruple_checkout_form_commerce_checkout_form_checkout_alter(&$form, &$f
   // Add ajax call back to the Ship To select so we can dynamically add the
   // Contact and Address fields if no Ship To is set.
   $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#ajax'] = array(
-    'callback' => 'xdruple_fields_checkout_shipto_ajax_callback',
+    'callback' => 'xdruple_checkout_form_commerce_checkout_form_checkout_shipto_ajax_callback',
     'wrapper' => 'xtuple-ship-to-wrapper',
     'method' => 'replace',
     'effect' => 'fade',
@@ -758,6 +758,20 @@ function xdruple_checkout_form_commerce_checkout_form_checkout_alter(&$form, &$f
     /** @var Xtuple\Xdruple\Session\RescuedSession $session */
     $session = extensions_get_session();
     $session->setRescued('custom_ship_to', TRUE);
+  }
+}
+
+/**
+ * Ajax callback for commerce_checkout_form_checkout. Returns Ship To select list when the Customer list is populated
+ */
+function xdruple_checkout_form_commerce_checkout_form_checkout_shipto_ajax_callback($form, $form_state) {
+  if (isset($form['customer_profile_shipping'])) {
+    return $form['customer_profile_shipping'];
+  }
+  else {
+    if ($form['commerce_customer_shipping']) {
+      return $form['commerce_customer_shipping'][LANGUAGE_NONE]['profiles'][0];
+    }
   }
 }
 
