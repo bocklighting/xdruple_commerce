@@ -426,10 +426,6 @@ function xdruple_checkout_form_alter(&$form, &$form_state, $form_id) {
     _xdruple_checkout_alter_user_forms($form, $form_state, $form_id);
   }
 
-  if ($form_id === 'commerce_checkout_form_checkout') {
-    _xdruple_checkout_alter_order_checkout_forms($form, $form_state, $form_id);
-  }
-
   // For resetting the session variables for back to cart checkout button.
   if (strpos($form_id, 'commerce_checkout_form_') === 0 && !empty($form['buttons']['cancel'])) {
     $form['buttons']['cancel']['#submit'][] = 'xdruple_checkout_form_cancel_submit';
@@ -536,24 +532,19 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
 }
 
 /**
- * Private helper function to do hook_form_alter() to order checkout forms.
+ * Implements hook_form_FORM_ID_alter() for commerce_checkout_form_checkout
  *
  * @param $form
  * @param $form_state
- * @param $form_id
  */
-function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $form_id) {
-  global $user;
-
-  if ($form_id === 'commerce_checkout_form_checkout') {
-    $form_billing = &$form['customer_profile_billing'];
-    $form_shipping = &$form['customer_profile_shipping'];
-    if (isset($form_state['values']['customer_profile_billing'])) {
-      $form_state_billing = &$form_state['values']['customer_profile_billing'];
-    }
-    if (isset($form_state['values']['customer_profile_shipping'])) {
-      $form_state_shipping = &$form_state['values']['customer_profile_shipping'];
-    }
+function xdruple_checkout_form_commerce_checkout_form_checkout_alter(&$form, &$form_state) {
+  $form_billing = &$form['customer_profile_billing'];
+  $form_shipping = &$form['customer_profile_shipping'];
+  if (isset($form_state['values']['customer_profile_billing'])) {
+    $form_state_billing = &$form_state['values']['customer_profile_billing'];
+  }
+  if (isset($form_state['values']['customer_profile_shipping'])) {
+    $form_state_shipping = &$form_state['values']['customer_profile_shipping'];
   }
 
   // Add ajax call back to the Ship To select so we can dynamically add the
@@ -565,10 +556,8 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
     'effect' => 'fade',
   );
 
-  if ($form_id === 'commerce_checkout_form_checkout') {
-    foreach ($form_state['field']['#parents'] as $field_name => $field) {
-      $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
-    }
+  foreach ($form_state['field']['#parents'] as $field_name => $field) {
+    $form_billing['xd_customer'][LANGUAGE_NONE]['#limit_validation_errors'][] = array($field_name);
   }
 
   $form_shipping['xd_ship_to'][LANGUAGE_NONE]['#submit'] = array('');
@@ -621,20 +610,18 @@ function _xdruple_checkout_alter_order_checkout_forms(&$form, &$form_state, $for
   else {
     // This is the second or more Ajax load, get it from the saved order.
 
-    if ($form_id === 'commerce_checkout_form_checkout') {
-      if (isset($form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) &&
-        $default_customer = $form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']
-      ) {
+    if (isset($form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']) &&
+      $default_customer = $form_state_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']
+    ) {
 
-        $ship_tos = xdruple_fields_get_ship_to_list($default_customer);
-      }
-      elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
-        preg_match("/.+\((.+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches);
-        // This is the first load of an edit form, use the default from autocomplete.
+      $ship_tos = xdruple_fields_get_ship_to_list($default_customer);
+    }
+    elseif (isset($form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
+      preg_match("/.+\((.+)\)/", $form_billing['xd_customer'][LANGUAGE_NONE][0]['target_id']['#default_value'], $matches);
+      // This is the first load of an edit form, use the default from autocomplete.
 
-        if (!empty($matches[1])) {
-          $ship_tos = xdruple_fields_get_ship_to_list($matches[1]);
-        }
+      if (!empty($matches[1])) {
+        $ship_tos = xdruple_fields_get_ship_to_list($matches[1]);
       }
     }
   }
