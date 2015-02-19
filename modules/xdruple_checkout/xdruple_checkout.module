@@ -902,3 +902,100 @@ function xdruple_checkout_features_exclude() {
     ),
   );
 }
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function xdruple_checkout_field_extra_fields() {
+  $extra['commerce_customer_profile']['shipping']['form'] = array(
+    'xd_shipping_address' => array(
+      'label' => t('Shipping address'),
+      'description' => t('Shipping address ERP entity reference'),
+      'weight' => 0,
+    ),
+  );
+  $extra['commerce_customer_profile']['billing']['form'] = array(
+    'xd_billing_address' => array(
+      'label' => t('Billing address'),
+      'description' => t('Billing address ERP entity reference'),
+      'weight' => 0,
+    ),
+  );
+
+  return $extra;
+}
+
+/**
+ * Implements hook_field_attach_form().
+ *
+ * @param $entity_type
+ * @param $entity
+ * @param $form
+ * @param $form_state
+ * @param $langcode
+ */
+function xdruple_checkout_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+  if ($entity_type == 'commerce_customer_profile' && $entity->type == 'billing') {
+    /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+    $session = extensions_get_session();
+
+    $fieldset = array(
+      '#type' => 'fieldset',
+      '#title' => t('Billing contact'),
+      '#tree' => TRUE,
+    );
+    $fieldset['first_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('First name'),
+      '#required' => TRUE,
+    );
+    $fieldset['last_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Last name'),
+      '#required' => TRUE,
+    );
+    $fieldset['email'] = array(
+      '#type' => 'emailfield',
+      '#title' => t('E-mail'),
+    );
+    $fieldset['phone'] = array(
+      '#type' => 'telfield',
+      '#title' => t('Phone'),
+    );
+    if ($contact_id = xdruple_fields_get_bill_to_cntct_default($session->getRescued('customer'))) {
+      /** @var \Xtuple\Rescued\Controller\ContactEntity $entity */
+      $entity = entity_load_single('xtuple_xdcontact', $contact_id);
+      $fieldset['first_name']['#default_value'] = !empty($entity->get('firstName')) ? $entity->get('firstName') : '';
+      $fieldset['last_name']['#default_value'] = !empty($entity->get('lastName')) ? $entity->get('lastName') : '';
+      $fieldset['email']['#default_value'] = !empty($entity->getPrimaryEmail()) ? $entity->getPrimaryEmail() : '';
+      $fieldset['phone']['#default_value'] = !empty($entity->getPhone()) ? $entity->getPhone() : '';
+    }
+    $form['xd_billing_address']['contact'] = $fieldset;
+
+    $fieldset = array(
+      '#type' => 'fieldset',
+      '#title' => t('Billing address'),
+      '#tree' => TRUE,
+    );
+    $address = addressfield_default_values();
+    if ($address_id = xdruple_fields_get_bill_to_addr_default($session->getRescued('customer'))) {
+      /** @var \Xtuple\Rescued\Controller\AddressEntity $entity */
+      $entity = entity_load_single('xtuple_xdaddress', $address_id);
+      $address = $entity->getXnal();
+    }
+    if (!empty($form_state['addressfield']['xd_shipping_address'])) {
+      $address = $form_state['addressfield']['xd_shipping_address'];
+    }
+    $fieldset['address'] = addressfield_generate($address, array(
+      'address',
+    ), array(
+      'mode' => 'form',
+    ));
+    $fieldset['address']['element_key'] = array(
+      '#type' => 'value',
+      '#value' => 'xd_shipping_address',
+    );
+    $fieldset['address']['#required'] = TRUE;
+    $form['xd_billing_address']['address'] = $fieldset;
+  }
+}
