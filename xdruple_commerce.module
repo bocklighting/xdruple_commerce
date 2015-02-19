@@ -18,13 +18,13 @@ function xdruple_commerce_user_login(&$edit, $account) {
   if (!isset($_POST['form_id']) || $_POST['form_id'] != 'user_pass_reset') {
     $redirect = variable_get('xdruple_commerce_login_redirect_page', FALSE);
     $frontpage = variable_get('site_frontpage');
-    
+
     // Altering behavior only if redirect is set.
     // Redirect has to be not empty, as drupal_goto() used for redirect uses $_GET['destination'] as higher priority,
     // so if it is FALSE, but exists, than no redirect is happening.
     if (!empty($redirect)) {
       $edit['redirect'] = $redirect;
-      
+
       // In some cases Drupal adds destination to the login form automatically
       if (!empty($_GET['destination']) && $frontpage === $_GET['destination']) {
         $_GET['destination'] = $redirect;
@@ -1301,15 +1301,31 @@ function xdruple_commerce_user_reg_form_validate(&$element_form, &$form_state, $
           $existing_contacts = entity_load('xtuple_xdcontact', FALSE, $conditions);
 
           if (count($existing_contacts) > 0) {
-            // Set form error.
-            $message = 'The Email address: %email is already in use. Please use a different Email address, !login_url or !reset_url.';
-            $message = t($message, array(
-                '%email' => $form_state['values']['mail'],
-                '!login_url' => l(t('Log In'), "user"),
-                '!reset_url' => l(t('Request a new password'), "user/password"),
-              )
-            );
-            form_set_error('mail', $message);
+            // Guest checkout will create contacts. Check if any of these contacts have Drupal User Associations.
+            $existing_user_ass = array();
+            foreach ($existing_contacts as $contact) {
+              // Check the Drupal User Associations.
+              $cntct_conditions = array(
+                'query' => array(
+                  'contact' => array(
+                    'EQUALS' => $contact->number,
+                  ),
+                ),
+              );
+              $existing_user_ass = array_merge($existing_user_ass, entity_load('xtuple_xdusercontact', FALSE, $cntct_conditions));
+            }
+
+            if (count($existing_user_ass) > 0) {
+              // Set form error.
+              $message = 'The Email address: %email is already in use. Please use a different Email address, !login_url or !reset_url.';
+              $message = t($message, array(
+                  '%email' => $form_state['values']['mail'],
+                  '!login_url' => l(t('Log In'), "user"),
+                  '!reset_url' => l(t('Request a new password'), "user/password"),
+                )
+              );
+              form_set_error('mail', $message);
+            }
           }
         }
       }
