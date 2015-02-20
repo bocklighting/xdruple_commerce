@@ -233,7 +233,7 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
     '#description' => t('When checked, users will not be able to change the ' .
       "Warehouse/Site orders are submitted for. The Customer's" .
       'default warehouse will be used. If no Customer default ' .
-      'is set, the defualt you set here will be used if you ' .
+      'is set, the default you set here will be used if you ' .
       'have more than one Warehouse/Site. If you only have one, ' .
       'it will be the default.'),
     '#default_value' => variable_get('xdruple_commerce_default_warehouse_access', FALSE),
