@@ -14,13 +14,8 @@
 function xdruple_queries_products_by_category_page($group_id) {
   $output = '';
 
-  $catalog = entity_load('xtuple_xdcatalog');
-  foreach ($catalog as $cat) {
-    if ($cat->id == $group_id) {
-      drupal_set_title($cat->name);
-      break;
-    }
-  }
+  $category = \Xtuple\XdrupleQueries\Categories\Tree::buildCategory($group_id);
+  drupal_set_title($category->getName());
 
   $params = array(
     'fields' => array(
@@ -46,9 +41,23 @@ function xdruple_queries_products_by_category_page($group_id) {
   $vars = array(
     'products' => _xdruple_prepare_products_list($product_ids, $params),
   );
-  if (!empty($cat)) {
-    $vars['category'] = $cat;
+
+  $catalog = entity_load('xtuple_xdcatalog');
+  foreach ($catalog as $cat) {
+    if ($cat->id == $group_id) {
+      $vars['category'] = $cat;
+    }
   }
+
+  if (empty($vars['category']->groups)) {
+    $children = $category->getChildren();
+    if (!empty($children)) {
+      foreach ($children as $child) {
+        $vars['category']->groups[] = $child->getId();
+      }
+    }
+  }
+
   $output .= theme('products_page', $vars);
 
   $output .= theme('pager');
