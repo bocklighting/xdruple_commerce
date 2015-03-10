@@ -965,10 +965,10 @@ function xdruple_checkout_field_attach_form($entity_type, $entity, &$form, &$for
     if ($contact_id = xdruple_fields_get_bill_to_cntct_default($session->getRescued('customer'))) {
       /** @var \Xtuple\Rescued\Controller\ContactEntity $entity */
       $entity = entity_load_single('xtuple_xdcontact', $contact_id);
-      $fieldset['first_name']['#default_value'] = !empty($entity->get('firstName')) ? $entity->get('firstName') : '';
-      $fieldset['last_name']['#default_value'] = !empty($entity->get('lastName')) ? $entity->get('lastName') : '';
-      $fieldset['email']['#default_value'] = !empty($entity->getPrimaryEmail()) ? $entity->getPrimaryEmail() : '';
-      $fieldset['phone']['#default_value'] = !empty($entity->getPhone()) ? $entity->getPhone() : '';
+      $fieldset['first_name']['#default_value'] = $entity->get('firstName') ? $entity->get('firstName') : '';
+      $fieldset['last_name']['#default_value'] = $entity->get('lastName') ? $entity->get('lastName') : '';
+      $fieldset['email']['#default_value'] = $entity->getPrimaryEmail() ? $entity->getPrimaryEmail() : '';
+      $fieldset['phone']['#default_value'] = $entity->getPhone() ? $entity->getPhone() : '';
     }
     $form['xd_billing_address']['contact'] = $fieldset;
 
@@ -977,7 +977,7 @@ function xdruple_checkout_field_attach_form($entity_type, $entity, &$form, &$for
       '#title' => t('Billing address'),
       '#tree' => TRUE,
     );
-    $address = addressfield_default_values();
+    $address = xdruple_addressfield_default_values();
     if ($address_id = xdruple_fields_get_bill_to_addr_default($session->getRescued('customer'))) {
       /** @var \Xtuple\Rescued\Controller\AddressEntity $entity */
       $entity = entity_load_single('xtuple_xdaddress', $address_id);
