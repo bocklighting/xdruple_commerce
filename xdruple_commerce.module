@@ -1193,50 +1193,6 @@ function xdruple_commerce_theme() {
 // }
 
 /**
- * Implements hook_user_insert().
- */
-function xdruple_commerce_user_insert(&$edit, $account, $category) {
-  $field_name = 'xd_contact_association';
-
-  // Get the XdUserContact uuid from this user's Entity Reference and load that entity.
-  if (isset($edit[$field_name][LANGUAGE_NONE][0]['target_id'])) {
-    $field = field_info_field($field_name);
-    $entity_type = $field['settings']['target_type'];
-
-    $user_contact_key = $edit['xd_contact_association'][LANGUAGE_NONE][0]['target_id'];
-
-    // Update the uid now that one exists.
-    $user_contact = entity_load_single($entity_type, $user_contact_key);
-    $user_contact->drupalUserUuid = $account->uuid;
-
-    // Save it back to xTuple.
-    entity_save($entity_type, $user_contact);
-  }
-}
-
-/**
- * Implements hook_user_update().
- */
-function xdruple_commerce_user_update(&$edit, $account, $category) {
-  $field_name = 'xd_contact_association';
-
-  // Get the XdUserContact uuid from this user's Entity Reference and load that entity.
-  if (isset($edit[$field_name][LANGUAGE_NONE][0]['target_id'])) {
-    $field = field_info_field($field_name);
-    $entity_type = $field['settings']['target_type'];
-
-    $user_contact_key = $edit['xd_contact_association'][LANGUAGE_NONE][0]['target_id'];
-
-    // Update the uid now that one exists.
-    $user_contact = entity_load_single($entity_type, $user_contact_key);
-    $user_contact->drupalUserUuid = $account->uuid;
-
-    // Save it back to xTuple.
-    entity_save($entity_type, $user_contact);
-  }
-}
-
-/**
  * Implements hook_form_FORM_ID_alter().
  *
  * The Product UI module instantiates the Product add/edit form alter the
@@ -1774,16 +1730,6 @@ function xdruple_commerce_xtuple_xdaddress_view_alter(&$build, $entity_type) {
   if (!empty($build['number'])) {
     $build['number']['#access'] = FALSE;
   }
-}
-
-function xdruple_commerce_xtuple_xdusercontact_view_alter(&$build, $entity_type) {
-  $build['#page'] = TRUE;
-
-  $build['uuid']['#access'] = FALSE;
-  $build['xdruple_site']['#access'] = FALSE;
-  $build['drupalUserUuid']['#access'] = FALSE;
-  $build['create_new_customer']['#access'] = FALSE;
-  $build['contact']['#access'] = FALSE;
 }
 
 /**
