@@ -156,7 +156,7 @@ function xdruple_checkout_commerce_checkout_complete($order) {
     }
   }
   else {
-    $customer_key = $order_wrapper->commerce_customer_billing->xd_customer->number->value();
+    $customer_key = $order_wrapper->customer->value()->identifier();
   }
   // TODO: Assuming 'xtuple' here. Get setting.
   $customer_entityType = 'xtuple_xdcustomer';

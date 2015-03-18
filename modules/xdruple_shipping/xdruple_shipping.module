@@ -346,7 +346,6 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
     /** @var \Xtuple\Entity\Contact\Contact $contact */
     $contact = $order_wrapper->commerce_customer_shipping->contact->value()->value();
     $address = $contact->getAddress();
-
     $ship_to_address['thoroughfare'] = $address->getThoroughfare();
     $ship_to_address['premise'] = $address->getPremise();
     $ship_to_address['locality'] = $address->getLocality();
@@ -355,10 +354,17 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
     $ship_to_address['country'] = $address->getCountry();
     $ship_to_address['first_name'] = $contact->getName()->getFirst();
     $ship_to_address['last_name'] = $contact->getName()->getLast();
-    $ship_to_address['organisation_name'] = ''; // TODO commerce_customer_billing->xd_customer->name field was used for this 
+    if (user_is_anonymous() && $customer = $order_wrapper->mail->value()) {
+      $shipping_address['organisation_name'] = $customer;
+    }
+    else {
+      $shipping_address['organisation_name'] = $order_wrapper->customer->value()->get('name');
+    }
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
-    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
+    watchdog('xdruple_commerce', theme('exception', array(
+      'exception' => $e,
+    )), array(), WATCHDOG_ERROR);
   }
 }
 
