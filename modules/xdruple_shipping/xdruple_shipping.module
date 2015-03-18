@@ -337,65 +337,25 @@ function xdruple_shipping_form_alter(&$form, &$form_state, $form_id) {
 
 /**
  * Implements hook_commerce_ups_ship_to_address_from_order_alter()
+ *
+ * @param $ship_to_address
+ * @param $order_wrapper
  */
 function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_to_address, $order_wrapper) {
-  // Necessary for country_get_list().
-  require_once DRUPAL_ROOT . '/includes/locale.inc';
-
   try {
-    if ($xd_ship_to_address = $order_wrapper->commerce_customer_shipping->xd_ship_to_address->value()) {
-      $countries = country_get_list();
-      $country_match = array_keys($countries, $xd_ship_to_address->country);
-      if (count($country_match) === 1) {
-        $country_code = $country_match[0];
-      }
-      else {
-        $country_code = 'US';
-      }
+    /** @var \Xtuple\Entity\Contact\Contact $contact */
+    $contact = $order_wrapper->commerce_customer_shipping->contact->value()->value();
+    $address = $contact->getAddress();
 
-      $ship_to_address['thoroughfare'] = $xd_ship_to_address->line1;
-      $ship_to_address['premise'] = $xd_ship_to_address->line2;
-      $ship_to_address['locality'] = $xd_ship_to_address->city;
-      $ship_to_address['administrative_area'] = $xd_ship_to_address->state;
-      $ship_to_address['postal_code'] = $xd_ship_to_address->postalCode;
-      $ship_to_address['country'] = $country_code;
-    }
-    elseif ($xd_ship_to = $order_wrapper->commerce_customer_shipping->xd_ship_to->value()) {
-      $countries = country_get_list();
-      $country_match = array_keys($countries, $xd_ship_to->address['country']);
-      if (count($country_match) === 1) {
-        $country_code = $country_match[0];
-      }
-      else {
-        $country_code = 'US';
-      }
-
-      $ship_to_address['thoroughfare'] = $xd_ship_to->address['line1'];
-      $ship_to_address['premise'] = $xd_ship_to->address['line2'];
-      $ship_to_address['locality'] = $xd_ship_to->address['city'];
-      $ship_to_address['administrative_area'] = $xd_ship_to->address['state'];
-      $ship_to_address['postal_code'] = $xd_ship_to->address['postalCode'];
-      $ship_to_address['country'] = $country_code;
-    }
-  } catch (\Exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
-    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
-
-  try {
-    if ($ship_to_contact = $order_wrapper->commerce_customer_shipping->xd_ship_to_contact->value()) {
-      $ship_to_address['first_name'] = $ship_to_contact->firstName;
-      $ship_to_address['last_name'] = $ship_to_contact->lastName;
-    }
-  } catch (\Exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
-    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
-  }
-
-  try {
-    if ($customer = $order_wrapper->commerce_customer_billing->xd_customer->value()) {
-      $ship_to_address['organisation_name'] = $customer->name;
-    }
+    $ship_to_address['thoroughfare'] = $address->getThoroughfare();
+    $ship_to_address['premise'] = $address->getPremise();
+    $ship_to_address['locality'] = $address->getLocality();
+    $ship_to_address['administrative_area'] = $address->getAdministrativeArea();
+    $ship_to_address['postal_code'] = $address->getPostalCode();
+    $ship_to_address['country'] = $address->getCountry();
+    $ship_to_address['first_name'] = $contact->getName()->getFirst();
+    $ship_to_address['last_name'] = $contact->getName()->getLast();
+    $ship_to_address['organisation_name'] = ''; // TODO commerce_customer_billing->xd_customer->name field was used for this 
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
     watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
@@ -568,3 +528,4 @@ function xdruple_shipping_rules_contains_freight_class($order, $freight_classes,
 
   return FALSE;
 }
+
