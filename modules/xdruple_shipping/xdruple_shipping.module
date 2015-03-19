@@ -357,8 +357,8 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
     if (user_is_anonymous() && $customer = $order_wrapper->mail->value()) {
       $shipping_address['organisation_name'] = $customer;
     }
-    else {
-      $shipping_address['organisation_name'] = $order_wrapper->customer->value()->get('name');
+    elseif ($customer = $order_wrapper->customer->value()) {
+      $shipping_address['organisation_name'] = $customer->get('name');
     }
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
