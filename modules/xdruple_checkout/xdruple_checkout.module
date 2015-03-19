@@ -148,158 +148,96 @@ function xdruple_checkout_commerce_checkout_complete($order) {
   /** @var stdClass $order_wrapper */
   $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
 
-  /** @var stdClass $user */
-  if ($user->uid === 0) {
-    $customer_key = variable_get('xdruple_checkout_guest_customer', NULL);
-    if (!$customer_key) {
-      drupal_set_message(t('Guest customer is not setup. Please contact the site administrator.'), 'warning');
-    }
-  }
-  else {
-    $customer_key = $order_wrapper->customer->value()->identifier();
-  }
-  // TODO: Assuming 'xtuple' here. Get setting.
-  $customer_entityType = 'xtuple_xdcustomer';
-  $customer = entity_load($customer_entityType, array($customer_key));
-  $customer = $customer[$customer_key];
+  /** @var \Xtuple\Rescued\Controller\AbstractEntity $customer */
+  $customer = entity_load_single("xtuple_xdcustomer", $order_wrapper->customer->value()->identifier());
 
-  $bill_to_contact = $order_wrapper->commerce_customer_billing->xd_bill_to_contact->value();
-  $bill_to_address = $order_wrapper->commerce_customer_billing->xd_bill_to_address->value();
-  $ship_to = $order_wrapper->commerce_customer_shipping->xd_ship_to->value();
-  $full_ship_to = FALSE;
+  /** @var \Xtuple\REST\Entity\XdContact\XdContact $billing_contact */
+  $billing_contact = $order_wrapper->commerce_customer_billing->contact->value();
 
-  if (isset($ship_to)) {
-    $ship_to_contact = json_decode(json_encode($ship_to->contact), FALSE);
-    $ship_to_address = json_decode(json_encode($ship_to->address), FALSE);
-
-    // Set multiple ship to email addresses to send order confirmation to.
-    if (isset($ship_to->shiptoEmails[0]['email']) && !empty($ship_to->shiptoEmails[0]['email'])) {
-      $ship_to_emails = $ship_to->shiptoEmails[0]['email'];
-    }
-
-    // Load the full customer ship to so we get ShipCharge, shipZone, etc. we normally do not expose.
-    foreach ($customer->shiptos as $customer_shipto) {
-      if ($customer_shipto['number'] === $ship_to->number) {
-        $full_ship_to = json_decode(json_encode($customer_shipto), FALSE);
-        $ship_to = $customer_shipto;
-
-        break;
-      }
-    }
-  }
-  else {
-    $ship_to_contact = $order_wrapper->commerce_customer_shipping->xd_ship_to_contact->value();
-    $ship_to_address = $order_wrapper->commerce_customer_shipping->xd_ship_to_address->value();
-  }
-
-  if (!$ship_to_contact) {
-    foreach ($customer->shiptos as $customer_shipto) {
-      if ($customer_shipto['isDefault']) {
-        $ship_to_contact = json_decode(json_encode($customer_shipto['contact']), FALSE);
-        if (!$ship_to_address) {
-          $ship_to_address = json_decode(json_encode($customer_shipto['address']), FALSE);
-        }
-        if (!$ship_to) {
-          $full_ship_to = json_decode(json_encode($customer_shipto), FALSE);
-          $ship_to = $customer_shipto;
-        }
-
-        break;
-      }
-    }
-  }
-
-  // TODO: Business logic question... Do we assume the default ship to address here if the above logic didn't set it?
-  if (!$ship_to_address) {
-    foreach ($customer->shiptos as $customer_shipto) {
-      if ($customer_shipto['isDefault']) {
-        $ship_to_address = json_decode(json_encode($customer_shipto['address']), FALSE);
-
-        // Load the full customer ship to so we get ShipCharge, shipZone, etc. we normally do not expose.
-        if (!$ship_to && !$full_ship_to) {
-          $full_ship_to = json_decode(json_encode($customer_shipto), FALSE);
-          $ship_to = $customer_shipto;
-        }
-
-        break;
-      }
-    }
-  }
+  /** @var \Xtuple\REST\Entity\XdContact\XdContact $shipping_contact */
+  $shipping_contact = $order_wrapper->commerce_customer_shipping->contact->value();
 
   $po_number = property_exists($order, 'xd_order_po_number') ? $order_wrapper->xd_order_po_number->value() : '';
-
+  $order_notes = '';
   if (property_exists($order, 'xd_order_notes')) {
     $notes = $order_wrapper->xd_order_notes->value();
     if (!empty($notes)) {
       $order_notes = $notes['safe_value'];
     }
-    else {
-      $order_notes = '';
+  }
+  $default_shipto = NULL;
+
+  foreach ($customer->get("shiptos") as $shipto) {
+    if ($shipto['isDefault']) {
+      $default_shipto = $shipto['isDefault'];
     }
   }
-  else {
-    $order_notes = '';
-  }
+  /** @var \Xtuple\Rescued\Controller\AbstractEntity $shipto */
+  $shipto = NULL;
 
-  // Create a new Sales Order entity.
-  // TODO: Assuming 'xtuple' here. Get setting.
-  $so_entityType = 'xtuple_salesorder';
-  $so_entityInfo = entity_get_info($so_entityType);
-  $so_class = $so_entityInfo['entity class'];
-  $sales_order = new $so_class(array(), $so_entityType);
+  $sales_order = entity_create("xtuple_salesorder", array(
+    "customer" => $customer->identifier(),
+    "customerPurchaseOrderNumber" => $po_number,
+    "orderDate" => date("Y-m-d"),
+    "terms" => !empty($order->data['xdruple_terms']) ? $order->data['xdruple_terms'] : NULL,
+    "salesRep" => $shipto ? $shipto->get("salesRep") : $customer->get("salesRep"),
+    "commission" => $shipto ? $shipto->get("commission") : $customer->get("commission"),
+    "taxZone" => $shipto ? $shipto->get("taxZone") : $customer->get("taxZone"),
+    "site" => $customer->get("preferredSite"),
+    "saleType" => "ECOMMERCE",
+    "status" => \Xtuple\REST\Entity\SalesOrder\SalesOrderStatus::$open,
 
-  // Set all the defaults on the Sales Order.
-  $sales_order->is_new = TRUE;
-  $sales_order->status = 'O';
-  $sales_order->saleType = 'INT';
-  $sales_order->calculateFreight = TRUE;
-  $sales_order->freight = 0;
-  $sales_order->orderDate = date("Y-m-d");
-  $sales_order->wasQuote = FALSE;
-  //$sales_order->number = $order->order_number;
-  $sales_order->orderNotes = $order_notes;
-  $sales_order->customerPurchaseOrderNumber = $po_number;
+    "billtoName" => $billing_contact->value()->getName()->getFirst() . " " . $billing_contact->value()->getName()->getLast(),
+    "billtoAddress1" => $billing_contact->value()->getAddress()->getThoroughfare(),
+    "billtoAddress2" => $billing_contact->value()->getAddress()->getPremise(),
+    "billtoAddress3" => $billing_contact->value()->getAddress()->getSubPremise(),
+    "billtoCity" => $billing_contact->value()->getAddress()->getLocality(),
+    "billtoState" => $billing_contact->value()->getAddress()->getAdministrativeArea(),
+    "billtoCountry" => $billing_contact->value()->getAddress()->getCountry(),
+    "billtoPostalCode" => $billing_contact->value()->getAddress()->getPostalCode(),
+    "billtoContact" => $billing_contact->id(),
+    "billtoContactHonorific" => $billing_contact->value()->getName()->getHonorific(),
+    "billtoContactFirstName" => $billing_contact->value()->getName()->getFirst(),
+    "billtoContactMiddleName" => $billing_contact->value()->getName()->getMiddle(),
+    "billtoContactLastName" => $billing_contact->value()->getName()->getLast(),
+    "billtoContactSuffix" => $billing_contact->value()->getName()->getTitle(),
+    "billtoContactPhone" => $billing_contact->value()->getPhone(),
+    "billtoContactTitle" => $billing_contact->value()->getJobTitle(),
+    "billtoContactFax" => $billing_contact->value()->getFax(),
+    "billtoContactEmail" => $billing_contact->value()->getEmail(),
 
-  // Set the Customer details on the Sales Order.
-  $sales_order->site = $customer->preferredSite;
-  $sales_order->customer = $customer->number;
-  $sales_order->terms = !empty($order->data['xdruple_terms']) ? $order->data['xdruple_terms'] : NULL;
-  $sales_order->salesRep = $full_ship_to ? $full_ship_to->salesRep : $customer->salesRep;
-  $sales_order->taxZone = $full_ship_to ? $full_ship_to->taxZone : $customer->taxZone;
-  $sales_order->billtoContact = $bill_to_contact->number;
-  /** @var \Xtuple\Rescued\Controller\AbstractEntity $ship_to */
-  $sales_order->shipto = $ship_to->getUUID();
-  $sales_order->shiptoContact = $ship_to_contact->number;
-  $sales_order->currency = $customer->currency;
-  $sales_order->shipZone = $full_ship_to ? $full_ship_to->shipZone : NULL;
-  $sales_order->shipCharge = $full_ship_to ? $full_ship_to->shipCharge : $customer->shipCharge;
-  $sales_order->commission = $full_ship_to ? $full_ship_to->commission : $customer->commission;
-  $sales_order->shipVia = $full_ship_to ? $full_ship_to->shipVia : $customer->shipVia;
-  $sales_order->billtoName = $bill_to_contact->firstName . ' ' . $bill_to_contact->lastName;
-  $sales_order->billtoContactFirstName = $bill_to_contact->firstName;
-  $sales_order->billtoContactLastName = $bill_to_contact->lastName;
-  $sales_order->billtoContactPhone = $bill_to_contact->phone;
-  $sales_order->billtoContactFax = $bill_to_contact->fax;
-  $sales_order->billtoAddress1 = $bill_to_address->line1;
-  $sales_order->billtoAddress2 = $bill_to_address->line2;
-  $sales_order->billtoAddress3 = $bill_to_address->line3;
-  $sales_order->billtoCity = $bill_to_address->city;
-  $sales_order->billtoState = $bill_to_address->state;
-  $sales_order->billtoPostalCode = $bill_to_address->postalCode;
-  $sales_order->billtoCountry = $bill_to_address->country;
-  $sales_order->shiptoName = $full_ship_to ? $full_ship_to->name : NULL;
-  $sales_order->shipNotes = $full_ship_to ? $full_ship_to->notes : NULL;
-  $sales_order->shiptoContactFirstName = $ship_to_contact->firstName;
-  $sales_order->shiptoContactLastName = $ship_to_contact->lastName;
-  $sales_order->shiptoContactPhone = $ship_to_contact->phone;
-  $sales_order->shiptoContactFax = $ship_to_contact->fax;
-  $sales_order->shiptoAddress1 = $ship_to_address->line1;
-  $sales_order->shiptoAddress2 = $ship_to_address->line2;
-  $sales_order->shiptoAddress3 = $ship_to_address->line3;
-  $sales_order->shiptoCity = $ship_to_address->city;
-  $sales_order->shiptoState = $ship_to_address->state;
-  $sales_order->shiptoPostalCode = $ship_to_address->postalCode;
-  $sales_order->shiptoCountry = $ship_to_address->country;
+    "shipto" => $shipto ? $shipto->identifier() : NULL,
+    "shiptoName" => $shipto ? $shipto->get("name") : "",
+
+//    "shiptoName" => $shipping_contact->value()->getName()->getFirst() . " " . $shipping_contact->value()->getName()->getLast(),
+    "shiptoAddress1" => $shipping_contact->value()->getAddress()->getThoroughfare(),
+    "shiptoAddress2" => $shipping_contact->value()->getAddress()->getPremise(),
+    "shiptoAddress3" => $shipping_contact->value()->getAddress()->getSubPremise(),
+    "shiptoCity" => $shipping_contact->value()->getAddress()->getLocality(),
+    "shiptoState" => $shipping_contact->value()->getAddress()->getAdministrativeArea(),
+    "shiptoCountry" => $shipping_contact->value()->getAddress()->getCountry(),
+    "shiptoPostalCode" => $shipping_contact->value()->getAddress()->getPostalCode(),
+    "shiptoContact" => $shipping_contact->id(),
+    "shiptoContactHonorific" => $shipping_contact->value()->getName()->getHonorific(),
+    "shiptoContactFirstName" => $shipping_contact->value()->getName()->getFirst(),
+    "shiptoContactMiddleName" => $shipping_contact->value()->getName()->getMiddle(),
+    "shiptoContactLastName" => $shipping_contact->value()->getName()->getLast(),
+    "shiptoContactSuffix" => $shipping_contact->value()->getName()->getTitle(),
+    "shiptoContactPhone" => $shipping_contact->value()->getPhone(),
+    "shiptoContactTitle" => $shipping_contact->value()->getJobTitle(),
+    "shiptoContactFax" => $shipping_contact->value()->getFax(),
+    "shiptoContactEmail" => $shipping_contact->value()->getEmail(),
+
+    "orderNotes" => $order_notes,
+    "shipNotes" => $shipto ? $shipto->get("notes") : "",
+    "shipVia" => $shipto ? $shipto->get("shipVia") : $customer->get("shipVia"),
+    "currency" => $customer->get("currency"),
+    "calculateFreight" => TRUE,
+    "shipZone" => $shipto ? $shipto->get("shipZone") : NULL,
+    "shipCharge" => $shipto ? $shipto->get("shipCharge") : $customer->get("shipCharge"),
+    "wasQuote" => FALSE,
+  ));
+
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
   $session = extensions_get_session();
