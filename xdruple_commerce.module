@@ -1793,70 +1793,10 @@ function xdruple_commerce_checkout_review($variables) {
   return implode('', $rows);
 }
 
-function xdruple_commerce_field_display_alter(&$display, $context) {
-  if ($context['entity_type'] == 'xtuple_xdshipto') {
-    if ($context['field']['field_name'] == 'xd_ship_to') {
-      $display['label'] = 'hidden';
-    }
-    if ($display['module'] == 'entityreference') {
-      $display['type'] = 'entityreference_entity_view';
-      $display['settings']['view_mode'] = 'default';
-      $display['settings']['links'] = TRUE;
-    }
-    if ($context['field']['field_name'] == 'erp_xdshiptocontact') {
-      $display['weight'] = 19;
-    }
-  }
-}
-
 // @TODO This code is trash. It's used to "theme" checkout review page, which is extremely hard to do due to the
 // fact, that the page itself build poorly (hard to theme) and the structure of the entity to render is enormous due
 // to usage of entity references
 function xdruple_commerce_entity_view_alter(&$build, $type) {
-  if ($type == 'commerce_customer_profile') {
-    if ($build['#bundle'] == 'shipping') {
-      if (!empty($build['xd_ship_to']['#items'][0]['target_id'])) {
-        $target_id = $build['xd_ship_to']['#items'][0]['target_id'];
-        $ship_to = &$build['xd_ship_to'][0]['xtuple_xdshipto'][$target_id];
-        if (!empty($ship_to['erp_xdshiptoaddress'])) {
-          $field = $ship_to['erp_xdshiptoaddress'];
-          $field['#field_name'] = 'xd_ship_to_address';
-          $field['#field_type'] = 'entityreference';
-          $field['#title'] = t('Ship To Address');
-          $build['xd_ship_to_address'] = $field;
-          $ship_to['erp_xdshiptoaddress']['#access'] = FALSE;
-        }
-        if (!empty($ship_to['erp_xdshiptocontact'])) {
-          $field = $ship_to['erp_xdshiptocontact'];
-          $field['#field_name'] = 'xd_ship_to_contact';
-          $field['#field_type'] = 'entityreference';
-          $field['#title'] = t('Ship To Contact');
-          $build['xd_ship_to_contact'] = $field;
-          $ship_to['erp_xdshiptocontact']['#access'] = FALSE;
-        }
-      }
-      else {
-        $name = '';
-        if (!empty($build['xd_ship_to_contact']['#items'][0]['target_id'])) {
-          $tid = $build['xd_ship_to_contact']['#items'][0]['target_id'];
-          $name = $build['xd_ship_to_contact'][0]['xtuple_xdcontact'][$tid]['firstName'][0]['#markup'];
-        }
-
-        $markup = '';
-        $markup .= '<div class="field field-name-xd-ship-to field-type-entityreference field-label-above col-lg-4">';
-        if ($name) {
-          $markup .= '<div class="field-label">' . t('Ship to') . ':&nbsp;</div>';
-          $markup .= '<div class="field-items"><div class="field-item even">' . $name . '</div></div>';
-        }
-        $markup .= '</div>';
-        $build['xd_ship_to'] = array(
-          '#markup' => $markup,
-          '#weight' => -30,
-        );
-      }
-    }
-  }
-
   if ($type == 'commerce_product' && $build['#view_mode'] == 'full') {
     _xdruple_commerce_product_entity_view_alter($build);
   }
