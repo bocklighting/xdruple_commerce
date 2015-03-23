@@ -1958,24 +1958,31 @@ function xdruple_commerce_form_entity_operations_operation_form_alter(&$form, $f
   $form['actions']['#weight'] = 100;
 }
 
-
+/**
+ * Helper function
+ *
+ * @return array
+ * @throws \EntityMetadataWrapperException
+ */
 function _xdruple_commerce_get_cart_summary() {
   $summary = array();
-
-  global $user;
-
-  $order = commerce_cart_order_load($user->uid);
-  if ($order) {
-    $wrapper = entity_metadata_wrapper('commerce_order', $order);
-    $count = commerce_line_items_quantity($wrapper->commerce_line_items, commerce_product_line_item_types());
-
-    $summary = array(
-      'count' => $count,
-      'total' => $order->commerce_order_total['und'][0]['amount'],
-      'currency' => $order->commerce_order_total['und'][0]['currency_code'],
-    );
+  $user = extensions_get_user();
+  if ($order = commerce_cart_order_load($user->getUserId())) {
+    try {
+      /** @var \EntityDrupalWrapper $order_wrapper */
+      $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+      /** @var \EntityDrupalWrapper $line_items_wrapper */
+      $line_items_wrapper = $order_wrapper->get("commerce_line_items");
+      $total = commerce_line_items_total($line_items_wrapper->value());
+      $summary = array(
+        "count" => commerce_line_items_quantity($line_items_wrapper, commerce_product_line_item_types()),
+        "total" => $total["amount"],
+        "currency" => $total["currency_code"],
+      );
+    } catch (\Exception $e) {
+      xdruple_catch_exception($e);
+    }
   }
-
   return $summary;
 }
 
