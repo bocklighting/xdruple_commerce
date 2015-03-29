@@ -417,9 +417,9 @@ function _xdruple_queries_prepare_curl($product, $qty) {
 
     $d = json_encode($d_array);
 
-    global $rescued_clients;
+    $config = rescued_get_configuration();
 
-    $uri = $rescued_clients['xtuple']['api_url'] . '/services/customer/item-price';
+    $uri = $config->apiUrl() . '/services/customer/item-price';
     $debug_flag = variable_get('rescued_debug_mode', FALSE) ? ' -k' : '';
     $curl = "curl$debug_flag -X POST -H \"Content-Type: application/json\" -d '$d' $uri?access_token={$access_token->access_token}";
 
