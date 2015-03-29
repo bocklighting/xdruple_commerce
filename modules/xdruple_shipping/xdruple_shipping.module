@@ -7,20 +7,14 @@
 use Xtuple\Xdruple\Theme\PrintAddressInfoHandler;
 
 /**
- * Implements hook_rescued_register_clients_resources_alter().
+ * Implements hook_rescued_resources().
  */
-function  xdruple_shipping_rescued_register_clients_resources_alter(&$rescued_clients_url_resources) {
-  if (!in_array('FreightClass', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'FreightClass';
-  }
-  if (!in_array('ShipVia', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'ShipVia';
-  }
-  if (!in_array('Site', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'Site';
-  }
-
-  return $rescued_clients_url_resources;
+function xdruple_shipping_rescued_resources() {
+  return array(
+    "FreightClass",
+    "ShipVia",
+    "Site",
+  );
 }
 
 /**

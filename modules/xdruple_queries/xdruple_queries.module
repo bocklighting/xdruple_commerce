@@ -93,20 +93,14 @@ function xdruple_queries_permission() {
 }
 
 /**
- * Implements hook_rescued_register_clients_resources_alter().
+ * Implements hook_rescued_resources().
  */
-function xdruple_queries_rescued_register_clients_resources_alter(&$rescued_clients_url_resources) {
-  if (!in_array('XdProduct', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'XdProduct';
-  }
-  if (!in_array('XdCatalog', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'XdCatalog';
-  }
-  if (!in_array('XdCatalogProduct', $rescued_clients_url_resources['xtuple'])) {
-    $rescued_clients_url_resources['xtuple'][] = 'XdCatalogProduct';
-  }
-
-  return $rescued_clients_url_resources;
+function xdruple_queries_rescued_resources() {
+  return array(
+    "XdProduct",
+    "XdCatalog",
+    "XdCatalogProduct",
+  );
 }
 
 /**
