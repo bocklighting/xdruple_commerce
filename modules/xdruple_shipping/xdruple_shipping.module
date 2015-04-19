@@ -339,15 +339,15 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
   try {
     /** @var \Xtuple\Entity\Contact\Contact $contact */
     $contact = $order_wrapper->commerce_customer_shipping->contact->value()->value();
-    $address = $contact->getAddress();
-    $ship_to_address['thoroughfare'] = $address->getThoroughfare();
-    $ship_to_address['premise'] = $address->getPremise();
-    $ship_to_address['locality'] = $address->getLocality();
-    $ship_to_address['administrative_area'] = $address->getAdministrativeArea();
-    $ship_to_address['postal_code'] = $address->getPostalCode();
-    $ship_to_address['country'] = $address->getCountry();
-    $ship_to_address['first_name'] = $contact->getName()->getFirst();
-    $ship_to_address['last_name'] = $contact->getName()->getLast();
+    $address = $contact->address();
+    $ship_to_address['thoroughfare'] = $address->thoroughfare();
+    $ship_to_address['premise'] = $address->premise();
+    $ship_to_address['locality'] = $address->locality();
+    $ship_to_address['administrative_area'] = $address->administrativeArea();
+    $ship_to_address['postal_code'] = $address->postalCode();
+    $ship_to_address['country'] = $address->country();
+    $ship_to_address['first_name'] = $contact->name()->first();
+    $ship_to_address['last_name'] = $contact->name()->last();
     if (user_is_anonymous() && $customer = $order_wrapper->mail->value()) {
       $shipping_address['organisation_name'] = $customer;
     }
