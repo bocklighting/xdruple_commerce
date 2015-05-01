@@ -221,7 +221,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     }
 
     if (isset($_GET['search'])) {
-      $query->propertyCondition('q', urldecode($_GET['search']), 'CONTAINS');
+      $query->propertyCondition('q', urlencode($_GET['search']), 'CONTAINS');
     }
 
     // Set a default order by so we don't get bogus duplicate results from the xTuple API.
