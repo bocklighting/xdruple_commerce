@@ -90,6 +90,7 @@ function xdruple_save_cart_form_alter(&$form, &$form_state, $form_id) {
       // Add the Move to saved cart button.
       $form['actions']['save_cart']['#type'] = 'submit';
       $form['actions']['save_cart']['#value'] = t('Move to saved cart');
+      $form["actions"]["save_cart"]["#name"] = "save-cart";
       $form['actions']['save_cart']['#weight'] = -1;
       // TODO: Add permission? This isn't very different from changing qty on a line.
       $form['actions']['save_cart']['#access'] = TRUE;
@@ -105,7 +106,8 @@ function xdruple_save_cart_form_alter(&$form, &$form_state, $form_id) {
  * Submit handler to move a cart to state = 'saved_cart'.
  */
 function xdruple_save_cart_form_submit($form, &$form_state) {
-  if ($form_state['triggering_element']['#id'] === 'edit-save-cart') {
+  if ($form_state['triggering_element']['#name'] === 'save-cart') {
+    /** @var \stdClass $user */
     global $user;
 
     // Reset the status of the order to cart.
@@ -130,7 +132,7 @@ function xdruple_save_cart_form_submit($form, &$form_state) {
 
     $message = 'Your shopping cart has been moved to your !saved_carts_url.';
     $message = t($message, array(
-        '!saved_carts_url' => l(t('Saved Carts'), "user/$user->uid/saved-carts"),
+        '!saved_carts_url' => l(t('Saved Carts'), "user/{$user->uid}/saved-carts"),
       )
     );
 
