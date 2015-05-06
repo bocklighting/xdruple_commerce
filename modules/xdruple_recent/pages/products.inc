@@ -26,7 +26,9 @@ function xdruple_recent_products_recent_page() {
     'products' => $list,
   ));
 
-  $output .= theme('pager');
-
+  if (empty($_GET["search"])) {
+    $output .= theme('pager');
+  }
+  
   return $output;
 }

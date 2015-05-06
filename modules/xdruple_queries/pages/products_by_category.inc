@@ -60,7 +60,8 @@ function xdruple_queries_products_by_category_page($group_id) {
 
   $output .= theme('products_page', $vars);
 
-  $output .= theme('pager');
-
+  if (empty($_GET["search"])) {
+    $output .= theme('pager');
+  }
   return $output;
 }
