@@ -30,8 +30,9 @@ function xdruple_favorites_favorite_products_page() {
   $output .= theme('products_page', array(
     'products' => $list,
   ));
-
-  $output .= theme('pager');
-
+  
+  if (empty($_GET["search"])) {
+    $output .= theme('pager');
+  }
   return $output;
 }

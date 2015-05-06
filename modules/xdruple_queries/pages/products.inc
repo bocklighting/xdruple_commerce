@@ -23,7 +23,9 @@ function xdruple_queries_products_page() {
     'products' => _xdruple_prepare_products_list(NULL, $params),
   ));
 
-  $output .= theme('pager');
+  if (empty($_GET["search"])) {
+    $output .= theme('pager');
+  }
 
   return $output;
 }
