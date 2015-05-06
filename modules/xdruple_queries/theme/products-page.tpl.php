@@ -7,7 +7,9 @@
 <div class="view-ft-commerce-xd-products">
   <div class="view-content">
     <?php if (!empty($columns)): ?>
-      <h3><?php print t("Products") ?></h3>
+      <?php if (!empty($subcategories)): ?>
+        <h3><?php print t("Products") ?></h3>
+      <?php endif; ?>
       <?php foreach ($columns as $column): ?>
         <div class="views-columns row">
           <?php foreach ($column as $product): ?>
