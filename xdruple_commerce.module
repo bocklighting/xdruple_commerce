@@ -261,29 +261,6 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
     }
   }
 
-
-
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdcontact') {
-    // Modify this entity form to hide some properties/fields.
-    unset ($form['number']);
-    unset ($form['honorific']);
-    unset ($form['middleName']);
-    unset ($form['suffix']);
-    unset ($form['jobTitle']);
-    unset ($form['initials']);
-    unset ($form['alternate']);
-    unset ($form['fax']);
-    unset ($form['webAddress']);
-
-    $form['firstName']['#weight'] = -44;
-    $form['lastName']['#weight'] = -43;
-    $form['primaryEmail']['#weight'] = -42;
-    $form['phone']['#weight'] = -41;
-
-    $form['firstName']['#required'] = TRUE;
-    $form['lastName']['#required'] = TRUE;
-  }
-
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdaddress') {
     // Modify this entity form to hide some properties/fields.
     unset ($form['number']);
@@ -450,14 +427,6 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
  * Implements hook_rescued_entity_default_label_alter().
  */
 function xdruple_commerce_rescued_entity_default_label_alter($entity, &$label, $context) {
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdcontact') {
-    if (isset($entity->firstName) || isset($entity->lastName)) {
-      $label = '';
-      $label .= isset($entity->firstName) ? ' ' . $entity->firstName : '';
-      $label .= isset($entity->lastName) ? ' ' . $entity->lastName : '';
-    }
-  }
-
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdaddress') {
     $label = $entity->line1;
     $label .= ' ' . $entity->city;
@@ -477,21 +446,6 @@ function xdruple_commerce_rescued_entity_default_label_alter($entity, &$label, $
  * Implements hook_rescued_entity_build_content_view_alter().
  */
 function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$resource_schema, $context) {
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdcontact') {
-    // TODO: Convert this to a function call that has a hook to override.
-    // Use that function in xdruple_commerce_rescued_operation_entityform_alter().
-    $properity_white_list = array(
-      'firstName' => TRUE,
-      'lastName' => TRUE,
-      'phone' => TRUE,
-      'primaryEmail' => TRUE,
-      'address' => TRUE,
-    );
-
-    // Limit the schema to only the fields we want to display.
-    $resource_schema = array_intersect_key($resource_schema, $properity_white_list);
-  }
-
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdaddress') {
     // TODO: Convert this to a function call that has a hook to override.
     // Use that function in xdruple_commerce_rescued_operation_entityform_alter().
@@ -545,17 +499,6 @@ function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$res
  * Implements hook_entity_view().
  */
 function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langcode) {
-  if ($entity_type === 'xtuple_xdcontact') {
-    // Reset the weights to the correct order.
-    $entity->content['firstName']['#weight'] = -4;
-    $entity->content['lastName']['#weight'] = -3;
-    $entity->content['primaryEmail']['#weight'] = -2;
-    $entity->content['phone']['#weight'] = -1;
-
-    // Unset the address and use the 'erp_xdcontactaddress' field instead.
-    unset($entity->content['address']);
-  }
-
   if ($entity_type === 'xtuple_xdaddress') {
     // Reset the weights to the correct order and change the labels.
     // For some reason these weights are not respected.  See the
@@ -651,20 +594,6 @@ function xdruple_commerce_field_extra_fields_alter(&$info) {
         }
       }
     }
-  }
-
-  if (isset($info['xtuple_xdcontact'])) {
-    $contact_fields = &$info['xtuple_xdcontact']['xtuple_xdcontact'];
-
-    $contact_fields['display']['firstName']['weight'] = -54;
-    $contact_fields['display']['lastName']['weight'] = -53;
-    $contact_fields['display']['primaryEmail']['weight'] = -52;
-    $contact_fields['display']['phone']['weight'] = -51;
-
-    $contact_fields['form']['firstName']['weight'] = -44;
-    $contact_fields['form']['lastName']['weight'] = -43;
-    $contact_fields['form']['primaryEmail']['weight'] = -42;
-    $contact_fields['form']['phone']['weight'] = -41;
   }
 
   if (isset($info['xtuple_xdaddress'])) {
@@ -1638,37 +1567,6 @@ function xdruple_commerce_xtuple_xdcustomerrelation_view_alter(&$build, $entity_
   }
   else {
     $build['name']['#access'] = FALSE;
-  }
-}
-
-function xdruple_commerce_xtuple_xdcontact_view_alter(&$build, $entity_type) {
-  $build['#page'] = TRUE;
-  $name = array();
-  if (!empty($build['firstName'][0]['#markup'])) {
-    $name[] = $build['firstName'][0]['#markup'];
-  }
-  if (!empty($build['lastName'][0]['#markup'])) {
-    $name[] = $build['lastName'][0]['#markup'];
-  }
-  $build['firstName']['#label_display'] = 'hidden';
-  $build['lastName']['#access'] = FALSE;
-  $build['firstName'][0]['#markup'] = implode(' ', $name);
-  if (empty($build['firstName'][0]['#markup'])) {
-    $build['firstName']['#access'] = FALSE;
-  }
-
-  $build['phone']['#label_display'] = 'hidden';
-  $build['primaryEmail']['#label_display'] = 'hidden';
-
-  $active_menu_item = menu_get_item();
-  if ($active_menu_item['path'] == 'checkout/%/%'
-    && !empty($active_menu_item['page_arguments'][1]['page_id'])
-    && $active_menu_item['page_arguments'][1]['page_id'] == 'review'
-  ) {
-    $build['erp_xdcontactaddress']['#access'] = FALSE;
-  }
-  else {
-    $build['erp_xdcontactaddress']['#label_display'] = 'above';
   }
 }
 
