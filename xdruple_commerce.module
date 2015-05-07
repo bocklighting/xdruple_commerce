@@ -261,135 +261,6 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
     }
   }
 
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdaddress') {
-    // Modify this entity form to hide some properties/fields.
-    unset ($form['number']);
-
-    $form['country']['#weight'] = -47;
-    $form['line1']['#weight'] = -46;
-    $form['line2']['#weight'] = -45;
-    $form['line3']['#weight'] = -44;
-    $form['city']['#weight'] = -43;
-    $form['state']['#weight'] = -42;
-    $form['postalCode']['#weight'] = -41;
-
-    $countries = _addressfield_country_options_list();
-    $xtuple_countries_format = array('' => '--');
-
-    // xTuple xm.xdruple_commerce_address uses a full country name as the key.
-    foreach ($countries as $key => $value) {
-      $xtuple_countries_format[$value] = $value;
-    }
-
-    $format = array();
-
-    if (isset($form_state['triggering_element']) && $form_state['triggering_element']['#name'] === 'country') {
-      // For non-IEF
-      $country = drupal_array_get_nested_value($form_state['values'], $form_state['triggering_element']['#parents']);
-      $selected_country = array_search($country, $countries);
-    }
-    else {
-      // For initial load an IEF ajax refreshes.
-      $selected_country = isset($context['entity']->country) ? array_search($context['entity']->country, $countries) : '';
-    }
-    $address = array(
-      'country' => $selected_country,
-    );
-    $addr_context = array(
-      'mode' => 'form',
-    );
-
-    module_load_include('inc', 'addressfield', 'plugins/format/address');
-    addressfield_format_address_generate($format, $address, $addr_context);
-
-    if (isset($form['#parents'])) {
-      $wrapper_id = 'xtuple-address-wrapper-' . implode('-', $form['#parents']);
-    }
-    else {
-      $wrapper_id = 'xtuple-address-wrapper';
-    }
-    $form['#wrapper_id'] = $wrapper_id;
-    $form['#prefix'] = '<div id="' . $wrapper_id . '">';
-    $form['#suffix'] = '</div>';
-
-    // If this is a child IEF and the operation is 'add', we can't make any of
-    // the address fields required becuase we allow contacts to be saved with
-    // no address set. There are also use cases like Customer that has a
-    // Correspondence Contact that can be blank. Skip for user reg/profile
-    // forms because it should be required on those.
-    $skip_required = FALSE;
-    if (isset($form['#ief_id'], $form['#op']) && $form_id !== 'user_register_form' && $form_id !== 'user_profile_form') {
-      $path_parts = explode('--', $form['#ief_id']);
-
-      if ((count($path_parts) > 1 && $form['#op'] === 'add')) {
-        $skip_required = TRUE;
-      }
-      elseif (isset($form_state['values'])) {
-        $country_parents = $form['#parents'];
-        $country_parents[] = 'country';
-        $country = drupal_array_get_nested_value($form_state['values'], $country_parents);
-
-        if (empty($country) && drupal_array_get_nested_value($form_state['values'], $form['#parents'])) {
-          $skip_required = TRUE;
-        }
-      }
-    }
-
-    $form['country']['#type'] = 'select';
-    $form['country']['#options'] = $xtuple_countries_format;
-    $form['country']['#weight'] = -47;
-    $form['country']['#default_value'] = isset($context['entity']->country) ? $context['entity']->country : '';
-    $form['country']['#title'] = $format['country']['#title'];
-    $form['country']['#required'] = $skip_required ? FALSE : $format['country']['#required'];
-    $form['country']['#ajax']['callback'] = 'addressfield_standard_widget_refresh';
-    $form['country']['#ajax']['wrapper'] = $wrapper_id;
-    $form['country']['#ief_processing'] = FALSE; // Do not want to save this through IEF on an ajax update.
-
-
-    $form['line1']['#title'] = $format['street_block']['thoroughfare']['#title'];
-    $form['line1']['#size'] = $format['street_block']['thoroughfare']['#size'];
-    $form['line1']['#required'] = $skip_required ? FALSE : $format['street_block']['thoroughfare']['#required'];
-
-    $form['line2']['#title'] = $format['street_block']['premise']['#title'];
-    $form['line2']['#size'] = $format['street_block']['premise']['#size'];
-
-
-    $form['line3']['#title'] = 'Address 3';
-    $form['line3']['#size'] = $format['street_block']['premise']['#size'];
-
-
-    $form['city']['#title'] = $format['locality_block']['locality']['#title'];
-    $form['city']['#size'] = $format['locality_block']['locality']['#size'];
-    $form['city']['#required'] = $skip_required ? FALSE : $format['locality_block']['locality']['#required'];
-
-
-    if (isset($format['locality_block']['administrative_area'])) {
-      if (isset($format['locality_block']['administrative_area']['#options'])) {
-        $form['state']['#type'] = 'select';
-        $form['state']['#options'] = $format['locality_block']['administrative_area']['#options'];
-      }
-      else {
-        $form['state']['#type'] = 'textfield';
-        $form['state']['#size'] = $format['locality_block']['administrative_area']['#size'];
-      }
-      $form['state']['#title'] = $format['locality_block']['administrative_area']['#title'];
-      $form['state']['#default_value'] = isset($context['entity']->state) ? $context['entity']->state : '_none';
-      $form['state']['#required'] = $skip_required ? FALSE : $format['locality_block']['administrative_area']['#required'];
-    }
-    else {
-      unset($form['state']);
-    }
-
-    if (isset($format['locality_block']['postal_code'])) {
-      $form['postalCode']['#title'] = $format['locality_block']['postal_code']['#title'];
-      $form['postalCode']['#size'] = $format['locality_block']['postal_code']['#size'];
-      $form['postalCode']['#required'] = $skip_required ? FALSE : $format['locality_block']['postal_code']['#required'];
-    }
-    else {
-      unset($form['postalCode']);
-    }
-  }
-
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdshipto') {
     // Modify this entity form to hide some properties/fields.
     unset ($form['uuid']);
@@ -427,12 +298,6 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
  * Implements hook_rescued_entity_default_label_alter().
  */
 function xdruple_commerce_rescued_entity_default_label_alter($entity, &$label, $context) {
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdaddress') {
-    $label = $entity->line1;
-    $label .= ' ' . $entity->city;
-    $label .= isset($entity->state) ? ', ' . $entity->state : '';
-  }
-
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdshipto') {
     $label = $entity->number;
   }
@@ -446,23 +311,6 @@ function xdruple_commerce_rescued_entity_default_label_alter($entity, &$label, $
  * Implements hook_rescued_entity_build_content_view_alter().
  */
 function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$resource_schema, $context) {
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdaddress') {
-    // TODO: Convert this to a function call that has a hook to override.
-    // Use that function in xdruple_commerce_rescued_operation_entityform_alter().
-    $properity_white_list = array(
-      'line1' => TRUE,
-      'line2' => TRUE,
-      'line3' => TRUE,
-      'city' => TRUE,
-      'state' => TRUE,
-      'postalCode' => TRUE,
-      'country' => TRUE,
-    );
-
-    // Limit the schema to only the fields we want to display.
-    $resource_schema = array_intersect_key($resource_schema, $properity_white_list);
-  }
-
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdshipto') {
     // TODO: Convert this to a function call that has a hook to override.
     // Use that function in xdruple_commerce_rescued_operation_entityform_alter().
@@ -499,22 +347,6 @@ function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$res
  * Implements hook_entity_view().
  */
 function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langcode) {
-  if ($entity_type === 'xtuple_xdaddress') {
-    // Reset the weights to the correct order and change the labels.
-    // For some reason these weights are not respected.  See the
-    // xdruple_commerce_field_extra_fields_alter() function.
-    $entity->content['line1']['#weight'] = -7;
-    $entity->content['line1']['#title'] = 'Address 1';
-    $entity->content['line2']['#weight'] = -6;
-    $entity->content['line2']['#title'] = 'Address 2';
-    $entity->content['line3']['#weight'] = -5;
-    $entity->content['line3']['#title'] = 'Address 3';
-    $entity->content['city']['#weight'] = -4;
-    $entity->content['state']['#weight'] = -3;
-    $entity->content['postalCode']['#weight'] = -2;
-    $entity->content['country']['#weight'] = -1;
-  }
-
   if ($entity_type === 'xtuple_xdshipto') {
     $entity->content['erp_xdshiptocontact']['#formatter'] = 'entityreference_entity_view';
     // Reset the weights to the correct order.
@@ -594,26 +426,6 @@ function xdruple_commerce_field_extra_fields_alter(&$info) {
         }
       }
     }
-  }
-
-  if (isset($info['xtuple_xdaddress'])) {
-    $address_fields = &$info['xtuple_xdaddress']['xtuple_xdaddress'];
-
-    $address_fields['display']['line1']['weight'] = -57;
-    $address_fields['display']['line2']['weight'] = -56;
-    $address_fields['display']['line3']['weight'] = -55;
-    $address_fields['display']['city']['weight'] = -54;
-    $address_fields['display']['state']['weight'] = -53;
-    $address_fields['display']['postalCode']['weight'] = -52;
-    $address_fields['display']['country']['weight'] = -51;
-
-    $address_fields['form']['country']['weight'] = -47;
-    $address_fields['form']['line1']['weight'] = -46;
-    $address_fields['form']['line2']['weight'] = -45;
-    $address_fields['form']['line3']['weight'] = -44;
-    $address_fields['form']['city']['weight'] = -43;
-    $address_fields['form']['state']['weight'] = -42;
-    $address_fields['form']['postalCode']['weight'] = -41;
   }
 
   if (isset($info['xtuple_xdshipto'])) {
@@ -1567,52 +1379,6 @@ function xdruple_commerce_xtuple_xdcustomerrelation_view_alter(&$build, $entity_
   }
   else {
     $build['name']['#access'] = FALSE;
-  }
-}
-
-function xdruple_commerce_xtuple_xdaddress_view_alter(&$build, $entity_type) {
-  $build['#page'] = TRUE;
-  if (!empty($build['line1'][0]['#markup'])) {
-    $build['line1']['#label_display'] = 'hidden';
-  }
-  else {
-    $build['line1']['#access'] = FALSE;
-  }
-  if (!empty($build['line2'][0]['#markup'])) {
-    $build['line2']['#label_display'] = 'hidden';
-  }
-  else {
-    $build['line2']['#access'] = FALSE;
-  }
-  if (!empty($build['line3'][0]['#markup'])) {
-    $build['line3']['#label_display'] = 'hidden';
-  }
-  else {
-    $build['line3']['#access'] = FALSE;
-  }
-
-  $city_state_zip = array();
-  if (!empty($build['city'][0]['#markup'])) {
-    $city_state_zip[] = $build['city'][0]['#markup'];
-  }
-  if (!empty($build['state'][0]['#markup'])) {
-    $city_state_zip[] = $build['state'][0]['#markup'];
-  }
-  if (!empty($build['postalCode'][0]['#markup'])) {
-    $city_state_zip[] = $build['postalCode'][0]['#markup'];
-  }
-  $build['city'][0]['#markup'] = implode(', ', $city_state_zip);
-  $build['city']['#label_display'] = 'hidden';
-  $build['state']['#access'] = FALSE;
-  $build['postalCode']['#access'] = FALSE;
-
-  $build['country']['#label_display'] = 'hidden';
-  if (empty($build['country'][0]['#markup'])) {
-    $build['country']['#access'] = FALSE;
-  }
-
-  if (!empty($build['number'])) {
-    $build['number']['#access'] = FALSE;
   }
 }
 
