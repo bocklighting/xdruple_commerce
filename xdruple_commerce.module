@@ -261,14 +261,6 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
     }
   }
 
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdcustomerrelation') {
-    // Modify this entity form to hide some properties/fields.
-    unset ($form['isActive']);
-
-    $form['number']['#weight'] = -42;
-    $form['name']['#weight'] = -41;
-  }
-
   if (isset($context['entity_type']) &&
     ($context['entity_type'] === 'commerce_product' || $context['entity_type'] === 'XdProduct' || $context['entity_type'] === 'xtuple_xdproduct')
   ) {
@@ -288,46 +280,18 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
  * Implements hook_rescued_entity_default_label_alter().
  */
 function xdruple_commerce_rescued_entity_default_label_alter($entity, &$label, $context) {
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdcustomerrelation') {
-    $label = $entity->number;
-  }
 }
 
 /**
  * Implements hook_rescued_entity_build_content_view_alter().
  */
 function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$resource_schema, $context) {
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdcustomerrelation') {
-    // TODO: Convert this to a function call that has a hook to override.
-    // Use that function in xdruple_commerce_rescued_operation_entityform_alter().
-    $properity_white_list = array(
-      'number' => TRUE,
-      'name' => TRUE,
-      'billingContact' => TRUE,
-      'correspondenceContact' => TRUE,
-      'shiptos' => TRUE,
-    );
-
-    // Limit the schema to only the fields we want to display.
-    $resource_schema = array_intersect_key($resource_schema, $properity_white_list);
-  }
 }
 
 /**
  * Implements hook_entity_view().
  */
 function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langcode) {
-  if ($entity_type === 'xtuple_xdcustomerrelation') {
-    // Reset the weights to the correct order.
-    $entity->content['number']['#weight'] = -2;
-    $entity->content['name']['#weight'] = -1;
-
-    // Unset some things. Use the 'erp_xdshiptoxxx' fields instead.
-    unset($entity->content['isActive']);
-    unset($entity->content['billingContact']);
-    unset($entity->content['correspondenceContact']);
-    unset($entity->content['shiptos']);
-  }
 }
 
 /**
@@ -380,16 +344,6 @@ function xdruple_commerce_field_extra_fields_alter(&$info) {
         }
       }
     }
-  }
-
-  if (isset($info['xtuple_xdcustomerrelation'])) {
-    $shipto_fields = &$info['xtuple_xdcustomerrelation']['xtuple_xdcustomerrelation'];
-
-    $shipto_fields['display']['number']['weight'] = -52;
-    $shipto_fields['display']['name']['weight'] = -51;
-
-    $shipto_fields['form']['number']['weight'] = -42;
-    $shipto_fields['form']['name']['weight'] = -41;
   }
 }
 
@@ -1274,31 +1228,6 @@ function _xdruple_commerce_product_format($item) {
   }
 
   return $format;
-}
-
-function xdruple_commerce_xtuple_xdcustomerrelation_view_alter(&$build, $entity_type) {
-  $build['#page'] = TRUE;
-  if (empty($build['erp_xdcustomerrelationbillingcontact'][0]['#markup'])) {
-    $build['erp_xdcustomerrelationbillingcontact']['#access'] = FALSE;
-  }
-  if (empty($build['erp_xdcustomerrelationshipto'][0]['#markup'])) {
-    $build['erp_xdcustomerrelationshipto']['#access'] = FALSE;
-  }
-  if (empty($build['erp_xdcustomerrelationcorrespondencecontact'][0]['#markup'])) {
-    $build['erp_xdcustomerrelationcorrespondencecontact']['#access'] = FALSE;
-  }
-  if (!empty($build['isActive']['#access'])) {
-    $build['isActive']['#access'] = FALSE;
-  }
-  if (!empty($build['number']['#access'])) {
-    $build['number']['#access'] = FALSE;
-  }
-  if (!empty($build['name'][0]['#markup'])) {
-    $build['name']['#label_display'] = 'hidden';
-  }
-  else {
-    $build['name']['#access'] = FALSE;
-  }
 }
 
 /**
