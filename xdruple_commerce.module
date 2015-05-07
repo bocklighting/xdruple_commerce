@@ -76,20 +76,11 @@ function xdruple_commerce_entity_info_alter(&$info) {
  *  The array of data provided by hook_entity_operation_info().
  */
 function xdruple_commerce_entity_operation_info_alter(&$operation_info) {
-  // TODO: Consider removing 'operations ui' from commerce_product in
-  // xdruple_commerce_entity_info_alter() instead of adding this here.
-
   // Add a handler for commerce_product.
   if (isset($operation_info['xtuple_xdproduct'])) {
     // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdproduct']
     $operation_info['commerce_product'] = $operation_info['xtuple_xdproduct'];
   }
-
-  // Add a handler for commerce_customer_profile.
-//   if (isset($operation_info['xtuple_xdcustomerrelationprofile'])) {
-//     // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdcustomerrelationprofile']
-//     $operation_info['commerce_customer_profile'] = $operation_info['xtuple_xdcustomerrelationprofile'];
-//   }
 }
 
 /**
@@ -256,8 +247,6 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
  * @param $context
  */
 function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_state, $context) {
-  $form_id = $form_state['build_info']['form_id'];
-
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
   $session = extensions_get_session();
 
@@ -290,37 +279,6 @@ function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_stat
     $description = t("This field is derived from xTuple's Units Of Measure Ratios. It cannot be changed here.");
     $form['uomRatio']['#description'] = $description;
   }
-}
-
-/**
- * Implements hook_rescued_entity_default_label_alter().
- *
- * @param $entity
- * @param $label
- * @param $context
- */
-function xdruple_commerce_rescued_entity_default_label_alter($entity, &$label, $context) {
-}
-
-/**
- * Implements hook_rescued_entity_build_content_view_alter().
- *
- * @param $entity
- * @param $resource_schema
- * @param $context
- */
-function xdruple_commerce_rescued_entity_build_content_view_alter($entity, &$resource_schema, $context) {
-}
-
-/**
- * Implements hook_entity_view().
- *
- * @param $entity
- * @param $entity_type
- * @param $view_mode
- * @param $langcode
- */
-function xdruple_commerce_entity_view($entity, $entity_type, $view_mode, $langcode) {
 }
 
 /**
@@ -940,7 +898,7 @@ function xdruple_commerce_field_attach_submit($entity_type, $entity, $form, $for
  * EntityFieldQuery used in _commerce_product_match_products_standard() does not
  * allow OR clauses. Alter the query to string match on sku OR title.
  *
- * @param $query
+ * @param EntityFieldQuery $query
  */
 function xdruple_commerce_entity_query_alter(&$query) {
   if (isset($query->tags['commerce_sku_or_title_match'])) {
@@ -1077,12 +1035,13 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
   // Load the product so we can do a UOM conversion to inventoryUnit.
   $product = entity_load_single('commerce_product', $line_item->commerce_product[LANGUAGE_NONE]['0']['product_id']);
 
+  $price = 0;
+
   // Do a conversion to the inventoryUnit.
   if (!empty($line_item->commerce_unit_price[LANGUAGE_NONE]['0']) &&
     isset($line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount']) &&
     is_numeric($line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'])
   ) {
-
     $price = $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'];
     // Drupal Commerce doesn't use decimals. When getting the price from the
     // line_item, convert to decimal first.
@@ -1237,7 +1196,7 @@ function xdruple_commerce_commerce_cart_line_item_refresh($line_item, $order_wra
  * @param object $currency
  *   The Currency object.
  *
- * @return Formatted amount.
+ * @return string $format - Formatted amount.
  */
 function _xdruple_commerce_currency_format($amount, $currency) {
   // Add commas and round to two places.
@@ -1253,15 +1212,13 @@ function _xdruple_commerce_currency_format($amount, $currency) {
  *
  * @param $item
  *
- * @return \Formatted link to the product page.
- * @internal param string $product
- *
+ * @return string - Formatted link to the product page.
  */
 function _xdruple_commerce_product_format($item) {
   $query = new EntityFieldQuery();
   $product = $query->entityCondition('entity_type', 'commerce_product')
-    ->propertyCondition('sku', $item['number'], '=')
-    ->execute();
+                   ->propertyCondition('sku', $item['number'], '=')
+                   ->execute();
 
   if (count($product['commerce_product']) > 0) {
     $product_id = key($product['commerce_product']);
@@ -1435,6 +1392,7 @@ function xdruple_commerce_checkout_completion_message_pane_settings_form($checko
  */
 function xdruple_commerce_checkout_completion_message_pane_checkout_form($form, &$form_state, $checkout_pane, $order) {
   $pane_form = array();
+  /** @var \stdClass $user */
   global $user;
 
   $message = variable_get('commerce_checkout_completion_message', xdruple_commerce_checkout_completion_message_default());
