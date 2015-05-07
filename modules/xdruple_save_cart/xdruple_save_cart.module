@@ -77,33 +77,38 @@ function xdruple_save_cart_forms() {
 
 /**
  * Implements hook_form_alter().
+ *
+ * @param $form
+ * @param $form_state
+ * @param $form_id
  */
 function xdruple_save_cart_form_alter(&$form, &$form_state, $form_id) {
   if (strpos($form_id, 'views_form_commerce_cart_form_') === 0 ||
     strpos($form_id, 'views_form_ft_commerce_cart_form_') === 0
   ) {
-
     // Only alter buttons if the cart form View shows line items.
     $view = reset($form_state['build_info']['args']);
-
     if (!empty($view->result)) {
       // Add the Move to saved cart button.
       $form['actions']['save_cart']['#type'] = 'submit';
       $form['actions']['save_cart']['#value'] = t('Move to saved cart');
       $form["actions"]["save_cart"]["#name"] = "save-cart";
       $form['actions']['save_cart']['#weight'] = -1;
-      // TODO: Add permission? This isn't very different from changing qty on a line.
       $form['actions']['save_cart']['#access'] = TRUE;
-      $form['actions']['save_cart']['#submit'] = array_merge($form['#submit'], array('xdruple_save_cart_form_submit'));
-
-      // Add our submit handler to the submit button.
-      $form['actions']['save_cart']['#submit'] = array_merge(array('xdruple_fields_cart_form_submit'), $form['actions']['save_cart']['#submit']);
+      $form['actions']['save_cart']['#submit'] = array_merge(
+        array('xdruple_fields_cart_form_submit'),
+        $form['#submit'],
+        array('xdruple_save_cart_form_submit')
+      );
     }
   }
 }
 
 /**
  * Submit handler to move a cart to state = 'saved_cart'.
+ *
+ * @param $form
+ * @param $form_state
  */
 function xdruple_save_cart_form_submit($form, &$form_state) {
   if ($form_state['triggering_element']['#name'] === 'save-cart') {
@@ -145,6 +150,8 @@ function xdruple_save_cart_form_submit($form, &$form_state) {
  *
  * @param $order
  *   The order object to move through the form.
+ *
+ * @return array|mixed
  */
 function xdruple_save_cart_move_order_form_wrapper($order) {
   return drupal_get_form('xdruple_save_cart_move_order_form', $order);
@@ -153,8 +160,11 @@ function xdruple_save_cart_move_order_form_wrapper($order) {
 /**
  * Form callback wrapper: confirmation form for moving an order.
  *
- * @param $order
- *   The order object to move through the form.
+ * @param $form
+ * @param $form_state
+ * @param $order - The order object to move through the form.
+ *
+ * @return
  */
 function xdruple_save_cart_move_order_form($form, &$form_state, $order) {
   $form_state['order'] = $order;
@@ -176,13 +186,14 @@ function xdruple_save_cart_move_order_form($form, &$form_state, $order) {
 /**
  * Form callback wrapper: confirmation form for moving an order.
  *
- * @param $order
- *   The order object to move through the form.
+ * @param $form
+ * @param $form_state
  */
 function xdruple_save_cart_move_order_form_submit($form, &$form_state) {
   $order = $form_state['order'];
 
   if ($order) {
+    /** @var \stdClass $user */
     global $user;
 
     // If there is currently an active cart, move it to Saved Carts.

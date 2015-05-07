@@ -25,6 +25,7 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
 
   /**
    * @param $values
+   *
    * @return mixed
    */
   protected function createOrder($values) {
@@ -46,6 +47,7 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
 
   /**
    * @param $values
+   *
    * @return string
    */
   protected function getLinkPath($values) {
@@ -69,13 +71,13 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
 
   /**
    * @param $values
+   *
    * @return string
    */
   function render($values) {
     if (!$this->hasAccess()) {
-      return;
+      return "";
     }
-
     return l($this->getLinkText(), $this->getLinkPath($values), $this->getLinkOptions());
   }
 }
