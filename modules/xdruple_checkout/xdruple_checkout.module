@@ -67,14 +67,6 @@ function xdruple_checkout_cpanel_alter(&$form, &$form_state) {
       '#rows' => 2,
     );
   }
-
-  $form['xdruple_commerce_store_settings']['xdruple_checkout_manager_order_confirm_emails'] = array(
-    '#type' => 'textfield',
-    '#size' => 60,
-    '#title' => t('Manager order confirmation emails'),
-    '#description' => t('A comma separated list of email addresses that should receive order confirmations. e.g. johndoe@example.com,janedoe@example.com'),
-    '#default_value' => variable_get('xdruple_checkout_manager_order_confirm_emails', NULL),
-  );
 }
 
 /**
