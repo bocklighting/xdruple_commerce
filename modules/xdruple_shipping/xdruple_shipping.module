@@ -323,7 +323,7 @@ function xdruple_shipping_form_alter(&$form, &$form_state, $form_id) {
     $form['xt_physical_weight'][LANGUAGE_NONE][0]['weight']['#attributes']['disabled'] = TRUE;
     $form['xt_physical_weight'][LANGUAGE_NONE][0]['unit']['#attributes']['disabled'] = TRUE;
 
-    // Add discription explaining this.
+    // Add description explaining this.
     $description = t("This field is calculated based on the 'productWeight' + 'packageWeight'. It cannot be changed. To change the weight, edit those fields instead.");
     $form['xt_physical_weight'][LANGUAGE_NONE][0]['weight']['#description'] = $description;
   }
@@ -337,8 +337,11 @@ function xdruple_shipping_form_alter(&$form, &$form_state, $form_id) {
  */
 function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_to_address, $order_wrapper) {
   try {
+    /** @var \stdClass $customer_shipping */
+    $customer_shipping = $order_wrapper->commerce_customer_shipping->value();
+    $customer_shipping_proxy = new \Xtuple\Drupal7\Proxy\CustomerProfile($customer_shipping);
     /** @var \Xtuple\Entity\Contact\Contact $contact */
-    $contact = $order_wrapper->commerce_customer_shipping->contact->value()->value();
+    $contact = $customer_shipping_proxy->contact();
     $address = $contact->address();
     $ship_to_address['thoroughfare'] = $address->thoroughfare();
     $ship_to_address['premise'] = $address->premise();
