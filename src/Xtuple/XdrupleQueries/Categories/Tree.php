@@ -103,8 +103,8 @@ class Tree {
   /**
    * Search a catalog tree and find a child category by category name.
    *
-   * @param Category $category The Category that is the root of the catalog tree.
-   * @param string $category_name The name of the child category to find.
+   * @param Category $category      The Category that is the root of the catalog tree.
+   * @param string   $category_name The name of the child category to find.
    *
    * @return Category
    */
@@ -112,7 +112,8 @@ class Tree {
     foreach ($category->getChildren() as $branch) {
       if ($branch->getName() === $category_name) {
         return $branch;
-      } else {
+      }
+      else {
         // Recurse into children.
         $found = self::findChildByName($branch, $category_name);
         if (!empty($found)) {
@@ -146,7 +147,7 @@ class Tree {
         $parent_paths = $first_parent->getPath();
 
         // Add parent tree paths to the child path.
-        foreach($parent_paths as $parent_path) {
+        foreach ($parent_paths as $parent_path) {
           $child->addPath($parent_path);
         }
 

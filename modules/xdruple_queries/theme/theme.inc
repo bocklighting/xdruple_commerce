@@ -67,7 +67,7 @@ function template_preprocess_products_page(&$variables) {
           $xdcatalogs = $cache->data;
         }
       }
-      
+
       $subcategories = array();
       foreach ($category->groups as $group_id) {
         if (!empty($xdcatalogs[$group_id])) {

@@ -10,7 +10,7 @@ function xdruple_commerce_install() {
 
   drupal_flush_all_caches();
   drupal_static_reset();
-  
+
   if (!field_info_field('xd_order_po_number')) {
     $field = array(
       'field_name' => 'xd_order_po_number',
@@ -24,9 +24,9 @@ function xdruple_commerce_install() {
     field_create_field($field);
 
     $instance = field_read_instance('commerce_order', 'xd_order_po_number', 'commerce_order', array(
-        'include_inactive' => TRUE,
-        'include_deleted' => TRUE
-      ));
+      'include_inactive' => TRUE,
+      'include_deleted' => TRUE
+    ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_order_po_number',
@@ -72,9 +72,9 @@ function xdruple_commerce_install() {
     field_create_field($field);
 
     $instance = field_read_instance('commerce_order', 'xd_order_notes', 'commerce_order', array(
-        'include_inactive' => TRUE,
-        'include_deleted' => TRUE
-      ));
+      'include_inactive' => TRUE,
+      'include_deleted' => TRUE
+    ));
     if (empty($instance)) {
       $instance = array(
         'field_name' => 'xd_order_notes',

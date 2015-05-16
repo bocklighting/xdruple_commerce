@@ -27,7 +27,7 @@ function template_preprocess_xdruple_commerce_similar_product_link_default(&$var
         'html' => TRUE,
       ));
     }
-    
+
     $units = xdruple_fields_get_uom_list();
     $unit = $units[$product->inventoryUnit];
     $variables['unit'] = $unit;
