@@ -319,7 +319,7 @@ function xdruple_shipping_map_ship_via($ship_label) {
  */
 function xdruple_shipping_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['xt_physical_weight'])) {
-    // Make 'xt_physical_weight' read only. It's a calculated field and can not be editied.
+    // Make 'xt_physical_weight' read only. It's a calculated field and can not be edited.
     $form['xt_physical_weight'][LANGUAGE_NONE][0]['weight']['#attributes']['disabled'] = TRUE;
     $form['xt_physical_weight'][LANGUAGE_NONE][0]['unit']['#attributes']['disabled'] = TRUE;
 

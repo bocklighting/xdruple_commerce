@@ -6,7 +6,7 @@
  * Contains class xdruple_invoice_handler_currency_formatter.
  *
  * Heavily borrowed from the Currency module. We could use that module, but it
- * doesn't work on PostgreSQL databases.
+ * doesn't work on PostgresQL databases.
  * @See: https://drupal.org/node/2007388
  */
 

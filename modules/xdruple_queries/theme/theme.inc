@@ -42,12 +42,12 @@ function template_preprocess_products_page(&$variables) {
                        ->execute();
 
         if ($count <= 100) {
-          $xdcatalogs = entity_load('xtuple_xdcatalog');
+          $xd_catalogs = entity_load('xtuple_xdcatalog');
         }
         else {
           // Paginate through all catalogs.
           $pages = ceil($count / 100);
-          $xdcatalogs = array();
+          $xd_catalogs = array();
 
           $i = 0;
           while ($i < $pages) {
@@ -57,26 +57,26 @@ function template_preprocess_products_page(&$variables) {
                                    ->propertyOrderBy('id', 'ASC')
                                    ->execute();
 
-            $xdcatalogs = $xdcatalogs + $catalogs['xtuple_xdcatalog'];
+            $xd_catalogs = $xd_catalogs + $catalogs['xtuple_xdcatalog'];
             $i++;
           }
         }
-        cache_set($cid, $xdcatalogs, 'cache', REQUEST_TIME + 60 * 60 * 1);
+        cache_set($cid, $xd_catalogs, 'cache', REQUEST_TIME + 60 * 60 * 1);
       }
       else {
         if (!$cache || empty($cache->data)) {
-          $xdcatalogs = array();
+          $xd_catalogs = array();
         }
         else {
-          $xdcatalogs = $cache->data;
+          $xd_catalogs = $cache->data;
         }
       }
 
       $subcategories = array();
       foreach ($category->groups as $group_id) {
-        if (!empty($xdcatalogs[$group_id])) {
+        if (!empty($xd_catalogs[$group_id])) {
           $subcategories[$group_id] = array(
-            'data' => l($xdcatalogs[$group_id]->name, 'products/categories/' . $group_id),
+            'data' => l($xd_catalogs[$group_id]->name, 'products/categories/' . $group_id),
             'class' => array('col-lg-4'),
           );
         }

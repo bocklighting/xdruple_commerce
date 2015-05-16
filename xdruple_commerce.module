@@ -39,7 +39,7 @@ function xdruple_commerce_user_login(&$edit, $account) {
 /**
  * Implements hook_entity_info_alter().
  *
- * Override Drupal Commerce's entities to use xTuples.
+ * Override Drupal Commerce's entities to use xTuple ones.
  *
  * @param $info
  */
@@ -301,7 +301,7 @@ function xdruple_commerce_entity_property_info_alter(&$info) {
 
   if (isset($info['commerce_order'], $info['commerce_order']['properties'])) {
     if (isset($info['commerce_order']['properties']['mail']['validation callback'])) {
-      // Change this validation callback to our own that support mulitple emails on one line.
+      // Change this validation callback to our own that support multiple emails on one line.
       $info['commerce_order']['properties']['mail']['validation callback'] = 'xdruple_valid_multiple_email_address';
     }
   }
@@ -619,14 +619,14 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
     //  'type' => MENU_CALLBACK,
     //  'file' => 'includes/commerce_checkout.pages.inc',
     // );
-    // The FAPI store the path of the of an include in the cached $form_state
+    // The Form API store the path of the of an include in the cached $form_state
     // form to satisfy the dependency when for an element in a viewed page
     // has an AJAX behavior so when an AJAX call is received the function
     // form_get_cache look into $form_state['build_info']['files'] and do a
     // include of that specified file. Unfortunately at doing menu_alter of this
     // menu item:
     // $items['checkout/%commerce_order/%commerce_checkout_page']['file'] = $task['file'];
-    // The FAPI will include only the file referenced in the menu array and the
+    // The Form API will include only the file referenced in the menu array and the
     // AJAX call will be broken. We resolve this altering the form to explicit
     // attach the commerce_checkout.pages.inc into the build_info files.
 
@@ -842,7 +842,7 @@ function xdruple_commerce_form_commerce_product_ui_product_form_alter(&$form, &$
     'characteristics', // Characteristics are loaded through the 'erp_xdproductcharacteristics' field.
   );
 
-  // Get the xtuple form version from our controler and loop over our fields in that
+  // Get the xtuple form version from our controller and loop over our fields in that
   // form and add to the commerce_product from.
   $xdruple_form = entity_operations_operation_form(array(), $foo_state, 'XdProduct', $handler_class, $op, $product);
   foreach ($entityInfo['json-schema']['XdProduct']['properties'] as $prop_name => $prop_value) {

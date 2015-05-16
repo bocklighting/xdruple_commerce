@@ -18,12 +18,12 @@ class Tree {
                      ->execute();
 
       if ($count <= 100) {
-        $xdcatalogs = entity_load('xtuple_xdcatalog');
+        $xd_catalogs = entity_load('xtuple_xdcatalog');
       }
       else {
         // Paginate through all catalogs.
         $pages = ceil($count / 100);
-        $xdcatalogs = array();
+        $xd_catalogs = array();
 
         $i = 0;
         while ($i < $pages) {
@@ -33,7 +33,7 @@ class Tree {
                                  ->propertyOrderBy('id', 'ASC')
                                  ->execute();
 
-          $xdcatalogs = $xdcatalogs + $catalogs['xtuple_xdcatalog'];
+          $xd_catalogs = $xd_catalogs + $catalogs['xtuple_xdcatalog'];
           $i++;
         }
       }
@@ -41,7 +41,7 @@ class Tree {
       $root_key = NULL;
 
       // Find root group.
-      foreach ($xdcatalogs as $key => $catalog) {
+      foreach ($xd_catalogs as $key => $catalog) {
         if ($catalog->catalog) {
           $root_key = $key;
           $root_group = $catalog;
