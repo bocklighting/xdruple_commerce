@@ -8,6 +8,11 @@
 
 /**
  * xDruple Commerce Delivery settings form.
+ *
+ * @param $form
+ * @param $form_state
+ *
+ * @return array
  */
 function xdruple_delivery_settings_form($form, &$form_state) {
   // Delivery shipping service display title.

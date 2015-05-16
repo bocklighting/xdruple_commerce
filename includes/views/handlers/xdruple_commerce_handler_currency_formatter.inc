@@ -36,6 +36,8 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
 
   /**
    * Overrides parent::set_definition().
+   *
+   * @param $definition
    */
   function set_definition($definition) {
     $this->definition = array_merge($this->definition, $definition);
@@ -62,7 +64,9 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
    * Overrides parent::render().
    * Dynamically adds currency symbol to the rendered amount based on the currency column.
    *
-   * @throws RuntimeException
+   * @param $values
+   *
+   * @return string
    */
   function render($values) {
     $amount = parent::render($values);
@@ -129,7 +133,7 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
    * @param $currency_code
    *   The currency code.
    *
-   * @return Currency xTuple's Currecny resource for the matching code.
+   * @return \Xtuple\Rescued\Controller\Entity - xTuple's Currency resource for the matching code.
    */
   function currency_load($currency_code) {
     $currency = NULL;

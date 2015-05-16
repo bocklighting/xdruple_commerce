@@ -27,6 +27,9 @@ function xdruple_specialty_shipping_menu() {
 
 /**
  * Implements hook_cpanel_alter()
+ *
+ * @param $form
+ * @param $form_state
  */
 function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
   $query = new EntityFieldQuery();
@@ -111,6 +114,11 @@ function xdruple_specialty_shipping_commerce_shipping_service_info() {
 /**
  * Shipping service callback: returns a base price array for a shipping service
  * calculated for the given order.
+ *
+ * @param $shipping_service
+ * @param $order
+ *
+ * @return array
  */
 function xdruple_specialty_shipping_service_rate($shipping_service, $order) {
   return array(
@@ -124,6 +132,9 @@ function xdruple_specialty_shipping_service_rate($shipping_service, $order) {
  * Implements hook_entity_load().
  *
  * Automatically create (and always keep) condition to block UPS delivery for specialty shipping items.
+ *
+ * @param $entities
+ * @param $type
  */
 function xdruple_specialty_shipping_entity_load($entities, $type) {
   if ($type == 'rules_config') {
