@@ -39,6 +39,9 @@ function xdruple_order_menu() {
 
 /**
  * Implements hook_opencdd_body_classes_alter()
+ *
+ * @param $classes
+ * @param $path
  */
 function xdruple_order_opencdd_body_classes_alter(&$classes, $path) {
   if ($path == 'user/%/pending-orders/%') {
@@ -48,6 +51,8 @@ function xdruple_order_opencdd_body_classes_alter(&$classes, $path) {
 
 /**
  * Implements hook_menu_get_item_alter()
+ *
+ * @param $router_item
  */
 function xdruple_order_menu_get_item_alter(&$router_item) {
   if ($router_item['path'] == 'user/%/pending-orders/%') {
@@ -71,6 +76,8 @@ function xdruple_order_rescued_resources() {
 
 /**
  * Implements hook_views_pre_execute().
+ *
+ * @param $view
  */
 function xdruple_order_views_pre_execute($view) {
   if ($view->name === 'xd_pending_orders') {

@@ -6,6 +6,10 @@
 
 /**
  * Preprocess variables for products-page.tpl.php
+ *
+ * @param $variables
+ *
+ * @throws \Exception
  */
 function template_preprocess_products_page(&$variables) {
   $products = $variables['products'];
@@ -89,6 +93,8 @@ function template_preprocess_products_page(&$variables) {
 
 /**
  * Preprocess variables for products-page-item.tpl.php
+ *
+ * @param $variables
  */
 function template_preprocess_products_page_item(&$variables) {
   $product = $variables['product'];
