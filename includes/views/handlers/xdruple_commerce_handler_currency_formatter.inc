@@ -81,12 +81,10 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
   /**
    * Loads the Currency for this field.
    *
+   * @param $values - A values object as received by $this->render().
+   *
+   * @return null|\Xtuple\Rescued\Controller\Entity
    * @throws RuntimeException
-   *
-   * @param $values
-   *   A values object as received by $this->render().
-   *
-   * @return Currency
    */
   function getCurrency($values) {
     $currency = NULL;

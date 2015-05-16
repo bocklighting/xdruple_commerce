@@ -1,15 +1,8 @@
 <?php
 
 /**
- * @file
- * Default theme implementation to present the classCode on a product page.
- *
- * Available variables:
- * - $classCode: The classCode to render.
- * - $label: If present, the string to use as the classCode label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the classCode represents.
+ * @var $classCode
+ * @var $label
  */
 ?>
 <?php if ($classCode): ?>

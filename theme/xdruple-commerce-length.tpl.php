@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the prodLength on a product page.
- *
- * Available variables:
- * - $prodLength: The prodLength to render.
- * - $label: If present, the string to use as the prodLength label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the prodLength represents.
+ * @var $prodLength
+ * @var $label
  */
 ?>
 <?php if ($prodLength): ?>

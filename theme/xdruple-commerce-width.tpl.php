@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the prodWidth on a product page.
- *
- * Available variables:
- * - $prodWidth: The prodWidth to render.
- * - $label: If present, the string to use as the prodWidth label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the prodWidth represents.
+ * @var $prodWidth
+ * @var $label
  */
 ?>
 <?php if ($prodWidth): ?>

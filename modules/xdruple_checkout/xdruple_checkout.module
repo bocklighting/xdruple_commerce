@@ -363,6 +363,7 @@ function xdruple_checkout_form_cancel_submit($form, &$form_state) {
  * Helper function to check if the cart contains any items.
  */
 function xdruple_checkout_items_in_cart() {
+  /** @var \stdClass $user */
   global $user;
 
   $cart = commerce_cart_order_load($user->uid);

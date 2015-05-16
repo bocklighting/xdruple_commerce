@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the priceUnit on a product page.
- *
- * Available variables:
- * - $priceUnit: The priceUnit to render.
- * - $label: If present, the string to use as the priceUnit label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the priceUnit represents.
+ * @var $priceUnit
+ * @var $label
  */
 ?>
 <?php if ($priceUnit): ?>

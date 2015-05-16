@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the productCategory on a product page.
- *
- * Available variables:
- * - $productCategory: The productCategory to render.
- * - $label: If present, the string to use as the productCategory label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the productCategory represents.
+ * @var $productCategory
+ * @var $label
  */
 ?>
 <?php if ($productCategory): ?>

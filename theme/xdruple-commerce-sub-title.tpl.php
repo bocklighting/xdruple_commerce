@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the subTitle on a product page.
- *
- * Available variables:
- * - $subTitle: The subTitle to render.
- * - $label: If present, the string to use as the subTitle label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the subTitle represents.
+ * @var $subTitle
+ * @var $label
  */
 ?>
 <?php if ($subTitle): ?>

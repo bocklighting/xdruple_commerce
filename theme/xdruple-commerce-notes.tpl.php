@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the notes on a product page.
- *
- * Available variables:
- * - $notes: The notes to render.
- * - $label: If present, the string to use as the notes label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the notes represents.
+ * @var $notes
+ * @var $label
  */
 ?>
 <?php if ($notes): ?>

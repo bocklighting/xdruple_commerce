@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the packLength on a product page.
- *
- * Available variables:
- * - $packLength: The packLength to render.
- * - $label: If present, the string to use as the packLength label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the packLength represents.
+ * @var $packLength
+ * @var $label
  */
 ?>
 <?php if ($packLength): ?>

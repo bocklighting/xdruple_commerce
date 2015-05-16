@@ -376,6 +376,7 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
       $shipping_address['organisation_name'] = $customer;
     }
     elseif ($customer = $order_wrapper->customer->value()) {
+      /** @var \Xtuple\Rescued\Controller\Entity $customer */
       $shipping_address['organisation_name'] = $customer->get('name');
     }
   } catch (\Exception $e) {

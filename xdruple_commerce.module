@@ -1814,7 +1814,7 @@ function xdruple_commerce_commerce_order_load($orders) {
             $product_ids[] = $line_item_wrapper->commerce_product->raw();
             foreach ($product_ids as $id) {
               // Check if we can load the product.
-              $product = entity_load_single('commerce_product', $id);
+              entity_load_single('commerce_product', $id);
             }
           } catch (Exception $e) {
             // Remove the product from this order.
