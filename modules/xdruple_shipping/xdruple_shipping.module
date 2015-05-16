@@ -370,6 +370,7 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
  */
 function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_address, $order_wrapper) {
   // Necessary for country_get_list().
+  /** @noinspection PhpIncludeInspection */
   require_once DRUPAL_ROOT . '/includes/locale.inc';
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
