@@ -339,7 +339,7 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
   try {
     /** @var \stdClass $customer_shipping */
     $customer_shipping = $order_wrapper->commerce_customer_shipping->value();
-    $customer_shipping_proxy = new \Xtuple\Drupal7\Proxy\CustomerProfile($customer_shipping);
+    $customer_shipping_proxy = new \Xtuple\Drupal7\Proxy\CustomerProfileProxy($customer_shipping);
     /** @var \Xtuple\Entity\Contact\Contact $contact */
     $contact = $customer_shipping_proxy->contact();
     $address = $contact->address();

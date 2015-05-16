@@ -1498,7 +1498,7 @@ function _xdruple_commerce_get_cart_summary() {
         "currency" => $total["currency_code"],
       );
     } catch (\Exception $e) {
-      xdruple_catch_exception($e);
+      watchdog_exception("xdruple", $e);
     }
   }
   return $summary;
