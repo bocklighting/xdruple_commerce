@@ -31,8 +31,8 @@ function xdruple_specialty_shipping_menu() {
 function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
   $query = new EntityFieldQuery();
   $count = $query->entityCondition('entity_type', 'xtuple_freightclass')
-    ->count()
-    ->execute();
+                 ->count()
+                 ->execute();
 
   if ($count <= 100) {
     $freight_classes = entity_load('xtuple_freightclass');
@@ -46,9 +46,9 @@ function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
     while ($i < $pages) {
       $page_query = new EntityFieldQuery();
       $more_classes = $page_query->entityCondition('entity_type', 'xtuple_freightclass')
-        ->range($i * 100, 100)
-        ->propertyOrderBy('id', 'ASC')
-        ->execute();
+                                 ->range($i * 100, 100)
+                                 ->propertyOrderBy('id', 'ASC')
+                                 ->execute();
 
       $freight_classes = $freight_classes + $more_classes['xtuple_freightclass'];
       $i++;

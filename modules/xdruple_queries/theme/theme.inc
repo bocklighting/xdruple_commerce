@@ -34,8 +34,8 @@ function template_preprocess_products_page(&$variables) {
       if ((empty($cache) || xdruple_cache_expired($cache)) && !empty($entity_info)) {
         $query = new EntityFieldQuery();
         $count = $query->entityCondition('entity_type', 'xtuple_xdcatalog')
-          ->count()
-          ->execute();
+                       ->count()
+                       ->execute();
 
         if ($count <= 100) {
           $xdcatalogs = entity_load('xtuple_xdcatalog');
@@ -49,9 +49,9 @@ function template_preprocess_products_page(&$variables) {
           while ($i < $pages) {
             $page_query = new EntityFieldQuery();
             $catalogs = $page_query->entityCondition('entity_type', 'xtuple_xdcatalog')
-              ->range($i * 100, 100)
-              ->propertyOrderBy('id', 'ASC')
-              ->execute();
+                                   ->range($i * 100, 100)
+                                   ->propertyOrderBy('id', 'ASC')
+                                   ->execute();
 
             $xdcatalogs = $xdcatalogs + $catalogs['xtuple_xdcatalog'];
             $i++;
