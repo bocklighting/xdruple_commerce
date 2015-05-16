@@ -29,6 +29,6 @@ function xdruple_recent_products_recent_page() {
   if (empty($_GET["search"])) {
     $output .= theme('pager');
   }
-  
+
   return $output;
 }

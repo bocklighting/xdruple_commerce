@@ -16,7 +16,7 @@ function xdruple_order_page($order_number) {
   if (!empty($order_number) && is_numeric($order_number)) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'xtuple_salesorder')
-      ->propertyCondition('number', $order_number, '=');
+          ->propertyCondition('number', $order_number, '=');
 
     if (user_access('administer rescued entities')) {
       $orders = $query->execute();
