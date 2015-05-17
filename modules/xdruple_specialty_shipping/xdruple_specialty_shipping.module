@@ -27,12 +27,15 @@ function xdruple_specialty_shipping_menu() {
 
 /**
  * Implements hook_cpanel_alter()
+ *
+ * @param $form
+ * @param $form_state
  */
 function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
   $query = new EntityFieldQuery();
   $count = $query->entityCondition('entity_type', 'xtuple_freightclass')
-    ->count()
-    ->execute();
+                 ->count()
+                 ->execute();
 
   if ($count <= 100) {
     $freight_classes = entity_load('xtuple_freightclass');
@@ -46,9 +49,9 @@ function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
     while ($i < $pages) {
       $page_query = new EntityFieldQuery();
       $more_classes = $page_query->entityCondition('entity_type', 'xtuple_freightclass')
-        ->range($i * 100, 100)
-        ->propertyOrderBy('id', 'ASC')
-        ->execute();
+                                 ->range($i * 100, 100)
+                                 ->propertyOrderBy('id', 'ASC')
+                                 ->execute();
 
       $freight_classes = $freight_classes + $more_classes['xtuple_freightclass'];
       $i++;
@@ -111,6 +114,11 @@ function xdruple_specialty_shipping_commerce_shipping_service_info() {
 /**
  * Shipping service callback: returns a base price array for a shipping service
  * calculated for the given order.
+ *
+ * @param $shipping_service
+ * @param $order
+ *
+ * @return array
  */
 function xdruple_specialty_shipping_service_rate($shipping_service, $order) {
   return array(
@@ -124,6 +132,9 @@ function xdruple_specialty_shipping_service_rate($shipping_service, $order) {
  * Implements hook_entity_load().
  *
  * Automatically create (and always keep) condition to block UPS delivery for specialty shipping items.
+ *
+ * @param $entities
+ * @param $type
  */
 function xdruple_specialty_shipping_entity_load($entities, $type) {
   if ($type == 'rules_config') {

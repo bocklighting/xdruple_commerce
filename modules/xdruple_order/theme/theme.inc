@@ -14,6 +14,10 @@ use Xtuple\Xdruple\Theme\PrintRemitToAddress;
 
 /**
  * Preprocess variables for order-page.tpl.php
+ *
+ * @param $variables
+ *
+ * @throws \Exception
  */
 function template_preprocess_order_page(&$variables) {
   $order = $variables['order'];

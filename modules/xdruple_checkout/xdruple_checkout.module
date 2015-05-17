@@ -248,6 +248,9 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
 
 /**
  * Submit callback for the user forms that will perform the redirection.
+ *
+ * @param $form
+ * @param $form_state
  */
 function xdruple_checkout_anonymous_submit($form, &$form_state) {
   // Because the user in the order may have been updated (from uid 0 to the real
@@ -286,6 +289,9 @@ function xdruple_checkout_anonymous_submit($form, &$form_state) {
 
 /**
  * Form validation handler for login form for using username as order email.
+ *
+ * @param $form
+ * @param $form_state
  */
 function xdruple_checkout_username_as_order_email_form_validate($form, &$form_state) {
   $name = trim($form_state['values']['name']);
@@ -321,6 +327,9 @@ function xdruple_checkout_username_as_order_email_form_validate($form, &$form_st
 
 /**
  * Submit callback to allow an anonymous users to continue without logging in.
+ *
+ * @param $form
+ * @param $form_state
  */
 function xdruple_checkout_anonymous_continue_checkout($form, &$form_state) {
   // If the user chooses to continue without an account, set this variable so user
@@ -337,6 +346,9 @@ function xdruple_checkout_anonymous_continue_checkout($form, &$form_state) {
 
 /**
  * Submit callback for the reset the checkout to cart.
+ *
+ * @param $form
+ * @param $form_state
  */
 function xdruple_checkout_form_cancel_submit($form, &$form_state) {
   if (!empty($_SESSION['xdruple_checkout_anonymous'])) {
@@ -351,6 +363,7 @@ function xdruple_checkout_form_cancel_submit($form, &$form_state) {
  * Helper function to check if the cart contains any items.
  */
 function xdruple_checkout_items_in_cart() {
+  /** @var \stdClass $user */
   global $user;
 
   $cart = commerce_cart_order_load($user->uid);

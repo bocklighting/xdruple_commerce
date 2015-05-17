@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the packWidth on a product page.
- *
- * Available variables:
- * - $packWidth: The packWidth to render.
- * - $label: If present, the string to use as the packWidth label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the packWidth represents.
+ * @var $packWidth
+ * @var $label
  */
 ?>
 <?php if ($packWidth): ?>

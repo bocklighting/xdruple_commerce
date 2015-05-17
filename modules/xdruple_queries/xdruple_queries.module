@@ -221,16 +221,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
     }
 
     if (isset($_GET['search'])) {
-      /**
-       * @workaround
-       * browsers turn "/" into "\", and "\" into "\\" then encode the URL, so we need to cleanup everything first
-       * and still encode "\" before querying
-       */
-      $_GET['search'] = str_replace("%5C%5C", "\\", $_GET['search']);
-      $_GET['search'] = str_replace("%5C", "%2F", $_GET['search']);
-      $_GET['search'] = str_replace("\\", "%5C", $_GET['search']);
-      $_GET['search'] = urldecode($_GET['search']);
-      $query->propertyCondition('q', str_replace("\\", "\\\\", $_GET['search']), 'CONTAINS');
+      $query->propertyCondition("q", str_replace("\\", "\\\\", urldecode($_GET["search"])), "CONTAINS");
       $query->pager(50);
     }
 
@@ -322,6 +313,14 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = arr
 
 /**
  * Helper function to build "Add to cart" button
+ *
+ * @param       $product
+ * @param bool  $show_qty
+ * @param array $context
+ * @param int   $qty
+ * @param int   $order_id
+ *
+ * @return string
  */
 function _xdruple_queries_add_to_cart_button($product, $show_qty = FALSE, $context = array(), $qty = 1, $order_id = 0) {
   $product_ids = array($product->product_id);
@@ -338,6 +337,12 @@ function _xdruple_queries_add_to_cart_button($product, $show_qty = FALSE, $conte
 
 /**
  * Helper function to build Image field
+ *
+ * @param        $product
+ * @param string $style
+ *
+ * @return string
+ * @throws \Exception
  */
 function _xdruple_queries_product_image($product, $style = '') {
   $img = !empty($product->xt_url_image_field[LANGUAGE_NONE][0]['uri']) ? l(theme('image_style', array(
@@ -352,6 +357,13 @@ function _xdruple_queries_product_image($product, $style = '') {
 
 /**
  * Helper function to show correct Product price
+ *
+ * @param      $product
+ * @param int  $qty
+ * @param int  $order_id
+ * @param bool $format
+ *
+ * @return string
  */
 function _xdruple_queries_price($product, $qty = 1, $order_id = 0, $format = TRUE) {
   $line_item = commerce_product_line_item_new($product, $qty, $order_id, array(), NULL);

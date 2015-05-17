@@ -14,26 +14,26 @@ class Tree {
     if ((empty($cache) || xdruple_cache_expired($cache)) && !empty($entity_info)) {
       $query = new EntityFieldQuery();
       $count = $query->entityCondition('entity_type', 'xtuple_xdcatalog')
-        ->count()
-        ->execute();
+                     ->count()
+                     ->execute();
 
       if ($count <= 100) {
-        $xdcatalogs = entity_load('xtuple_xdcatalog');
+        $xd_catalogs = entity_load('xtuple_xdcatalog');
       }
       else {
         // Paginate through all catalogs.
         $pages = ceil($count / 100);
-        $xdcatalogs = array();
+        $xd_catalogs = array();
 
         $i = 0;
         while ($i < $pages) {
           $page_query = new EntityFieldQuery();
           $catalogs = $page_query->entityCondition('entity_type', 'xtuple_xdcatalog')
-            ->range($i * 100, 100)
-            ->propertyOrderBy('id', 'ASC')
-            ->execute();
+                                 ->range($i * 100, 100)
+                                 ->propertyOrderBy('id', 'ASC')
+                                 ->execute();
 
-          $xdcatalogs = $xdcatalogs + $catalogs['xtuple_xdcatalog'];
+          $xd_catalogs = $xd_catalogs + $catalogs['xtuple_xdcatalog'];
           $i++;
         }
       }
@@ -41,7 +41,7 @@ class Tree {
       $root_key = NULL;
 
       // Find root group.
-      foreach ($xdcatalogs as $key => $catalog) {
+      foreach ($xd_catalogs as $key => $catalog) {
         if ($catalog->catalog) {
           $root_key = $key;
           $root_group = $catalog;
@@ -121,6 +121,7 @@ class Tree {
         }
       }
     }
+    return NULL;
   }
 
   /**

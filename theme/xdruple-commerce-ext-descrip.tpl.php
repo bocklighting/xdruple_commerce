@@ -1,15 +1,8 @@
 <?php
 
 /**
- * @file
- * Default theme implementation to present the extDescrip on a product page.
- *
- * Available variables:
- * - $extDescrip: The extDescrip to render.
- * - $label: If present, the string to use as the extDescrip label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the extDescrip represents.
+ * @var $extDescrip
+ * @var $label
  */
 ?>
 <?php if ($extDescrip): ?>

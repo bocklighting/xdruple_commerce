@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the inventoryUnit on a product page.
- *
- * Available variables:
- * - $inventoryUnit: The inventoryUnit to render.
- * - $label: If present, the string to use as the inventoryUnit label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the inventoryUnit represents.
+ * @var $inventoryUnit
+ * @var $label
  */
 ?>
 <?php if ($inventoryUnit): ?>

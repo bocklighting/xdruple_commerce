@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the packHeight on a product page.
- *
- * Available variables:
- * - $packHeight: The packHeight to render.
- * - $label: If present, the string to use as the packHeight label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the packHeight represents.
+ * @var $packHeight
+ * @var $label
  */
 ?>
 <?php if ($packHeight): ?>

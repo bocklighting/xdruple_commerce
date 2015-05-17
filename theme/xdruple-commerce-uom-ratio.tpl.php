@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the uomRatio on a product page.
- *
- * Available variables:
- * - $weightUnit: The uomRatio to render.
- * - $label: If present, the string to use as the uomRatio label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the uomRatio represents.
+ * @var $uomRatio
+ * @var $label
  */
 ?>
 <?php if ($uomRatio): ?>

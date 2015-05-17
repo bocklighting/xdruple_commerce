@@ -62,6 +62,11 @@ function xdruple_delivery_commerce_shipping_service_info() {
 /**
  * Shipping service callback: returns a base price array for a shipping service
  * calculated for the given order.
+ *
+ * @param $shipping_service
+ * @param $order
+ *
+ * @return array
  */
 function xdruple_delivery_service_rate($shipping_service, $order) {
   return array(

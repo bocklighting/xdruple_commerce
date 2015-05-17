@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the physicalPackUnit on a product page.
- *
- * Available variables:
- * - $physicalPackUnit: The physicalPackUnit to render.
- * - $label: If present, the string to use as the physicalPackUnit label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the physicalPackUnit represents.
+ * @var $physicalPackUnit
+ * @var $label
  */
 ?>
 <?php if ($physicalPackUnit): ?>

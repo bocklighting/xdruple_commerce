@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the weightUnit on a product page.
- *
- * Available variables:
- * - $weightUnit: The weightUnit to render.
- * - $label: If present, the string to use as the weightUnit label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the weightUnit represents.
+ * @var $weightUnit
+ * @var $label
  */
 ?>
 <?php if ($weightUnit): ?>

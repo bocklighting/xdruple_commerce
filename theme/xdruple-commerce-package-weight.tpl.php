@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the packageWeight on a product page.
- *
- * Available variables:
- * - $packageWeight: The packageWeight to render.
- * - $label: If present, the string to use as the packageWeight label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the packageWeight represents.
+ * @var $packageWeight
+ * @var $label
  */
 ?>
 <?php if ($packageWeight): ?>

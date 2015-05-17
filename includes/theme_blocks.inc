@@ -2,6 +2,8 @@
 
 /**
  * @file keeps theming and preprocess functions
+ *
+ * @param $variables
  */
 
 function template_preprocess_block_cart_dropdown(&$variables) {

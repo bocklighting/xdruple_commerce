@@ -6,6 +6,11 @@
 
 /**
  * Page callback
+ *
+ * @param $order_number
+ *
+ * @return string
+ * @throws \Exception
  */
 function xdruple_order_page($order_number) {
   $output = '';
@@ -58,6 +63,10 @@ function xdruple_order_page($order_number) {
 
 /**
  * Title callback
+ *
+ * @param $order_number
+ *
+ * @return null|string
  */
 function xdruple_order_page_title($order_number) {
   $title = t('Order');

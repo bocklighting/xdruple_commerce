@@ -53,8 +53,7 @@ function _xdruple_queries_categories_build_list_group_items($tree, $catalog) {
 /**
  * Build the Product Catalog tree HTML unordered list.
  *
- * @param array $tree    The catalog tree/branch to build.
- * @param array $catalog An array of all Product Catalog branches.
+ * @param array $tree The catalog tree/branch to build.
  *
  * @return string The HTML unordered list.
  */

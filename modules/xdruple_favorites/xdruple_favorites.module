@@ -9,6 +9,10 @@ define('XDRUPLE_FAVORITES_REMOVE', 'remove');
 
 /**
  * Implements hook_forms()
+ *
+ * @param $form_id
+ *
+ * @return array
  */
 function xdruple_favorites_forms($form_id) {
   $forms = array();

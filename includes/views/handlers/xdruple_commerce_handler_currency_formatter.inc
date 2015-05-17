@@ -6,7 +6,7 @@
  * Contains class xdruple_invoice_handler_currency_formatter.
  *
  * Heavily borrowed from the Currency module. We could use that module, but it
- * doesn't work on PostgreSQL databases.
+ * doesn't work on PostgresQL databases.
  * @See: https://drupal.org/node/2007388
  */
 
@@ -36,6 +36,8 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
 
   /**
    * Overrides parent::set_definition().
+   *
+   * @param $definition
    */
   function set_definition($definition) {
     $this->definition = array_merge($this->definition, $definition);
@@ -62,7 +64,9 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
    * Overrides parent::render().
    * Dynamically adds currency symbol to the rendered amount based on the currency column.
    *
-   * @throws RuntimeException
+   * @param $values
+   *
+   * @return string
    */
   function render($values) {
     $amount = parent::render($values);
@@ -77,12 +81,10 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
   /**
    * Loads the Currency for this field.
    *
+   * @param $values - A values object as received by $this->render().
+   *
+   * @return null|\Xtuple\Rescued\Controller\Entity
    * @throws RuntimeException
-   *
-   * @param $values
-   *   A values object as received by $this->render().
-   *
-   * @return Currency
    */
   function getCurrency($values) {
     $currency = NULL;
@@ -129,7 +131,7 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
    * @param $currency_code
    *   The currency code.
    *
-   * @return Currency xTuple's Currecny resource for the matching code.
+   * @return \Xtuple\Rescued\Controller\Entity - xTuple's Currency resource for the matching code.
    */
   function currency_load($currency_code) {
     $currency = NULL;

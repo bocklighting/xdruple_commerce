@@ -19,6 +19,9 @@ function xdruple_shipping_rescued_resources() {
 
 /**
  * Implements hook_cpanel_alter()
+ *
+ * @param $form
+ * @param $form_state
  */
 function xdruple_shipping_cpanel_alter(&$form, &$form_state) {
   if (module_exists('commerce_pickup')) {
@@ -46,6 +49,10 @@ function xdruple_shipping_cpanel_alter(&$form, &$form_state) {
 
 /**
  * Implements hook_field_storage_pre_insert().
+ *
+ * @param $entity_type
+ * @param $entity
+ * @param $skip_fields
  */
 function xdruple_shipping_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
   // Wrap the update hook, which does everything we need.
@@ -54,6 +61,10 @@ function xdruple_shipping_field_storage_pre_insert($entity_type, $entity, &$skip
 
 /**
  * Implements hook_field_storage_pre_update().
+ *
+ * @param $entity_type
+ * @param $entity
+ * @param $skip_fields
  */
 function xdruple_shipping_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
   // Check $entity_type and only act on ones we support.
@@ -86,6 +97,12 @@ function xdruple_shipping_field_storage_pre_update($entity_type, $entity, &$skip
  *
  * Side loads weight from a xTuple entity's 'productWeight' and 'packageWeight'
  * property into the 'xt_physical_weight' field.
+ *
+ * @param $entity_type
+ * @param $entities
+ * @param $age
+ * @param $skip_fields
+ * @param $options
  */
 function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, &$skip_fields, $options) {
   // Check $entity_type and only act on ones we support.
@@ -297,9 +314,9 @@ function xdruple_shipping_map_physical_dimension_units($unit, $valid_units) {
  */
 function xdruple_shipping_map_ship_via($ship_label) {
   $entity_type = 'xtuple_shipvia';
-  $ship_vias = entity_load($entity_type);
+  $ship_via = entity_load($entity_type);
 
-  foreach ($ship_vias as $code => $value) {
+  foreach ($ship_via as $code => $value) {
     // Remove and space, dashes, underscores.
     $stripped_label = str_replace(array(' ', '-', '_'), '', $ship_label);
     $stripped_description = str_replace(array(' ', '-', '_'), '', $value->description);
@@ -316,10 +333,14 @@ function xdruple_shipping_map_ship_via($ship_label) {
 
 /**
  * Implements hook_form_alter().
+ *
+ * @param $form
+ * @param $form_state
+ * @param $form_id
  */
 function xdruple_shipping_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['xt_physical_weight'])) {
-    // Make 'xt_physical_weight' read only. It's a calculated field and can not be editied.
+    // Make 'xt_physical_weight' read only. It's a calculated field and can not be edited.
     $form['xt_physical_weight'][LANGUAGE_NONE][0]['weight']['#attributes']['disabled'] = TRUE;
     $form['xt_physical_weight'][LANGUAGE_NONE][0]['unit']['#attributes']['disabled'] = TRUE;
 
@@ -339,7 +360,7 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
   try {
     /** @var \stdClass $customer_shipping */
     $customer_shipping = $order_wrapper->commerce_customer_shipping->value();
-    $customer_shipping_proxy = new \Xtuple\Drupal7\Proxy\CustomerProfile($customer_shipping);
+    $customer_shipping_proxy = new \Xtuple\Drupal7\Proxy\CustomerProfileProxy($customer_shipping);
     /** @var \Xtuple\Entity\Contact\Contact $contact */
     $contact = $customer_shipping_proxy->contact();
     $address = $contact->address();
@@ -355,6 +376,7 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
       $shipping_address['organisation_name'] = $customer;
     }
     elseif ($customer = $order_wrapper->customer->value()) {
+      /** @var \Xtuple\Rescued\Controller\Entity $customer */
       $shipping_address['organisation_name'] = $customer->get('name');
     }
   } catch (\Exception $e) {
@@ -367,9 +389,13 @@ function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_t
 
 /**
  * Implements hook_commerce_ups_ship_from_address_alter().
+ *
+ * @param $ship_from_address
+ * @param $order_wrapper
  */
 function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_address, $order_wrapper) {
   // Necessary for country_get_list().
+  /** @noinspection PhpIncludeInspection */
   require_once DRUPAL_ROOT . '/includes/locale.inc';
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
@@ -413,6 +439,10 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
 
 /**
  * Implements hook_commerce_shipping_service_info_alter().
+ *
+ * @param $shipping_services
+ *
+ * @throws \Exception
  */
 function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_services) {
   $allowed_pickup_sites = variable_get('xdruple_shipping_allowed_pickup_sites', array());
@@ -492,6 +522,13 @@ function xdruple_shipping_rules_condition_info() {
 /**
  * Condition callback: checks to see if one or more particular Freight Classes
  * exist for any products on an order in the specified quantity.
+ *
+ * @param $order
+ * @param $freight_classes
+ * @param $operator
+ * @param $value
+ *
+ * @return bool
  */
 function xdruple_shipping_rules_contains_freight_class($order, $freight_classes, $operator, $value) {
   $quantity = 0;

@@ -10,7 +10,7 @@
 <?php endif; ?>
 <?php if (!empty($subTitle)): ?>
   <div class="views-field views-field-subTitle">
-    <span class="field-content"><?php print $subtitle ?></span>
+    <span class="field-content"><?php print $subTitle ?></span>
   </div>
 <?php endif; ?>
 <?php if (!empty($price)): ?>

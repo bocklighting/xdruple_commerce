@@ -1,15 +1,7 @@
 <?php
-
 /**
- * @file
- * Default theme implementation to present the prodHeight on a product page.
- *
- * Available variables:
- * - $prodHeight: The prodHeight to render.
- * - $label: If present, the string to use as the prodHeight label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the prodHeight represents.
+ * @var $prodHeight
+ * @var $label
  */
 ?>
 <?php if ($prodHeight): ?>

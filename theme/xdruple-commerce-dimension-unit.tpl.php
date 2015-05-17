@@ -1,15 +1,8 @@
 <?php
 
 /**
- * @file
- * Default theme implementation to present the dimensionUnit on a product page.
- *
- * Available variables:
- * - $dimensionUnit: The dimensionUnit to render.
- * - $label: If present, the string to use as the dimensionUnit label.
- *
- * Helper variables:
- * - $product: The fully loaded product object the dimensionUnit represents.
+ * @var $dimensionUnit
+ * @var $label
  */
 ?>
 <?php if ($dimensionUnit): ?>
