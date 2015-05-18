@@ -947,7 +947,7 @@ function xdruple_commerce_api_customer_exclusive_item_list($discovery_client = '
     $result = rescued_api_resource_list($discovery_client, $resource, $optParams, FALSE);
   }
   else {
-    $client = rescued_api_get_client($discovery_client);
+    $client = rescued_api_get_client();
 
     $customer = xdruple_rescued_session_get('customer');
     $shipto = xdruple_rescued_session_get('ship_to');
@@ -1017,7 +1017,7 @@ function _xdruple_commerce_convert_uom_price($price, $uom_ratio) {
  * @return array The query result response.
  */
 function xdruple_commerce_api_customer_item_price($discovery_client = 'xtuple', $resource = 'Customer', $postBody, $optParams = array()) {
-  $client = rescued_api_get_client($discovery_client);
+  $client = rescued_api_get_client();
 
   $params = array('postBody' => $postBody);
   $params = array_merge($params, $optParams);
