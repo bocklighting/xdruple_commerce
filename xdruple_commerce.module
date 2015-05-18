@@ -51,7 +51,7 @@ function xdruple_commerce_entity_info_alter(&$info) {
     $original = $info['commerce_product'];
 
     // Override 'api-list-callback' to support exclusive items.
-    $info['xtuple_xdproduct']['api-list-callback'] = 'xdruple_commerce_api_customer_exclusive_item_list';
+    $info['xtuple_xdproduct']['api-list-callback'] = 'xdruple_commerce_api_customer_exclusive_item_list'; // @todo: call rescued_api_resource_list statically
 
     // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdproduct']
     $info['commerce_product'] = $info['xtuple_xdproduct'];
@@ -933,18 +933,18 @@ function xdruple_commerce_entity_query_alter(&$query) {
  * Query the dispatch function XM.XdProduct.XdProductFetch to
  * get a filtered list of items that a Customer is allowed to see.
  *
- * @param string $discovery_client The API client name. e.g. 'xtuple'
- * @param string $resource         The API resource name. e.g. 'ItemSiteListItem'
- * @param array  $optParams        The structured query to perform.
+ * @param string $resource  The API resource name. e.g. 'ItemSiteListItem'
+ * @param array  $optParams The structured query to perform.
  *
  * @param bool   $data_only
  *
  * @return array The query result response.
+ * @internal param string $discovery_client The API client name. e.g. 'xtuple'
  */
-function xdruple_commerce_api_customer_exclusive_item_list($discovery_client = 'xtuple', $resource = 'XdProduct', $optParams = array(), $data_only = TRUE) {
+function xdruple_commerce_api_customer_exclusive_item_list($resource = 'XdProduct', $optParams = array(), $data_only = TRUE) {
   // When exclusive_items setting is off, just query rescued_api_resource_list().
   if (!variable_get('xdruple_commerce_filter_exclusive_items', FALSE)) {
-    $result = rescued_api_resource_list($discovery_client, $resource, $optParams, FALSE);
+    $result = rescued_api_resource_list($resource, $optParams, FALSE);
   }
   else {
     $client = rescued_api_get_client();
@@ -1009,14 +1009,14 @@ function _xdruple_commerce_convert_uom_price($price, $uom_ratio) {
  *
  * Query the dispatch function XM.Customer.itemPrice to get a item price quote.
  *
- * @param string $discovery_client The API client name. e.g. 'xtuple'
- * @param string $resource         The API resource name. e.g. 'Customer'
- * @param array  $postBody         The structured query to perform.
- * @param array  $optParams        Additional option parameters.
+ * @param string $resource  The API resource name. e.g. 'Customer'
+ * @param array  $postBody  The structured query to perform.
+ * @param array  $optParams Additional option parameters.
  *
  * @return array The query result response.
+ * @internal param string $discovery_client The API client name. e.g. 'xtuple'
  */
-function xdruple_commerce_api_customer_item_price($discovery_client = 'xtuple', $resource = 'Customer', $postBody, $optParams = array()) {
+function xdruple_commerce_api_customer_item_price($resource = 'Customer', $postBody, $optParams = array()) {
   $client = rescued_api_get_client();
 
   $params = array('postBody' => $postBody);
@@ -1141,7 +1141,7 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
 
     // Make the itemPrice service request.
     if (!$cache_only) {
-      $price = xdruple_commerce_api_customer_item_price('xtuple', 'Customer', $postBody);
+      $price = xdruple_commerce_api_customer_item_price('Customer', $postBody);
 
       cache_set($cid, $price, 'cache', REQUEST_TIME + 60 * 60 * 10);
 
