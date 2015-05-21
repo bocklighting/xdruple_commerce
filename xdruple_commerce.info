@@ -3,7 +3,6 @@ description = Uses hook to override some features in Drupal Commerce to integrat
 core = 7.x
 package = xDruple
 
-dependencies[] = entity_operations
 dependencies[] = rescued
 dependencies[] = xdruple
 dependencies[] = commerce

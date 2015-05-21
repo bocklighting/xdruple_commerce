@@ -68,22 +68,6 @@ function xdruple_commerce_entity_info_alter(&$info) {
 }
 
 /**
- * Implements hook_entity_operation_info_alter(().
- *
- * Override Drupal Commerce's entities to use the RESCUED entity operation handler.
- *
- * @param $operation_info
- *  The array of data provided by hook_entity_operation_info().
- */
-function xdruple_commerce_entity_operation_info_alter(&$operation_info) {
-  // Add a handler for commerce_product.
-  if (isset($operation_info['xtuple_xdproduct'])) {
-    // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdproduct']
-    $operation_info['commerce_product'] = $operation_info['xtuple_xdproduct'];
-  }
-}
-
-/**
  * Implements hook_menu_alter().
  *
  * Wrap any 'access checkout' or 'access content' items in our custom callback
@@ -796,60 +780,6 @@ function xdruple_commerce_theme() {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- *
- * The Product UI module instantiates the Product add/edit form alter the
- * form here to xTuple properties as fields.
- *
- * @see commerce_product_ui_product_form()
- *
- * @param $form
- * @param $form_state
- */
-function xdruple_commerce_form_commerce_product_ui_product_form_alter(&$form, &$form_state) {
-  $product = $form_state['commerce_product'];
-  $op = 'edit';
-  $entityType = 'commerce_product';
-  $entityInfo = entity_get_info($entityType);
-  $handler_class = $entityInfo['operations ui']['operations'][$op]['handler'];
-
-  // Break the reference to $form_state.
-  $foo_state = (array) clone ((object) $form_state);
-
-  $excluded_fields = array(
-    'product_id',
-    'revision_id',
-    'sku',
-    'title',
-    'type',
-    'language',
-    'uid',
-    'status',
-    'created',
-    'changed',
-    'data',
-    'commerce_price',
-    'urls', // URLs are loaded through the 'erp_xdproducturls' field.
-    'characteristics', // Characteristics are loaded through the 'erp_xdproductcharacteristics' field.
-  );
-
-  // Get the xtuple form version from our controller and loop over our fields in that
-  // form and add to the commerce_product from.
-  $xdruple_form = entity_operations_operation_form(array(), $foo_state, 'XdProduct', $handler_class, $op, $product);
-  foreach ($entityInfo['json-schema']['XdProduct']['properties'] as $prop_name => $prop_value) {
-    // Skip the fields that are already handled or should not be shown.
-    if (!in_array($prop_name, $excluded_fields)) {
-      $form[$prop_name] = $xdruple_form[$prop_name];
-      if (in_array($prop_name, array('notes', 'extDescrip'))) {
-        $form[$prop_name]['#type'] = 'textarea';
-        $form[$prop_name]['#rows'] = 4;
-      }
-      $form[$prop_name]['#weight'] = -3;
-    }
-  }
-}
-
-/**
  * Implements hook_field_attach_submit.
  *
  * @param $entity_type
@@ -1461,10 +1391,6 @@ function xdruple_commerce_checkout_purchased_items_pane_checkout_form($form, &$f
   }
 
   return $pane_form;
-}
-
-function xdruple_commerce_form_entity_operations_operation_form_alter(&$form, $form_state) {
-  $form['actions']['#weight'] = 100;
 }
 
 /**
