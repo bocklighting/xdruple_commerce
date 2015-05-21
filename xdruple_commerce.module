@@ -796,15 +796,6 @@ function xdruple_commerce_theme() {
 }
 
 /**
- * Implements hook_email_registration_name().
- */
-// function xdruple_commerce_email_registration_name($edit, $account) {
-//   $name = $account->mail;
-
-//   return email_registration_cleanup_username($name);
-// }
-
-/**
  * Implements hook_form_FORM_ID_alter().
  *
  * The Product UI module instantiates the Product add/edit form alter the
