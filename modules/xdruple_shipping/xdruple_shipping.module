@@ -351,43 +351,6 @@ function xdruple_shipping_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- * Implements hook_commerce_ups_ship_to_address_from_order_alter()
- *
- * @param $ship_to_address
- * @param $order_wrapper
- */
-function xdruple_shipping_commerce_ups_ship_to_address_from_order_alter(&$ship_to_address, $order_wrapper) {
-  try {
-    /** @var \stdClass $customer_shipping */
-    $customer_shipping = $order_wrapper->commerce_customer_shipping->value();
-    $customer_shipping_proxy = new \Xtuple\Drupal7\Proxy\CustomerProfileProxy($customer_shipping);
-    /** @var \Xtuple\Entity\Contact\Contact $contact */
-    $contact = $customer_shipping_proxy->contact();
-    $address = $contact->address();
-    $ship_to_address['thoroughfare'] = $address->thoroughfare();
-    $ship_to_address['premise'] = $address->premise();
-    $ship_to_address['locality'] = $address->locality();
-    $ship_to_address['administrative_area'] = $address->administrativeArea();
-    $ship_to_address['postal_code'] = $address->postalCode();
-    $ship_to_address['country'] = $address->country();
-    $ship_to_address['first_name'] = $contact->name()->first();
-    $ship_to_address['last_name'] = $contact->name()->last();
-    if (user_is_anonymous() && $customer = $order_wrapper->mail->value()) {
-      $shipping_address['organisation_name'] = $customer;
-    }
-    elseif ($customer = $order_wrapper->customer->value()) {
-      /** @var \Xtuple\Rescued\Controller\Entity $customer */
-      $shipping_address['organisation_name'] = $customer->get('name');
-    }
-  } catch (\Exception $e) {
-    drupal_set_message($e->getMessage(), 'error');
-    watchdog('xdruple_commerce', theme('exception', array(
-      'exception' => $e,
-    )), array(), WATCHDOG_ERROR);
-  }
-}
-
-/**
  * Implements hook_commerce_ups_ship_from_address_alter().
  *
  * @param $ship_from_address
