@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Set default values for Specialty Shipping admin notifications
+ */
+function xdruple_specialty_shipping_update_7001() {
+  variable_set("xdruple_specialty_shipping_admin_notification_emails", "");
+  variable_set("xdruple_specialty_shipping_admin_notification_subject", "An order with Specialty Shipping item has been placed on [site:name]");
+}
