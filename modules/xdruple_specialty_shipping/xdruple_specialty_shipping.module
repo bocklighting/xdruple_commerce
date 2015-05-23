@@ -181,3 +181,23 @@ function xdruple_specialty_shipping_entity_load($entities, $type) {
     }
   }
 }
+
+function xdruple_specialty_shipping_form_xdruple_email_settings_form_alter(&$form, &$form_state) {
+  $form["xdruple_specialty_shipping_admin_notification"] = array(
+    "#type" => "fieldset",
+    "#group" => "emails",
+    "#title" => t("Specialty shipping order admin notification"),
+  );
+  $form["xdruple_specialty_shipping_admin_notification"]["xdruple_specialty_shipping_admin_notification_emails"] = array(
+    "#type" => "textfield",
+    "#title" => "E-mail",
+    "#default_value" => variable_get("xdruple_specialty_shipping_admin_notification_emails", ""),
+    "#description" => "Use comma to separate multiple addresses.",
+  );
+  $form["xdruple_specialty_shipping_admin_notification"]["xdruple_specialty_shipping_admin_notification_subject"] = array(
+    "#type" => "textfield",
+    "#title" => "Subject",
+    "#default_value" => variable_get("xdruple_specialty_shipping_admin_notification_subject"),
+    "#required" => TRUE,
+  );
+}
