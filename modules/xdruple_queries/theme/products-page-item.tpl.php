@@ -8,9 +8,9 @@
     <span class="field-content"><?php print $title ?></span>
   </div>
 <?php endif; ?>
-<?php if (!empty($subTitle)): ?>
+<?php if (!empty($subtitle)): ?>
   <div class="views-field views-field-subTitle">
-    <span class="field-content"><?php print $subTitle ?></span>
+    <span class="field-content"><?php print $subtitle ?></span>
   </div>
 <?php endif; ?>
 <?php if (!empty($price)): ?>
