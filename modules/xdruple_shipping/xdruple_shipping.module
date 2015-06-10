@@ -173,14 +173,14 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
               $dimensionUnit = $instances['widget']['settings']['default_unit'];
             }
 
-            if (property_exists($entity, 'packLength') && !empty($entity->packLength)) {
-              $length = $entity->packLength;
+            if (property_exists($entity, 'packageLength') && !empty($entity->packageLength)) {
+              $length = $entity->packageLength;
             }
-            if (property_exists($entity, 'packWidth') && !empty($entity->packWidth)) {
-              $width = $entity->packWidth;
+            if (property_exists($entity, 'packageWidth') && !empty($entity->packageWidth)) {
+              $width = $entity->packageWidth;
             }
-            if (property_exists($entity, 'packHeight') && !empty($entity->packHeight)) {
-              $height = $entity->packHeight;
+            if (property_exists($entity, 'packageHeight') && !empty($entity->packageHeight)) {
+              $height = $entity->packageHeight;
             }
 
             if (!empty($length) && !empty($width) && !empty($height)) {
