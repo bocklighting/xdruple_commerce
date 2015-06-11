@@ -25,16 +25,6 @@
                     <div class="subcategory-title">
                       <?php print l($sub_category->getName(), 'products/categories/' . $sub_category->getId()) ?>
                     </div>
-                    <?php $sub_category_children = $sub_category->getChildren(); ?>
-                    <?php if (!empty($sub_category_children)): ?>
-                      <ul class="list-unstyled">
-                        <?php foreach ($sub_category_children as $sub_sub_category): ?>
-                          <li>
-                            <?php print l($sub_sub_category->getName(), 'products/categories/' . $sub_sub_category->getId()) ?>
-                          </li>
-                        <?php endforeach; ?>
-                      </ul>
-                    <?php endif; ?>
                   </div>
                 <?php endforeach; ?>
               </div>
