@@ -29,8 +29,9 @@ function template_preprocess_products_page(&$variables) {
   }
 
   if (!empty($variables['category'])) {
+    /** @var \Xtuple\XdrupleQueries\Categories\Category $category */
     $category = $variables['category'];
-    if (!empty($category->groups)) {
+    if (!empty($category->getChildren())) {
       $cid = 'xtuple_xdcatalog-flat';
       $cache = cache_get($cid, 'cache');
       $entity_info = entity_get_info('xtuple_xdcatalog');
@@ -73,10 +74,10 @@ function template_preprocess_products_page(&$variables) {
       }
 
       $subcategories = array();
-      foreach ($category->groups as $group_id) {
-        if (!empty($xd_catalogs[$group_id])) {
-          $subcategories[$group_id] = array(
-            'data' => l($xd_catalogs[$group_id]->name, 'products/categories/' . $group_id),
+      foreach ($category->getChildren() as $child) {
+        if (!empty($xd_catalogs[$child->getId()])) {
+          $subcategories[$child->getId()] = array(
+            'data' => l($xd_catalogs[$child->getId()]->name, 'products/categories/' . $child->getId()),
             'class' => array('col-lg-4'),
           );
         }
