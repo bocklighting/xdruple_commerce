@@ -15,12 +15,12 @@ function template_preprocess_products_page(&$variables) {
   $products = $variables['products'];
 
   $column_size = 3;
-  $column = array();
+  $column = [];
   foreach ($products as $i => $product) {
     $column[] = $product;
     if (($i + 1) % $column_size === 0) {
       $variables['columns'][] = $column;
-      $column = array();
+      $column = [];
     }
   }
   if (!empty($column)) {
@@ -48,7 +48,7 @@ function template_preprocess_products_page(&$variables) {
         else {
           // Paginate through all catalogs.
           $pages = ceil($count / 100);
-          $xd_catalogs = array();
+          $xd_catalogs = [];
 
           $i = 0;
           while ($i < $pages) {
@@ -66,27 +66,27 @@ function template_preprocess_products_page(&$variables) {
       }
       else {
         if (!$cache || empty($cache->data)) {
-          $xd_catalogs = array();
+          $xd_catalogs = [];
         }
         else {
           $xd_catalogs = $cache->data;
         }
       }
 
-      $subcategories = array();
+      $subcategories = [];
       foreach ($category->getChildren() as $child) {
         if (!empty($xd_catalogs[$child->getId()])) {
-          $subcategories[$child->getId()] = array(
+          $subcategories[$child->getId()] = [
             'data' => l($xd_catalogs[$child->getId()]->name, 'products/categories/' . $child->getId()),
-            'class' => array('col-lg-4'),
-          );
+            'class' => ['col-lg-4'],
+          ];
         }
       }
       if (!empty($subcategories)) {
-        $variables['subcategories'] = theme('item_list', array(
+        $variables['subcategories'] = theme('item_list', [
           'items' => $subcategories,
-          'attributes' => array('class' => array('row')),
-        ));
+          'attributes' => ['class' => ['row']],
+        ]);
       }
     }
   }
@@ -125,12 +125,12 @@ function template_preprocess_products_page_item(&$variables) {
     if (isset($params['fields']['add_to_cart']['order_id'])) {
       $order_id = $params['fields']['add_to_cart']['order_id'];
     }
-    $variables['add_to_cart'] = _xdruple_queries_add_to_cart_button($product, $show_qty, array(), $qty, $order_id);
+    $variables['add_to_cart'] = _xdruple_queries_add_to_cart_button($product, $show_qty, [], $qty, $order_id);
   }
 
-  $variables['read_more'] = l('Read more', "products/$product->product_id", array(
-    'attributes' => array(
-      'class' => array('btn', 'btn-info'),
-    ),
-  ));
+  $variables['read_more'] = l('Read more', "products/$product->product_id", [
+    'attributes' => [
+      'class' => ['btn', 'btn-info'],
+    ],
+  ]);
 }

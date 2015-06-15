@@ -32,7 +32,7 @@ function xdruple_order_views_default_views() {
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['style_plugin'] = 'table';
-  $handler->display->display_options['style_options']['columns'] = array(
+  $handler->display->display_options['style_options']['columns'] = [
     'number' => 'number',
     'orderDate' => 'orderDate',
     'billtoName' => 'billtoName',
@@ -42,73 +42,73 @@ function xdruple_order_views_default_views() {
     'shiptoCity' => 'shiptoCity',
     'shiptoState' => 'shiptoState',
     'total' => 'total',
-  );
+  ];
   $handler->display->display_options['style_options']['default'] = '-1';
-  $handler->display->display_options['style_options']['info'] = array(
-    'number' => array(
+  $handler->display->display_options['style_options']['info'] = [
+    'number' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'orderDate' => array(
+    ],
+    'orderDate' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'billtoName' => array(
+    ],
+    'billtoName' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'billtoCity' => array(
+    ],
+    'billtoCity' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'billtoState' => array(
+    ],
+    'billtoState' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'shiptoName' => array(
+    ],
+    'shiptoName' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'shiptoCity' => array(
+    ],
+    'shiptoCity' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'shiptoState' => array(
+    ],
+    'shiptoState' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'total' => array(
+    ],
+    'total' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => 'views-align-right',
       'separator' => '',
       'empty_column' => 0,
-    ),
-  );
+    ],
+  ];
   /* Field: SalesOrderListItem: Number */
   $handler->display->display_options['fields']['number']['id'] = 'number';
   $handler->display->display_options['fields']['number']['table'] = 'efq_xtuple_salesorderlistitem';

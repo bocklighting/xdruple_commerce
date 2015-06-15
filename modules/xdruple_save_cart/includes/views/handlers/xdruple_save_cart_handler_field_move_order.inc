@@ -61,10 +61,10 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
    * @return array
    */
   protected function getLinkOptions() {
-    $destination = array('destination' => 'cart');
-    $options = array(
+    $destination = ['destination' => 'cart'];
+    $options = [
       'query' => $destination,
-    );
+    ];
 
     return $options;
   }

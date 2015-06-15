@@ -21,7 +21,7 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
    *
    * @var array
    */
-  public $definition = array(
+  public $definition = [
     // A default currency code to use for the amounts.
     'currency_code' => 'USD',
     // The name of the database field the currency code is in.
@@ -32,7 +32,7 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
     'type' => 'decimal',
     'float' => TRUE,
     'click sortable' => TRUE,
-  );
+  ];
 
   /**
    * Overrides parent::set_definition().
@@ -52,10 +52,10 @@ class xdruple_commerce_handler_currency_formatter extends entity_views_handler_f
   function query() {
     $this->ensure_my_table();
     if ($this->definition['currency_code_field']) {
-      $this->additional_fields['currency_code_field'] = array(
+      $this->additional_fields['currency_code_field'] = [
         'field' => $this->definition['currency_code_field'],
         'table' => $this->definition['currency_code_table'] ? $this->definition['currency_code_table'] : $this->table_alias,
-      );
+      ];
     }
     parent::query();
   }

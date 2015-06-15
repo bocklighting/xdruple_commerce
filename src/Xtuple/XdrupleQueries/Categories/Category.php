@@ -19,16 +19,16 @@ class Category {
   /**
    * @var Category[]
    */
-  private $children = array();
-  private $parents = array();
-  private $path = array();
+  private $children = [];
+  private $parents = [];
+  private $path = [];
 
   /**
    * @param integer    $id
    * @param string     $name
    * @param Category[] $children
    */
-  public function __construct($id, $name, $children = array()) {
+  public function __construct($id, $name, $children = []) {
     $this->setId($id);
     $this->setName($name);
     $this->setChildren($children);

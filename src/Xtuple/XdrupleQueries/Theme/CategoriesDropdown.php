@@ -17,18 +17,18 @@ class CategoriesDropdown extends AbstractThemeHook {
   public function preprocess() {
     $variables = parent::preprocess();
     $variables['catalog'] = Tree::getCatalog();
-    $variables['content_attributes_array'] = array(
-      'class' => array(
+    $variables['content_attributes_array'] = [
+      'class' => [
         'panel',
         'panel-' . $this->getContext(),
-      ),
-    );
-    $variables['attributes_array'] = array(
-      'class' => array(
+      ],
+    ];
+    $variables['attributes_array'] = [
+      'class' => [
         'b-categories-dropdown',
         'b-categories-dropdown--left',
-      ),
-    );
+      ],
+    ];
 
     return $variables;
   }

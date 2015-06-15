@@ -8,16 +8,16 @@
  * Implements hook_menu()
  */
 function xdruple_recent_menu() {
-  $items = array();
+  $items = [];
 
-  $items['user/%user/recent'] = array(
+  $items['user/%user/recent'] = [
     'title' => 'Recently ordered',
     'page callback' => 'xdruple_recent_products_recent_page',
     'access callback' => 'xdruple_access',
-    'access arguments' => array('products/recent', 'view', 'xtuple: access product lists'),
+    'access arguments' => ['products/recent', 'view', 'xtuple: access product lists'],
     'file' => 'pages/products.inc',
     'type' => MENU_LOCAL_TASK,
-  );
+  ];
 
   return $items;
 }
@@ -26,7 +26,7 @@ function xdruple_recent_menu() {
  * Implements hook_rescued_resources().
  */
 function xdruple_recent_rescued_resources() {
-  return array(
+  return [
     "XdCatalogRecentOrd",
-  );
+  ];
 }

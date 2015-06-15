@@ -17,31 +17,31 @@ function xdruple_queries_products_by_category_page($group_id) {
   $category = \Xtuple\XdrupleQueries\Categories\Tree::buildCategory($group_id);
   drupal_set_title($category->getName());
 
-  $params = array(
-    'fields' => array(
-      'add_to_cart' => array(
+  $params = [
+    'fields' => [
+      'add_to_cart' => [
         'show_quantity' => FALSE,
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 
-  drupal_alter(array(
+  drupal_alter([
     'product_page_item',
     'products_by_category_page_item'
-  ), $params);
+  ], $params);
 
-  $product_ids = array();
-  $group_products = entity_load('xtuple_xdcatalogproduct', NULL, array(
+  $product_ids = [];
+  $group_products = entity_load('xtuple_xdcatalogproduct', NULL, [
     'parentGroup' => $group_id,
-  ));
+  ]);
   foreach ($group_products as $item) {
     $product_ids[] = $item->product;
   }
 
-  $vars = array(
+  $vars = [
     "category" => $category,
     'products' => _xdruple_prepare_products_list($product_ids, $params),
-  );
+  ];
   $output .= theme('products_page', $vars);
 
   if (empty($_GET["search"])) {

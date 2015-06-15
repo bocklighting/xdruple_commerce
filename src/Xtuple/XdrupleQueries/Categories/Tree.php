@@ -23,7 +23,7 @@ class Tree {
       else {
         // Paginate through all catalogs.
         $pages = ceil($count / 100);
-        $xd_catalogs = array();
+        $xd_catalogs = [];
 
         $i = 0;
         while ($i < $pages) {
@@ -51,14 +51,14 @@ class Tree {
       if (empty($root_group) || empty($root_key)) {
         drupal_set_message(t('Catalog structure not set. Contact the site administrator.'), 'warning');
 
-        return array();
+        return [];
       }
 
-      $tree = array(
-        $root_key => array(),
-      );
+      $tree = [
+        $root_key => [],
+      ];
 
-      $catalog = array();
+      $catalog = [];
       if (!empty($tree)) {
         foreach (array_keys($tree) as $entityId) {
           $catalog[] = self::buildCategory($entityId);
@@ -70,7 +70,7 @@ class Tree {
     }
     else {
       if (!$cache || empty($cache->data)) {
-        $catalog = array();
+        $catalog = [];
       }
       else {
         $catalog = $cache->data;
@@ -135,7 +135,7 @@ class Tree {
       // We allow a many-to-many tree, so there is no one true path for breadcrumbs.
       // Instead, we alpha sort the parent names and grab the first parent to use
       // for setting the breadcrumb path.
-      $parent_names = array();
+      $parent_names = [];
       $parents = $child->getParents();
       foreach ($parents as $parent) {
         $parent_names[$parent->getName()] = $parent;
@@ -153,10 +153,10 @@ class Tree {
         }
 
         // Then add the new immediate parent to the child path.
-        $path = array(
+        $path = [
           'id' => $first_parent->getId(),
           'name' => $first_parent->getName(),
-        );
+        ];
         $child->addPath($path);
       }
 
