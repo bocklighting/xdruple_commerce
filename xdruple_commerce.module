@@ -1401,8 +1401,9 @@ function xdruple_commerce_checkout_purchased_items_pane_checkout_form($form, &$f
  */
 function _xdruple_commerce_get_cart_summary() {
   $summary = [];
-  $user = extensions_get_user();
-  if ($order = commerce_cart_order_load($user->getUserId())) {
+  /** @var \Xtuple\Drupal7\Proxy\User\UserProxyInterface $user */
+  global $user;
+  if ($order = commerce_cart_order_load($user->uid())) {
     try {
       /** @var \EntityDrupalWrapper $order_wrapper */
       $order_wrapper = entity_metadata_wrapper('commerce_order', $order);
