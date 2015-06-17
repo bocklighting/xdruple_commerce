@@ -310,17 +310,10 @@ function xdruple_checkout_username_as_order_email_form_validate($form, &$form_st
       ->execute()
       ->fetchField();
     if ($mail_taken) {
-      // Format error message dependent on whether the user is logged in or not.
-      // TODO: I'm not sure how this could be called by a user that is logged in.
-      if ($GLOBALS['user']->uid) {
-        form_set_error('name', t('The e-mail address %email is already taken.', ['%email' => $form_state['values']['email']]));
-      }
-      else {
-        form_set_error('name', t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', [
-          '%email' => $form_state['values']['email'],
-          '@password' => url('user/password')
-        ]));
-      }
+      form_set_error('name', t('The e-mail address %email is already registered. !forgotten', [
+        '%email' => $form_state['values']['email'],
+        '!forgotten' => l("Have you forgotten your password?", "user/password"),
+      ]));
     }
   }
 }
