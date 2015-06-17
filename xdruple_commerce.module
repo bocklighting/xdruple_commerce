@@ -232,7 +232,7 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
  */
 function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_state, $context) {
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-  $session = extensions_get_session();
+  global $session;
 
   if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdstdordproduct') {
     // Default this form to the customer and ship to in the user's session.
@@ -973,7 +973,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
   }
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-  $session = extensions_get_session();
+  global $session;
   if ((!$session->getRescued('customer') || !$session->getRescued('ship_to') || !$session->getRescued('site'))
     && $user->uid !== 0
   ) {
@@ -1013,7 +1013,7 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
   global $user;
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-  $session = extensions_get_session();
+  global $session;
 
   if ($user->uid === 0) {
     // Get anonymous checkout defaults from control panel.

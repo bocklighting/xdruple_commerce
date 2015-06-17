@@ -362,7 +362,7 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
   require_once DRUPAL_ROOT . '/includes/locale.inc';
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-  $session = extensions_get_session();
+  global $session;
 
   $id = $session->getRescued('site');
   $entity_type = 'xtuple_site';

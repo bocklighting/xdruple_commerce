@@ -206,7 +206,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = [],
     }
     else {
       /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-      $session = extensions_get_session();
+      global $session;
       $customer = $session->getRescued('customer');
       $ship_to = $session->getRescued('ship_to');
       $site = $session->getRescued('site');
@@ -405,7 +405,7 @@ function _xdruple_queries_prepare_curl($product, $qty) {
     }
     else {
       /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-      $session = extensions_get_session();
+      global $session;
       $customer = $session->getRescued('customer');
       $ship_to = $session->getRescued('ship_to');
       $site = $session->getRescued('site');

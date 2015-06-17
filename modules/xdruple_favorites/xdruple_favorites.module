@@ -172,7 +172,7 @@ function xdruple_favorites_favorites_form_submit_ajax($form, $form_state) {
   $commands = [];
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-  $session = extensions_get_session();
+  global $session;
 
   if (($customer = $session->getRescued('customer'))
     && ($ship_to = $session->getRescued('ship_to'))

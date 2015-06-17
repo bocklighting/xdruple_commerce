@@ -17,7 +17,7 @@ function xdruple_order_page($order_number) {
   $orders = [];
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-  $session = extensions_get_session();
+  global $session;
   if (!empty($order_number) && is_numeric($order_number)) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'xtuple_salesorder')

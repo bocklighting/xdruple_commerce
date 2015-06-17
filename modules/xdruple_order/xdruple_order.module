@@ -83,7 +83,7 @@ function xdruple_order_views_pre_execute($view) {
   if ($view->name === 'xd_pending_orders') {
     // Query on Customer.
     /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-    $session = extensions_get_session();
+    global $session;
     if ($session->getRescued('customer')) {
       $view->query->query->propertyConditions[] = [
         'column' => 'customer',
