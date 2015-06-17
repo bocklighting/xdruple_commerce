@@ -164,7 +164,7 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
       && empty($_SESSION['xdruple_checkout_bypass'])
       && !empty($_SESSION['xdruple_checkout_anonymous'])
     ) {
-      if (in_array($form_id, ['user_login', 'user_login_block', 'user_profile_form'])) {
+      if ($form_id == 'user_login') {
         // Append the checkout redirect function on user's forms.
         $form['#submit'][] = 'xdruple_checkout_anonymous_submit';
         unset($form['#action']);
