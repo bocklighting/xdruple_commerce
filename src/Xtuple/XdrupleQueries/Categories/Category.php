@@ -28,17 +28,22 @@ class Category {
   private $documents;
   /** @var \stdClass[] */
   private $files = [];
+  /** @var string */
+  private $description = "";
 
   /**
    * @param integer    $id
    * @param string     $name
    * @param Category[] $children
+   * @param array      $documents
+   * @param string     $description
    */
-  public function __construct($id, $name, $children = [], $documents = []) {
+  public function __construct($id, $name, $children = [], $documents = [], $description = "") {
     $this->setId($id);
     $this->setName($name);
     $this->setChildren($children);
     $this->setDocuments($documents);
+    $this->description = $description;
   }
 
   /**
@@ -153,6 +158,13 @@ class Category {
    */
   public function files() {
     return $this->files;
+  }
+
+  /**
+   * @return string
+   */
+  public function description() {
+    return $this->description;
   }
 
   protected function importFiles() {
