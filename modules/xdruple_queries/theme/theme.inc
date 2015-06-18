@@ -78,17 +78,30 @@ function template_preprocess_products_page(&$variables) {
         if (!empty($xd_catalogs[$child->getId()])) {
           $subcategories[$child->getId()] = [
             'data' => l($xd_catalogs[$child->getId()]->name, 'products/categories/' . $child->getId()),
+            "title" => $xd_catalogs[$child->getId()]->name,
+            "url" => 'products/categories/' . $child->getId(),
             'class' => ['col-lg-4'],
           ];
         }
       }
       if (!empty($subcategories)) {
-        $variables['subcategories'] = theme('item_list', [
-          'items' => $subcategories,
-          'attributes' => ['class' => ['row']],
-        ]);
+        $variables["subcategories"] = [
+          "#theme" => "item_list",
+          "#items" => $subcategories,
+          "#attributes" => [
+            "class" => [
+              "row" => "row"
+            ],
+          ],
+        ];
       }
     }
+  }
+}
+
+function template_process_products_page(&$variables) {
+  if (!empty($variables["subcategories"])) {
+    $variables["subcategories"] = drupal_render($variables["subcategories"]);
   }
 }
 
