@@ -157,7 +157,26 @@ class Category {
    * @return \stdClass[]
    */
   public function files() {
-    return $this->files;
+    $files = [];
+    foreach ($this->files as $key => $file) {
+      if ($file->type !== "image") {
+        $files[$key] = $file;
+      }
+    }
+    return $files;
+  }
+
+  /**
+   * @return \stdClass[]
+   */
+  public function images() {
+    $files = [];
+    foreach ($this->files as $key => $file) {
+      if ($file->type == "image") {
+        $files[$key] = $file;
+      }
+    }
+    return $files;
   }
 
   /**
