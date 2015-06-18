@@ -90,7 +90,7 @@ class Tree {
     // getCatalog() called entity_load('xtuple_xdcatalog'), so entity_load_single()
     // will hit it's static cache instead of the REST API.
     $group = entity_load_single('xtuple_xdcatalog', $entityId);
-    $category = new Category($entityId, $group->name);
+    $category = new Category($entityId, $group->name, [], $group->documents);
     if (!empty($group->groups)) {
       foreach ($group->groups as $groupId) {
         $category->addChild(self::buildCategory($groupId));
