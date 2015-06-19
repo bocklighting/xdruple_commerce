@@ -4,13 +4,14 @@
  * @file keep Drupal hooks implementations
  */
 
+include_once __DIR__ . "/pages/products_by_category.inc";
+
 /**
  * Implements hook_init()
  */
 function xdruple_queries_init() {
   module_load_include('inc', 'xdruple_queries', 'pages/categories');
   module_load_include('inc', 'xdruple_queries', 'pages/product');
-  module_load_include('inc', 'xdruple_queries', 'pages/products_by_category');
 }
 
 /**
@@ -68,7 +69,8 @@ function xdruple_queries_menu() {
   ];
 
   $items['products/categories/%'] = [
-    'title' => 'Products by category',
+    "title callback" => "xdruple_queries_products_by_category_page_title",
+    "title arguments" => [2],
     'page callback' => 'xdruple_queries_products_by_category_page',
     'page arguments' => [2],
     'access callback' => 'xdruple_access',
