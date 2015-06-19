@@ -110,12 +110,34 @@ class Tree {
    */
   static public function findChildByName($category, $category_name) {
     foreach ($category->getChildren() as $branch) {
-      if ($branch->getName() === $category_name) {
+      if ($branch->getName() == $category_name) {
         return $branch;
       }
       else {
         // Recurse into children.
         $found = self::findChildByName($branch, $category_name);
+        if (!empty($found)) {
+          return $found;
+        }
+      }
+    }
+    return NULL;
+  }
+
+  /**
+   * @param Category $category The Category that is the root of the catalog tree.
+   * @param int      $id       The name of the child category to find.
+   *
+   * @return NULL|Category
+   */
+  static public function findChildById($category, $id) {
+    foreach ($category->getChildren() as $branch) {
+      if ($branch->getId() == $id) {
+        return $branch;
+      }
+      else {
+        // Recurse into children.
+        $found = self::findChildById($branch, $id);
         if (!empty($found)) {
           return $found;
         }
