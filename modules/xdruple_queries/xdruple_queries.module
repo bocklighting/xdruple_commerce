@@ -121,6 +121,7 @@ function xdruple_queries_theme() {
   $items['products_page_item'] = [
     'variables' => [
       'product' => NULL,
+      "params" => [],
     ],
     'template' => 'theme/products-page-item',
     'file' => 'theme/theme.inc',
@@ -299,10 +300,11 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = [],
 
     foreach ($products_list as $product) {
       if ($product_item_theme !== FALSE) {
-        $list[] = theme($product_item_theme, [
-          'product' => $product,
-          'params' => $params,
-        ]);
+        $list[] = [
+          "#theme" => $product_item_theme,
+          "#product" => $product,
+          "#params" => $params,
+        ];
       }
       else {
         $list[] = $product;

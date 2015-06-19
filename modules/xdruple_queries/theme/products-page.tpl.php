@@ -14,7 +14,7 @@
         <div class="views-columns row">
           <?php foreach ($column as $product): ?>
             <div class="views-row col-lg-4">
-              <?php print $product ?>
+              <?php print drupal_render($product); ?>
             </div>
           <?php endforeach; ?>
         </div>
