@@ -46,16 +46,15 @@ function xdruple_favorites_init() {
 function xdruple_favorites_menu() {
   $items = [];
 
-  $items['products/favorites'] = [
-    'title' => '!favorites',
-    'title arguments' => [
-      '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
-    ],
-    'page callback' => 'xdruple_favorites_favorite_products_page',
-    'access callback' => 'xdruple_access',
-    'access arguments' => ['products/favorites', 'view', 'xtuple: access product lists'],
-    'file' => 'pages/favorites.inc',
-    'type' => MENU_LOCAL_TASK,
+  $items["products/favorites"] = [
+    "title" => "Favorite products",
+    "title callback" => "xdruple_favorites_favorite_products_page_title",
+    "title arguments" => ["xdruple_favorites_favorites_title", "Favorite products"],
+    "page callback" => "xdruple_favorites_favorite_products_page",
+    "access callback" => "xdruple_access",
+    "access arguments" => ["products/favorites", "view", "xtuple: access product lists"],
+    "file" => "pages/favorites.inc",
+    "type" => MENU_LOCAL_TASK,
   ];
 
   return $items;
@@ -190,4 +189,8 @@ function xdruple_favorites_favorites_form_submit_ajax($form, $form_state) {
     '#type' => 'ajax',
     '#commands' => $commands,
   ];
+}
+
+function xdruple_favorites_favorite_products_page_title($variable, $default) {
+  return t(variable_get($variable, $default));
 }
