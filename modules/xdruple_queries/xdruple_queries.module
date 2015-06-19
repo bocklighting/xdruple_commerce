@@ -10,8 +10,8 @@ include_once __DIR__ . "/pages/products_by_category.inc";
  * Implements hook_init()
  */
 function xdruple_queries_init() {
-  module_load_include('inc', 'xdruple_queries', 'pages/categories');
-  module_load_include('inc', 'xdruple_queries', 'pages/product');
+  module_load_include("inc", "xdruple_queries", "pages/categories");
+  module_load_include("inc", "xdruple_queries", "pages/product");
 }
 
 /**
@@ -20,8 +20,8 @@ function xdruple_queries_init() {
  * @return \CDD\Compass\DrupalModule
  */
 function xdruple_queries_compass_module() {
-  return new \CDD\Compass\DrupalModule('xdruple_queries', [
-    'xdruple_queries',
+  return new \CDD\Compass\DrupalModule("xdruple_queries", [
+    "xdruple_queries",
   ]);
 }
 
@@ -31,51 +31,51 @@ function xdruple_queries_compass_module() {
 function xdruple_queries_menu() {
   $items = [];
 
-  $items['products'] = [
-    'title' => 'Products',
-    'page callback' => 'xdruple_queries_products_page',
-    'access callback' => 'xdruple_access',
-    'access arguments' => ['products', 'view', 'xtuple: access product lists'],
-    'file' => 'pages/products.inc',
-    'type' => MENU_NORMAL_ITEM,
+  $items["products"] = [
+    "title" => "Products",
+    "page callback" => "xdruple_queries_products_page",
+    "access callback" => "xdruple_access",
+    "access arguments" => ["products", "view", "xtuple: access product lists"],
+    "file" => "pages/products.inc",
+    "type" => MENU_NORMAL_ITEM,
   ];
 
-  $items['products/list'] = [
-    'title' => 'Products',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
+  $items["products/list"] = [
+    "title" => "Products",
+    "type" => MENU_DEFAULT_LOCAL_TASK,
+    "weight" => -10,
   ];
 
-  $items['products/%'] = [
-    'title' => 'Product',
-    'title callback' => 'xdruple_queries_product_page_title',
-    'title arguments' => [1],
-    'page callback' => 'xdruple_queries_product_page',
-    'page arguments' => [1],
-    'access callback' => 'xdruple_access',
-    'access arguments' => ['products/%', 'view', 'xtuple: access product lists'],
-    'file' => 'pages/product.inc',
-    'type' => MENU_CALLBACK,
+  $items["products/%"] = [
+    "title" => "Product",
+    "title callback" => "xdruple_queries_product_page_title",
+    "title arguments" => [1],
+    "page callback" => "xdruple_queries_product_page",
+    "page arguments" => [1],
+    "access callback" => "xdruple_access",
+    "access arguments" => ["products/%", "view", "xtuple: access product lists"],
+    "file" => "pages/product.inc",
+    "type" => MENU_CALLBACK,
   ];
 
-  $items['products/categories'] = [
-    'title' => 'Categories',
-    'page callback' => 'xdruple_queries_categories_page',
-    'access callback' => 'xdruple_access',
-    'access arguments' => ['products/categories', 'view', 'xtuple: access product lists'],
-    'file' => 'pages/categories.inc',
-    'type' => MENU_LOCAL_TASK,
+  $items["products/categories"] = [
+    "title" => "Categories",
+    "page callback" => "xdruple_queries_categories_page",
+    "access callback" => "xdruple_access",
+    "access arguments" => ["products/categories", "view", "xtuple: access product lists"],
+    "file" => "pages/categories.inc",
+    "type" => MENU_LOCAL_TASK,
   ];
 
-  $items['products/categories/%'] = [
+  $items["products/categories/%"] = [
     "title callback" => "xdruple_queries_products_by_category_page_title",
     "title arguments" => [2],
-    'page callback' => 'xdruple_queries_products_by_category_page',
-    'page arguments' => [2],
-    'access callback' => 'xdruple_access',
-    'access arguments' => ['products/categories/%', 'view', 'xtuple: access product lists'],
-    'file' => 'pages/products_by_category.inc',
-    'type' => MENU_CALLBACK,
+    "page callback" => "xdruple_queries_products_by_category_page",
+    "page arguments" => [2],
+    "access callback" => "xdruple_access",
+    "access arguments" => ["products/categories/%", "view", "xtuple: access product lists"],
+    "file" => "pages/products_by_category.inc",
+    "type" => MENU_CALLBACK,
   ];
 
   return $items;
@@ -86,9 +86,9 @@ function xdruple_queries_menu() {
  */
 function xdruple_queries_permission() {
   return [
-    'xtuple: access product lists' => [
-      'title' => t('Access xTuple Product Lists'),
-      'description' => t('Allow users to view lists of products.'),
+    "xtuple: access product lists" => [
+      "title" => t("Access xTuple Product Lists"),
+      "description" => t("Allow users to view lists of products."),
     ],
   ];
 }
@@ -110,21 +110,21 @@ function xdruple_queries_rescued_resources() {
 function xdruple_queries_theme() {
   $items = [];
 
-  $items['products_page'] = [
-    'variables' => [
-      'products' => [],
+  $items["products_page"] = [
+    "variables" => [
+      "products" => [],
     ],
-    'template' => 'theme/products-page',
-    'file' => 'theme/theme.inc',
+    "template" => "theme/products-page",
+    "file" => "theme/theme.inc",
   ];
 
-  $items['products_page_item'] = [
-    'variables' => [
-      'product' => NULL,
+  $items["products_page_item"] = [
+    "variables" => [
+      "product" => NULL,
       "params" => [],
     ],
-    'template' => 'theme/products-page-item',
-    'file' => 'theme/theme.inc',
+    "template" => "theme/products-page-item",
+    "file" => "theme/theme.inc",
   ];
 
   return $items;
@@ -137,8 +137,8 @@ function xdruple_queries_theme() {
  */
 function xdruple_queries_extensions_theme() {
   return [
-    'Xtuple\XdrupleQueries\Theme\CategoriesDropdown',
-    'Xtuple\XdrupleQueries\Theme\CategoriesAccordion',
+    "Xtuple\\XdrupleQueries\\Theme\\CategoriesDropdown",
+    "Xtuple\\XdrupleQueries\\Theme\\CategoriesAccordion",
   ];
 }
 
@@ -150,17 +150,17 @@ function xdruple_queries_extensions_theme() {
 function _xdruple_queries_load_orders($entity_type) {
   $orders = [];
 
-  if ($ship_to = xdruple_rescued_session_get('ship_to')) {
+  if ($ship_to = xdruple_rescued_session_get("ship_to")) {
     $cid = "xtuple_{$entity_type}-$ship_to";
-    $cache = cache_get($cid, 'cache');
+    $cache = cache_get($cid, "cache");
 
     if (empty($cache) || xdruple_cache_expired($cache)) {
       $conditions = [
-        'shipTo' => $ship_to,
+        "shipTo" => $ship_to,
       ];
 
       $orders = entity_load("xtuple_{$entity_type}", FALSE, $conditions);
-      cache_set($cid, $orders, 'cache', REQUEST_TIME + 60 * 5); // Expires 5 minutes from now.
+      cache_set($cid, $orders, "cache", REQUEST_TIME + 60 * 5); // Expires 5 minutes from now.
     }
     else {
       $orders = $cache->data;
@@ -193,44 +193,44 @@ function _xdruple_queries_load_products_by_order_type($order_type) {
  *
  * @return array
  */
-function _xdruple_prepare_products_list($product_ids = NULL, array $params = [], $product_item_theme = 'products_page_item') {
+function _xdruple_prepare_products_list($product_ids = NULL, array $params = [], $product_item_theme = "products_page_item") {
   /** @var stdClass $user */
   global $user;
 
   $list = [];
 
   if ($product_ids === NULL || !empty($product_ids)) {
-    if ($user->uid === 0 && variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE)) {
+    if ($user->uid === 0 && variable_get("xdruple_checkout_use_guest_customer_price_schedule", FALSE)) {
       // Get anonymous checkout defaults from control panel.
-      $customer = variable_get('xdruple_checkout_guest_customer', NULL);
+      $customer = variable_get("xdruple_checkout_guest_customer", NULL);
       $ship_to = NULL;
-      $site = variable_get('xdruple_commerce_default_warehouse', NULL);
+      $site = variable_get("xdruple_commerce_default_warehouse", NULL);
     }
     else {
       /** @var Xtuple\Xdruple\Session\RescuedSession $session */
       global $session;
-      $customer = $session->getRescued('customer');
-      $ship_to = $session->getRescued('ship_to');
-      $site = $session->getRescued('site');
+      $customer = $session->getRescued("customer");
+      $ship_to = $session->getRescued("ship_to");
+      $site = $session->getRescued("site");
     }
-    $scheduled_date = xdruple_rescued_session_get('scheduled_date');
+    $scheduled_date = xdruple_rescued_session_get("scheduled_date");
 
     $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'commerce_product');
+    $query->entityCondition("entity_type", "commerce_product");
     $query->pager(20);
 
     if (!empty($product_ids)) {
-      $query->propertyCondition('product_id', $product_ids, 'ANY');
+      $query->propertyCondition("product_id", $product_ids, "ANY");
     }
 
-    if (isset($_GET['search'])) {
+    if (isset($_GET["search"])) {
       $query->propertyCondition("q", str_replace("\\", "\\\\", urldecode($_GET["search"])), "CONTAINS");
       $query->pager(50);
     }
 
-    // Set a default order by so we don't get bogus duplicate results from the xTuple API.
-    // TODO: User a URL query parameter to change 'product_id' it different sort fields.
-    $query->propertyOrderBy('sku', 'ASC');
+    // Set a default order by so we don"t get bogus duplicate results from the xTuple API.
+    // TODO: User a URL query parameter to change "product_id" it different sort fields.
+    $query->propertyOrderBy("sku", "ASC");
 
     $products = $query->execute();
 
@@ -241,8 +241,8 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = [],
     // We can skip this call for now. This is one reason why the entity cache
     // and EntityFieldQuery cache need to work together.
     $products_list = [];
-    if (isset($products['commerce_product'])) {
-      foreach ($products['commerce_product'] as $product) {
+    if (isset($products["commerce_product"])) {
+      foreach ($products["commerce_product"] as $product) {
         $products_list[] = $product;
       }
     }
@@ -279,19 +279,19 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = [],
             $out = $process->getOutput();
             $finished_processes[$product_id] = json_decode($out);
 
-            $product = $products['commerce_product'][$product_id];
+            $product = $products["commerce_product"][$product_id];
             $line_item = commerce_product_line_item_new($product, $qty);
-            $line_item->data['context']['product_ids'] = [$product->product_id];
+            $line_item->data["context"]["product_ids"] = [$product->product_id];
 
             // Cache the price
-            $cid = 'xdruple_commerce_customer_line_item_price-' .
-              $customer . '-' .
-              $line_item->line_item_label . '-' .
-              strval($line_item->quantity) . '-' .
-              strval($scheduled_date) . '-' .
-              $ship_to . '-' .
+            $cid = "xdruple_commerce_customer_line_item_price-" .
+              $customer . "-" .
+              $line_item->line_item_label . "-" .
+              strval($line_item->quantity) . "-" .
+              strval($scheduled_date) . "-" .
+              $ship_to . "-" .
               $site;
-            cache_set($cid, $finished_processes[$product_id]->data->price, 'cache', REQUEST_TIME + 60 * 60 * 10);
+            cache_set($cid, $finished_processes[$product_id]->data->price, "cache", REQUEST_TIME + 60 * 60 * 10);
           }
         }
         usleep(20000);
@@ -331,8 +331,8 @@ function _xdruple_queries_add_to_cart_button($product, $show_qty = FALSE, $conte
   $form_id = commerce_cart_add_to_cart_form_id($product_ids);
 
   $line_item = commerce_product_line_item_new($product, $qty, $order_id, []);
-  $line_item->data['context']['product_ids'] = $product_ids;
-  $line_item->data['context']['add_to_cart_combine'] = TRUE;
+  $line_item->data["context"]["product_ids"] = $product_ids;
+  $line_item->data["context"]["add_to_cart_combine"] = TRUE;
 
   $form = drupal_get_form($form_id, $line_item, $show_qty, $context);
 
@@ -348,13 +348,13 @@ function _xdruple_queries_add_to_cart_button($product, $show_qty = FALSE, $conte
  * @return string
  * @throws \Exception
  */
-function _xdruple_queries_product_image($product, $style = '') {
-  $img = !empty($product->xt_url_image_field[LANGUAGE_NONE][0]['uri']) ? l(theme('image_style', [
-    'style_name' => $style,
-    'path' => $product->xt_url_image_field[LANGUAGE_NONE][0]['uri'],
+function _xdruple_queries_product_image($product, $style = "") {
+  $img = !empty($product->xt_url_image_field[LANGUAGE_NONE][0]["uri"]) ? l(theme("image_style", [
+    "style_name" => $style,
+    "path" => $product->xt_url_image_field[LANGUAGE_NONE][0]["uri"],
   ]), "products/{$product->product_id}", [
-    'html' => TRUE,
-  ]) : '';
+    "html" => TRUE,
+  ]) : "";
 
   return $img;
 }
@@ -372,13 +372,13 @@ function _xdruple_queries_product_image($product, $style = '') {
 function _xdruple_queries_price($product, $qty = 1, $order_id = 0, $format = TRUE) {
   $line_item = commerce_product_line_item_new($product, $qty, $order_id, [], NULL);
   xdruple_commerce_get_customer_line_item_price($line_item);
-  $unit_price = $line_item->commerce_unit_price[LANGUAGE_NONE]['0'];
+  $unit_price = $line_item->commerce_unit_price[LANGUAGE_NONE]["0"];
 
   if ($format) {
-    $price = commerce_currency_format($unit_price['amount'], $unit_price['currency_code']);
+    $price = commerce_currency_format($unit_price["amount"], $unit_price["currency_code"]);
   }
   else {
-    $price = $unit_price['amount'];
+    $price = $unit_price["amount"];
   }
 
   return $price;
@@ -390,63 +390,63 @@ function _xdruple_queries_prepare_curl($product, $qty) {
 
   $product_id = $product->sku;
 
-  $scheduled_date = xdruple_rescued_session_get('scheduled_date');
+  $scheduled_date = xdruple_rescued_session_get("scheduled_date");
   if (empty($scheduled_date)) {
-    $scheduled_date = xdruple_rescued_scheduled_date('tomorrow');
+    $scheduled_date = xdruple_rescued_scheduled_date("tomorrow");
   }
-  $access_token = json_decode($_SESSION['access_token']);
+  $access_token = json_decode($_SESSION["access_token"]);
 
   $line_item = commerce_product_line_item_new($product, $qty);
-  $line_item->data['context']['product_ids'] = [$product->product_id];
+  $line_item->data["context"]["product_ids"] = [$product->product_id];
   $price = xdruple_commerce_get_customer_line_item_price($line_item, TRUE);
   if ($price === NULL) {
-    if ($user->uid === 0 && variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE)) {
+    if ($user->uid === 0 && variable_get("xdruple_checkout_use_guest_customer_price_schedule", FALSE)) {
       // Get anonymous checkout defaults from control panel.
-      $customer = variable_get('xdruple_checkout_guest_customer', NULL);
+      $customer = variable_get("xdruple_checkout_guest_customer", NULL);
       $ship_to = NULL;
-      $site = variable_get('xdruple_commerce_default_warehouse', NULL);
+      $site = variable_get("xdruple_commerce_default_warehouse", NULL);
     }
     else {
       /** @var Xtuple\Xdruple\Session\RescuedSession $session */
       global $session;
-      $customer = $session->getRescued('customer');
-      $ship_to = $session->getRescued('ship_to');
-      $site = $session->getRescued('site');
+      $customer = $session->getRescued("customer");
+      $ship_to = $session->getRescued("ship_to");
+      $site = $session->getRescued("site");
     }
 
     if (empty($customer)) {
-      drupal_set_message('Cannot get a price quote without a Customer selected. Please set your order defaults.', 'warning');
+      drupal_set_message("Cannot get a price quote without a Customer selected. Please set your order defaults.", "warning");
     }
     if (empty($site)) {
-      drupal_set_message('Cannot get a price quote without a Warehouse/Site selected. Please set your order defaults.', 'warning');
+      drupal_set_message("Cannot get a price quote without a Warehouse/Site selected. Please set your order defaults.", "warning");
     }
     if (empty($scheduled_date)) {
-      drupal_set_message('Cannot get a price quote without a Scheduled Date selected. Please set your order defaults.', 'warning');
+      drupal_set_message("Cannot get a price quote without a Scheduled Date selected. Please set your order defaults.", "warning");
     }
 
     $d_array = [
-      'attributes' => [
+      "attributes" => [
         $customer,
         $product_id,
         $qty,
         [
-          'asOf' => $scheduled_date,
-          'siteId' => $site,
-          'effective' => date('Y-m-d'),
+          "asOf" => $scheduled_date,
+          "siteId" => $site,
+          "effective" => date("Y-m-d"),
         ],
       ],
     ];
 
     if (!empty($ship_to)) {
-      $d_array['attributes'][3]['shiptoId'] = $ship_to;
+      $d_array["attributes"][3]["shiptoId"] = $ship_to;
     }
 
     $d = json_encode($d_array);
 
     $config = rescued_get_configuration();
 
-    $uri = $config->apiUrl() . '/services/customer/item-price';
-    $debug_flag = variable_get('rescued_debug_mode', FALSE) ? ' -k' : '';
+    $uri = $config->apiUrl() . "/services/customer/item-price";
+    $debug_flag = variable_get("rescued_debug_mode", FALSE) ? " -k" : "";
     $curl = "curl$debug_flag -X POST -H \"Content-Type: application/json\" -d '$d' $uri?access_token={$access_token->access_token}";
 
     return $curl;
