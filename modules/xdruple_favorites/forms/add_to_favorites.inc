@@ -44,7 +44,7 @@ function xdruple_favorites_add_to_favorites_form_submit($form, &$form_state) {
     $std_order_product = entity_create($entity_type, [
       'product' => $values['product_id'],
       'customer' => $values['customer'],
-      'shipto' => $values['ship_to'],
+      'shipTo' => $values['ship_to'],
     ]);
     entity_save($entity_type, $std_order_product);
 

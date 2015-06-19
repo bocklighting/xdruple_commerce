@@ -44,7 +44,7 @@ function xdruple_favorites_remove_from_favorites_form_submit($form, &$form_state
     $std_order_product = entity_load($entity_type, FALSE, [
       'product' => $values['product_id'],
       'customer' => $values['customer'],
-      'shipto' => $values['ship_to'],
+      'shipTo' => $values['ship_to'],
     ]);
     if (count($std_order_product) === 1) {
       $uuid = key($std_order_product);
