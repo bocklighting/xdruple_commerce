@@ -16,33 +16,22 @@ function xdruple_queries_product_page($product_id) {
     drupal_not_found();
     return MENU_NOT_FOUND;
   }
-  $output = [];
-  if (user_access("administer rescued entities")) {
-    $output[] = [
-      "#theme" => "bootstrap_pills",
-      "#items" => [
-        [
-          "title" => t("Edit"),
-          "link" => "admin/commerce/products/$product_id/edit",
-        ],
-      ],
-    ];
-  }
-
   if ($product = entity_load_single("commerce_product", $product_id)) {
-    /** @var array $product_view */
-    if ($product_view = entity_view("commerce_product", [$product], "full", NULL, TRUE)) {
-      $product_view["commerce_product"][$product_id]["product_price"] = [
+    /** @var array $output */
+    if ($output = entity_view("commerce_product", [$product], "full", NULL, TRUE)) {
+      $output["commerce_product"][$product_id]["product_price"] = [
         "#markup" => _xdruple_queries_price($product),
         "#weight" => 20,
       ];
-      $product_view["commerce_product"][$product_id]["add_to_cart"] = [
+      $output["commerce_product"][$product_id]["add_to_cart"] = [
         "#markup" => _xdruple_queries_add_to_cart_button($product, TRUE, [
           "commerce_product_page" => TRUE,
         ]),
         "#weight" => 20,
       ];
-      $output = array_merge($output, $product_view);
+    }
+    else {
+      $output = [];
     }
   }
   else {
