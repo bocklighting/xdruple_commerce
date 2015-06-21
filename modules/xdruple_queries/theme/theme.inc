@@ -158,13 +158,6 @@ function template_preprocess_xdruple_queries_price(&$variables) {
     $uom_ratio = $variables["product"]->uomRatio;
   }
   $variables["price"] = _xdruple_queries_price($variables["product"], $variables["quantity"], $variables["order_id"], $variables["format"], $uom_ratio);
-  if (empty($variables["label"])) {
-    $variables["label_position"] = LABEL_HIDDEN;
-  }
-  $variables["classes_array"]["field"] = "field";
-  $variables["classes_array"]["field-product-price"] = "field-product-price";
-  $label_position_class = drupal_clean_css_identifier("field-label-{$variables["label_position"]}");
-  $variables["classes_array"][$label_position_class] = $label_position_class;
 }
 
 function template_process_xdruple_queries_price(&$variables) {

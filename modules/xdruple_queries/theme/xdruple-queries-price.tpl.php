@@ -10,9 +10,9 @@
 <?php if ($price): ?>
   <div class="<?php print $classes ?>"<?php print $attributes ?>>
     <?php if ($label): ?>
-      <div class="field-label"><?php print $label ?>:&nbsp;</div>
+      <div class="xdruple-queries-price--label"><?php print $label ?>:&nbsp;</div>
     <?php endif; ?>
-    <div class="field-item">
+    <div class="xdruple-queries-price--item">
       <span><?php print $price ?></span>
       <?php if ($unit): ?>
         <small>/&nbsp;<?php print $unit ?></small>
