@@ -195,17 +195,22 @@ function template_process_xdruple_queries_price(&$variables) {
 }
 
 function template_preprocess_xdruple_queries_add_to_cart_button(&$variables) {
+  $product = $variables["product"];
+  $product_ids = [
+    $product->product_id,
+  ];
+  $form_id = commerce_cart_add_to_cart_form_id($product_ids);
+  /** @var \stdClass $line_item */
+  $line_item = commerce_product_line_item_new($product, $variables["quantity"], $variables["order_id"], []);
+  $line_item->data["context"]["product_ids"] = $product_ids;
+  $line_item->data["context"]["add_to_cart_combine"] = TRUE;
+  $variables["line_item"] = $line_item;
+  $variables["form"] = drupal_get_form($form_id, $line_item, $variables["show_quantity"], $variables["context"]);
 }
 
 function template_process_xdruple_queries_add_to_cart_button(&$variables) {
 }
 
 function theme_xdruple_queries_add_to_cart_button(&$variables) {
-  return _xdruple_queries_add_to_cart_button(
-    $variables["product"],
-    $variables["show_quantity"],
-    $variables["context"],
-    $variables["quantity"],
-    $variables["order_id"]
-  );
+  return drupal_render($variables["form"]);
 }
