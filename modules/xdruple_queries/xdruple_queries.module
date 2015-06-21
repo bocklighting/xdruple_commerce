@@ -5,13 +5,13 @@
  */
 
 include_once __DIR__ . "/pages/products_by_category.inc";
+include_once __DIR__ . "/pages/product.inc";
 
 /**
  * Implements hook_init()
  */
 function xdruple_queries_init() {
   module_load_include("inc", "xdruple_queries", "pages/categories");
-  module_load_include("inc", "xdruple_queries", "pages/product");
 }
 
 /**
