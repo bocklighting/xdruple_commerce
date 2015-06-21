@@ -891,8 +891,7 @@ function _xdruple_commerce_convert_uom_price($price, $uom_ratio) {
  * @param array  $postBody      The structured query to perform.
  * @param array  $optParams     Additional option parameters.
  *
- * @return array The query result response.
- * @internal param string $discovery_client The API client name. e.g. 'xtuple'
+ * @return float The query result response.
  */
 function xdruple_commerce_api_customer_item_price($resource_name = 'Customer', $postBody, $optParams = []) {
   $client = rescued_api_get_client();
@@ -964,7 +963,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
  * @param $line_item
  * @param $cache_only
  *
- * @return array
+ * @return float
  */
 function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only = FALSE) {
   /** @var stdClass $user */

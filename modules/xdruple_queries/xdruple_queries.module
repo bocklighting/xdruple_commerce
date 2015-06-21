@@ -295,11 +295,10 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = [],
 
     /** @var \Symfony\Component\Process\Process[] $processes */
     $processes = [];
-
+    $qty = 1;
     // Creating the list of processes
     foreach ($products_list as $product) {
       $product_id = $product->product_id;
-      $qty = 1;
       $curl = _xdruple_queries_prepare_curl($product, $qty);
       if ($curl !== NULL) {
         $processes[$product_id] = new \Symfony\Component\Process\Process($curl);
@@ -326,6 +325,7 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = [],
             $finished_processes[$product_id] = json_decode($out);
 
             $product = $products["commerce_product"][$product_id];
+            /** @var \stdClass $line_item */
             $line_item = commerce_product_line_item_new($product, $qty);
             $line_item->data["context"]["product_ids"] = [$product->product_id];
 
@@ -392,7 +392,7 @@ function _xdruple_queries_prepare_curl($product, $qty) {
     $scheduled_date = xdruple_rescued_scheduled_date("tomorrow");
   }
   $access_token = json_decode($_SESSION["access_token"]);
-
+  /** @var \stdClass $line_item */
   $line_item = commerce_product_line_item_new($product, $qty);
   $line_item->data["context"]["product_ids"] = [$product->product_id];
   $price = xdruple_commerce_get_customer_line_item_price($line_item, TRUE);
