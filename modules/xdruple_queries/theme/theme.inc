@@ -147,3 +147,18 @@ function template_preprocess_products_page_item(&$variables) {
     ],
   ]);
 }
+
+function template_preprocess_xdruple_queries_price(&$variables) {
+  $variables["price"] = _xdruple_queries_price($variables["product"], $variables["quantity"], $variables["order_id"], $variables["format"]);
+  $variables["classes_array"]["field"] = "field";
+  $variables["classes_array"]["field-product-price"] = "field-product-price";
+  $label_position_class = drupal_clean_css_identifier("field-label-{$variables["label_position"]}");
+  $variables["classes_array"][$label_position_class] = $label_position_class;
+}
+
+function template_process_xdruple_queries_price(&$variables) {
+  if ($variables["label"]) {
+    $variables["label"] = t($variables["label"]);
+  }
+  $variables["unit"] = strtolower($variables["unit"]);
+}

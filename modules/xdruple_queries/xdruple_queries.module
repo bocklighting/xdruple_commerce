@@ -109,7 +109,6 @@ function xdruple_queries_rescued_resources() {
  */
 function xdruple_queries_theme() {
   $items = [];
-
   $items["products_page"] = [
     "variables" => [
       "products" => [],
@@ -117,7 +116,6 @@ function xdruple_queries_theme() {
     "template" => "theme/products-page",
     "file" => "theme/theme.inc",
   ];
-
   $items["products_page_item"] = [
     "variables" => [
       "product" => NULL,
@@ -126,7 +124,19 @@ function xdruple_queries_theme() {
     "template" => "theme/products-page-item",
     "file" => "theme/theme.inc",
   ];
-
+  $items["xdruple_queries_price"] = [
+    "variables" => [
+      "product" => NULL,
+      "quantity" => 1,
+      "order_id" => 0,
+      "format" => TRUE,
+      "unit" => "",
+      "label" => "Price",
+      "label_position" => LABEL_ABOVE,
+    ],
+    "template" => "theme/xdruple-queries-price",
+    "file" => "theme/theme.inc",
+  ];
   return $items;
 }
 
@@ -150,8 +160,13 @@ function xdruple_queries_extensions_theme() {
  */
 function xdruple_queries_entity_view_alter(&$build, $type) {
   if ($type == "commerce_product" && $build["#view_mode"] == "full") {
+    $unit_key = $build['inventoryUnit']['#items'][0]['value'];
+    $units = xdruple_fields_get_uom_list();
+    $unit = $units[$unit_key];
     $build["product_price"] = [
-      "#markup" => _xdruple_queries_price($build["#entity"]),
+      "#theme" => "xdruple_queries_price",
+      "#product" => $build["#entity"],
+      "#unit" => $unit,
       "#weight" => 20,
     ];
     $build["add_to_cart"] = [
