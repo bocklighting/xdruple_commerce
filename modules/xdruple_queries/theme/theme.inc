@@ -175,7 +175,17 @@ function template_preprocess_xdruple_queries_price(&$variables) {
   if ($variables["unit_price"]) {
     $uom_ratio = $variables["product"]->uomRatio;
   }
-  $variables["price"] = _xdruple_queries_price($variables["product"], $variables["quantity"], $variables["order_id"], $variables["format"], $uom_ratio);
+  /** @var \stdClass $line_item */
+  $line_item = commerce_product_line_item_new($variables["product"], $variables["quantity"], $variables["order_id"], [], NULL);
+  xdruple_commerce_get_customer_line_item_price($line_item);
+  $unit_price = $line_item->commerce_unit_price[LANGUAGE_NONE][0];
+  if ($variables["format"]) {
+    $price = commerce_currency_format($unit_price["amount"] / $uom_ratio, $unit_price["currency_code"]);
+  }
+  else {
+    $price = $unit_price["amount"] / $uom_ratio;
+  }
+  $variables["price"] = $price;
   if ($variables["show_unit"]) {
     if ($variables["unit_price"]) {
       $unit = $variables["product"]->priceUnit;
