@@ -1218,12 +1218,62 @@ function xdruple_commerce_checkout_review($variables) {
   return implode('', $rows);
 }
 
-// @TODO This code is trash. It's used to "theme" checkout review page, which is extremely hard to do due to the
-// fact, that the page itself build poorly (hard to theme) and the structure of the entity to render is enormous due
-// to usage of entity references
 function xdruple_commerce_entity_view_alter(&$build, $type) {
-  if ($type == 'commerce_product' && $build['#view_mode'] == 'full') {
-    _xdruple_commerce_product_entity_view_alter($build);
+  if ($type == "commerce_product" && $build["#view_mode"] == "full") {
+    $config = xdruple_commerce_get_product_display_config();
+    foreach ($build as $key => &$item) {
+      if (is_array($item) && !empty($item["#theme"]) && $item["#theme"] == "field") {
+        $item["#access"] = FALSE;
+        if (!empty($config[$key])) {
+          $field_config = $config[$key];
+          if (!empty($field_config["title"])) {
+            $item["#title"] = t($field_config["title"]);
+          }
+          $item["#label_display"] = $field_config["label"];
+          $item["#weight"] = $field_config["weight"];
+          $item["#access"] = TRUE;
+        }
+      }
+    }
+    // Overriding any current value for xt_url_image_field display
+    if (!empty($build["xt_url_image_field"]["#items"]) && $build["xt_url_image_field"]["#access"]) {
+      $img_field = &$build["xt_url_image_field"];
+      $img_field["#formatter"] = "fancybox";
+      foreach ($img_field["#items"] as $i => $item) {
+        $img_field[$i] = [
+          "#theme" => "fancybox_formatter_default",
+          "#settings" => [
+            "cyclic" => TRUE,
+            "full" => "large",
+            "preview" => "ft_commerce_product_page_thumb_small",
+            "title_position" => "over",
+            "title_show" => TRUE,
+          ],
+          "#item" => [
+            "path" => $item["uri"],
+            "width" => $item["width"],
+            "height" => $item["height"],
+            "alt" => $item["alt"],
+            "title" => $item["title"],
+          ],
+          "#class" => ["fancybox-commerce-product-product-xt-url-image-field"],
+          "#rel" => "fancybox-commerce-product-product-xt-url-image-field",
+        ];
+      }
+    }
+    // Overriding default substitutes property to be themed
+    if (!empty($build["substitutes"]["#items"])) {
+      foreach ($build["substitutes"]["#items"] as $i => $product_id) {
+        $build["substitutes"][$i] = [
+          "#theme" => "xdruple_commerce_similar_product_link_default",
+          "#product_id" => $product_id,
+          "#style" => "ft_commerce_product_thumb",
+        ];
+      }
+    }
+    else {
+      $build["substitutes"]["#access"] = FALSE;
+    }
   }
 }
 
@@ -1615,78 +1665,6 @@ function xdruple_commerce_get_product_display_config() {
   }
 
   return $config;
-}
-
-/**
- * Helper function. Process hook_entity_view_alter() for product entity, full mode
- *
- * @see xdruple_commerce_entity_view_alter()
- * @see hook_entity_view_alter()
- *
- * @param $build
- */
-function _xdruple_commerce_product_entity_view_alter(&$build) {
-  $config = xdruple_commerce_get_product_display_config();
-
-  foreach ($build as $key => &$item) {
-    if (is_array($item) && !empty($item['#theme']) && $item['#theme'] == 'field') {
-      $item['#access'] = FALSE;
-
-      if (!empty($config[$key])) {
-        $field_config = $config[$key];
-
-        if (!empty($field_config['title'])) {
-          $item['#title'] = t($field_config['title']);
-        }
-
-        $item['#label_display'] = $field_config['label'];
-        $item['#weight'] = $field_config['weight'];
-
-        $item['#access'] = TRUE;
-      }
-    }
-  }
-
-  // Overriding any current value for xt_url_image_field display
-  if (!empty($build['xt_url_image_field']['#items']) && $build['xt_url_image_field']['#access']) {
-    $img_field = &$build['xt_url_image_field'];
-    $img_field['#formatter'] = 'fancybox';
-    foreach ($img_field['#items'] as $i => $item) {
-      $img_field[$i] = [
-        '#theme' => 'fancybox_formatter_default',
-        '#settings' => [
-          'cyclic' => TRUE,
-          'full' => 'large',
-          'preview' => 'ft_commerce_product_page_thumb_small',
-          'title_position' => 'over',
-          'title_show' => TRUE,
-        ],
-        '#item' => [
-          'path' => $item['uri'],
-          'width' => $item['width'],
-          'height' => $item['height'],
-          'alt' => $item['alt'],
-          'title' => $item['title'],
-        ],
-        '#class' => ['fancybox-commerce-product-product-xt-url-image-field'],
-        '#rel' => 'fancybox-commerce-product-product-xt-url-image-field',
-      ];
-    }
-  }
-
-  // Overriding default substitutes property to be themed
-  if (!empty($build['substitutes']['#items'])) {
-    foreach ($build['substitutes']['#items'] as $i => $product_id) {
-      $build['substitutes'][$i] = [
-        '#theme' => 'xdruple_commerce_similar_product_link_default',
-        '#product_id' => $product_id,
-        '#style' => 'ft_commerce_product_thumb',
-      ];
-    }
-  }
-  else {
-    $build['substitutes']['#access'] = FALSE;
-  }
 }
 
 /**
