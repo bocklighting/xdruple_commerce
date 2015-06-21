@@ -16,29 +16,14 @@ function xdruple_queries_product_page($product_id) {
     drupal_not_found();
     return MENU_NOT_FOUND;
   }
-  if ($product = entity_load_single("commerce_product", $product_id)) {
-    /** @var array $output */
-    if ($output = entity_view("commerce_product", [$product], "full", NULL, TRUE)) {
-      $output["commerce_product"][$product_id]["product_price"] = [
-        "#markup" => _xdruple_queries_price($product),
-        "#weight" => 20,
-      ];
-      $output["commerce_product"][$product_id]["add_to_cart"] = [
-        "#markup" => _xdruple_queries_add_to_cart_button($product, TRUE, [
-          "commerce_product_page" => TRUE,
-        ]),
-        "#weight" => 20,
-      ];
-    }
-    else {
-      $output = [];
-    }
-  }
-  else {
+  try {
+    $product = entity_load_single("commerce_product", $product_id);
+    $output = entity_view("commerce_product", [$product], "full", NULL, TRUE);
+  } catch (\Exception $e) {
+    watchdog_exception("xdruple_queries", $e);
     drupal_not_found();
     return MENU_NOT_FOUND;
   }
-
   return $output;
 }
 

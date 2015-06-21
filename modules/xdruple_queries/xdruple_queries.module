@@ -131,7 +131,7 @@ function xdruple_queries_theme() {
 }
 
 /**
- * Implements hook_theme_objects()
+ * Implements hook_extensions_theme()
  *
  * @return array
  */
@@ -140,6 +140,27 @@ function xdruple_queries_extensions_theme() {
     "Xtuple\\XdrupleQueries\\Theme\\CategoriesDropdown",
     "Xtuple\\XdrupleQueries\\Theme\\CategoriesAccordion",
   ];
+}
+
+/**
+ * Implements hook_entity_view_alter()
+ *
+ * @param $build
+ * @param $type
+ */
+function xdruple_queries_entity_view_alter(&$build, $type) {
+  if ($type == "commerce_product" && $build["#view_mode"] == "full") {
+    $build["product_price"] = [
+      "#markup" => _xdruple_queries_price($build["#entity"]),
+      "#weight" => 20,
+    ];
+    $build["add_to_cart"] = [
+      "#markup" => _xdruple_queries_add_to_cart_button($build["#entity"], TRUE, [
+        "commerce_product_page" => TRUE,
+      ]),
+      "#weight" => 20,
+    ];
+  }
 }
 
 /**
