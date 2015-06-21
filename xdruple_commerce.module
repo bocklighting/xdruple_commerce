@@ -224,48 +224,6 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
 }
 
 /**
- * Implements hook_rescued_operation_entityform_alter().
- *
- * @param $form
- * @param $form_state
- * @param $context
- */
-function xdruple_commerce_rescued_operation_entityform_alter(&$form, &$form_state, $context) {
-  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-  global $session;
-
-  if (isset($context['entity_type']) && $context['entity_type'] === 'xtuple_xdstdordproduct') {
-    // Default this form to the customer and ship to in the user's session.
-    if ($session->getRescued('customer')) {
-      $customer = $session->getRescued('customer');
-      $form['customer']['#default_value'] = $customer;
-      $form['customer']['#options'] = [$customer => $customer];
-    }
-    else {
-      $customer = NULL;
-    }
-    if ($session->getRescued('ship_to')) {
-      $form['shipto']['#default_value'] = $session->getRescued('ship_to');
-      $form['shipto']['#options'] = xdruple_fields_get_ship_to_list($customer);
-    }
-  }
-
-  if (isset($context['entity_type']) &&
-    ($context['entity_type'] === 'commerce_product' || $context['entity_type'] === 'XdProduct' || $context['entity_type'] === 'xtuple_xdproduct')
-  ) {
-
-    // Make 'weightUnit' read only.
-    $form['weightUnit']['#attributes']['disabled'] = TRUE;
-    $description = t("This field is derived from xTuple's Setup->Products->Units Of Measure with the 'Item Weight' flag set. It cannot be changed here.");
-    $form['weightUnit']['#description'] = $description;
-    // Make 'uomRatio' read only.
-    $form['uomRatio']['#attributes']['disabled'] = TRUE;
-    $description = t("This field is derived from xTuple's Units Of Measure Ratios. It cannot be changed here.");
-    $form['uomRatio']['#description'] = $description;
-  }
-}
-
-/**
  * Implements hook_entity_property_info_alter()
  *
  * Add our custom xTuple properties.
