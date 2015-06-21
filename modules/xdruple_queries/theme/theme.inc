@@ -115,10 +115,14 @@ function template_preprocess_products_page_item(&$variables) {
   $params = $variables['params'];
 
   $variables['id'] = $product->product_id;
-  $variables['price'] = _xdruple_queries_price($product);
-
   $units = xdruple_fields_get_uom_list();
   $variables['unit'] = $units[$product->inventoryUnit];
+  $variables['price'] = [
+    "#theme"=> "xdruple_queries_price",
+    "#product" => $product,
+    "#unit" => $variables["unit"],
+    "#label" => "",
+  ];
   $variables['title'] = l($product->title, "products/{$product->product_id}");
   $variables['subtitle'] = $product->subTitle;
   $variables['img'] = _xdruple_queries_product_image($product, 'ft_commerce_product_thumb');
@@ -149,7 +153,14 @@ function template_preprocess_products_page_item(&$variables) {
 }
 
 function template_preprocess_xdruple_queries_price(&$variables) {
-  $variables["price"] = _xdruple_queries_price($variables["product"], $variables["quantity"], $variables["order_id"], $variables["format"]);
+  $uom_ratio = 1;
+  if ($variables["unit_price"]) {
+    $uom_ratio = $variables["product"]->uomRatio;
+  }
+  $variables["price"] = _xdruple_queries_price($variables["product"], $variables["quantity"], $variables["order_id"], $variables["format"], $uom_ratio);
+  if (empty($variables["label"])) {
+    $variables["label_position"] = LABEL_HIDDEN;
+  }
   $variables["classes_array"]["field"] = "field";
   $variables["classes_array"]["field-product-price"] = "field-product-price";
   $label_position_class = drupal_clean_css_identifier("field-label-{$variables["label_position"]}");
@@ -160,5 +171,4 @@ function template_process_xdruple_queries_price(&$variables) {
   if ($variables["label"]) {
     $variables["label"] = t($variables["label"]);
   }
-  $variables["unit"] = strtolower($variables["unit"]);
 }

@@ -131,6 +131,7 @@ function xdruple_queries_theme() {
       "order_id" => 0,
       "format" => TRUE,
       "unit" => "",
+      "unit_price" => FALSE,
       "label" => "Price",
       "label_position" => LABEL_ABOVE,
     ],
@@ -402,19 +403,20 @@ function _xdruple_queries_product_image($product, $style = "") {
  * @param int  $qty
  * @param int  $order_id
  * @param bool $format
+ * @param int  $uom_ratio
  *
  * @return string
  */
-function _xdruple_queries_price($product, $qty = 1, $order_id = 0, $format = TRUE) {
+function _xdruple_queries_price($product, $qty = 1, $order_id = 0, $format = TRUE, $uom_ratio = 1) {
   $line_item = commerce_product_line_item_new($product, $qty, $order_id, [], NULL);
   xdruple_commerce_get_customer_line_item_price($line_item);
   $unit_price = $line_item->commerce_unit_price[LANGUAGE_NONE]["0"];
 
   if ($format) {
-    $price = commerce_currency_format($unit_price["amount"], $unit_price["currency_code"]);
+    $price = commerce_currency_format($unit_price["amount"] / $uom_ratio, $unit_price["currency_code"]);
   }
   else {
-    $price = $unit_price["amount"];
+    $price = $unit_price["amount"] / $uom_ratio;
   }
 
   return $price;
