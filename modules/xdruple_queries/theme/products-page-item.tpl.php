@@ -15,7 +15,7 @@
 <?php endif; ?>
 <?php if (!empty($price)): ?>
   <h4 class="views-field views-field-commerce-price">
-    <span class="field-content"><?php print drupal_render($price) ?></span>
+    <span class="field-content"><?php print $price ?></span>
   </h4>
 <?php endif; ?>
 <?php if (!empty($read_more)): ?>

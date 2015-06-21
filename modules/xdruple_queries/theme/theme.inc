@@ -141,7 +141,14 @@ function template_preprocess_products_page_item(&$variables) {
     if (isset($params['fields']['add_to_cart']['order_id'])) {
       $order_id = $params['fields']['add_to_cart']['order_id'];
     }
-    $variables['add_to_cart'] = _xdruple_queries_add_to_cart_button($product, $show_qty, [], $qty, $order_id);
+    $variables['add_to_cart'] = [
+      "#theme" => "xdruple_queries_add_to_cart_button",
+      "#product" => $product,
+      "#show_quantity" => $show_qty,
+      "#context" => [],
+      "#quantity" => $qty,
+      "#order_id" => $order_id,
+    ];
   }
 
   $variables['read_more'] = l('Read more', "products/$product->product_id", [
@@ -149,6 +156,18 @@ function template_preprocess_products_page_item(&$variables) {
       'class' => ['btn', 'btn-info'],
     ],
   ]);
+}
+
+function template_process_products_page_item(&$variables) {
+  if (!empty($variables["unit_price"])) {
+    $variables["unit_price"] = drupal_render($variables["unit_price"]);
+  }
+  if (!empty($variables["price"])) {
+    $variables["price"] = drupal_render($variables["price"]);
+  }
+  if (!empty($variables["add_to_cart"])) {
+    $variables["add_to_cart"] = drupal_render($variables["add_to_cart"]);
+  }
 }
 
 function template_preprocess_xdruple_queries_price(&$variables) {
@@ -173,4 +192,20 @@ function template_process_xdruple_queries_price(&$variables) {
   if ($variables["label"]) {
     $variables["label"] = t($variables["label"]);
   }
+}
+
+function template_preprocess_xdruple_queries_add_to_cart_button(&$variables) {
+}
+
+function template_process_xdruple_queries_add_to_cart_button(&$variables) {
+}
+
+function theme_xdruple_queries_add_to_cart_button(&$variables) {
+  return _xdruple_queries_add_to_cart_button(
+    $variables["product"],
+    $variables["show_quantity"],
+    $variables["context"],
+    $variables["quantity"],
+    $variables["order_id"]
+  );
 }

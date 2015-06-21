@@ -137,6 +137,16 @@ function xdruple_queries_theme() {
     "template" => "theme/xdruple-queries-price",
     "file" => "theme/theme.inc",
   ];
+  $items["xdruple_queries_add_to_cart_button"] = [
+    "variables" => [
+      "product" => NULL,
+      "quantity" => 1,
+      "show_quantity" => FALSE,
+      "context" => [],
+      "order_id" => 0,
+    ],
+    "file" => "theme/theme.inc",
+  ];
   return $items;
 }
 
@@ -167,9 +177,12 @@ function xdruple_queries_entity_view_alter(&$build, $type) {
       "#weight" => 20,
     ];
     $build["add_to_cart"] = [
-      "#markup" => _xdruple_queries_add_to_cart_button($build["#entity"], TRUE, [
+      "#theme" => "xdruple_queries_add_to_cart_button",
+      "#product" => $build["#entity"],
+      "#show_quantity" => TRUE,
+      "#context" => [
         "commerce_product_page" => TRUE,
-      ]),
+      ],
       "#weight" => 20,
     ];
   }
