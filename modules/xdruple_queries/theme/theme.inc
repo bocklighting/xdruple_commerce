@@ -118,9 +118,8 @@ function template_preprocess_products_page_item(&$variables) {
   $units = xdruple_fields_get_uom_list();
   $variables['unit'] = $units[$product->inventoryUnit];
   $variables['price'] = [
-    "#theme"=> "xdruple_queries_price",
+    "#theme" => "xdruple_queries_price",
     "#product" => $product,
-    "#unit" => $variables["unit"],
     "#label" => "",
   ];
   $variables['title'] = l($product->title, "products/{$product->product_id}");
@@ -158,6 +157,16 @@ function template_preprocess_xdruple_queries_price(&$variables) {
     $uom_ratio = $variables["product"]->uomRatio;
   }
   $variables["price"] = _xdruple_queries_price($variables["product"], $variables["quantity"], $variables["order_id"], $variables["format"], $uom_ratio);
+  if ($variables["show_unit"]) {
+    if ($variables["unit_price"]) {
+      $unit = $variables["product"]->priceUnit;
+    }
+    else {
+      $unit = $variables["product"]->inventoryUnit;
+    }
+    $units = xdruple_fields_get_uom_list();
+    $variables["unit"] = $units[$unit];
+  }
 }
 
 function template_process_xdruple_queries_price(&$variables) {

@@ -130,10 +130,9 @@ function xdruple_queries_theme() {
       "quantity" => 1,
       "order_id" => 0,
       "format" => TRUE,
-      "unit" => "",
+      "show_unit" => TRUE,
       "unit_price" => FALSE,
       "label" => "Price",
-      "label_position" => LABEL_ABOVE,
     ],
     "template" => "theme/xdruple-queries-price",
     "file" => "theme/theme.inc",
@@ -161,13 +160,10 @@ function xdruple_queries_extensions_theme() {
  */
 function xdruple_queries_entity_view_alter(&$build, $type) {
   if ($type == "commerce_product" && $build["#view_mode"] == "full") {
-    $unit_key = $build['inventoryUnit']['#items'][0]['value'];
-    $units = xdruple_fields_get_uom_list();
-    $unit = $units[$unit_key];
     $build["product_price"] = [
       "#theme" => "xdruple_queries_price",
       "#product" => $build["#entity"],
-      "#unit" => $unit,
+      "#show_unit" => TRUE,
       "#weight" => 20,
     ];
     $build["add_to_cart"] = [

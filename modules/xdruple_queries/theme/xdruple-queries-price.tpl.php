@@ -4,6 +4,7 @@
  * @var string $attributes
  * @var string $label
  * @var string $price
+ * @var bool   $show_unit
  * @var string $unit
  */
 ?>
@@ -14,7 +15,7 @@
     <?php endif; ?>
     <div class="xdruple-queries-price--item">
       <span><?php print $price ?></span>
-      <?php if ($unit): ?>
+      <?php if ($show_unit): ?>
         <small>/&nbsp;<?php print $unit ?></small>
       <?php endif; ?>
     </div>
