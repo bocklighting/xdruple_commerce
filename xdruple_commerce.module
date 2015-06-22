@@ -1188,7 +1188,9 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
           }
           $item["#label_display"] = $field_config["label"];
           $item["#weight"] = $field_config["weight"];
-          $item["#access"] = TRUE;
+          if (!isset($item["#access"])) {
+            $item["#access"] = TRUE;
+          } 
         }
       }
     }
