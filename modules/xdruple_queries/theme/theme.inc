@@ -222,3 +222,17 @@ function template_process_xdruple_queries_add_to_cart_button(&$variables) {
 function theme_xdruple_queries_add_to_cart_button(&$variables) {
   return drupal_render($variables["form"]);
 }
+
+function template_preprocess_product_page(&$variables) {
+  if (!empty($variables["product"])) {
+    $variables["entity_view_array"] = entity_view("commerce_product", [
+      $variables["product"],
+    ], "full", NULL, TRUE);
+  }
+}
+
+function template_process_product_page(&$variables) {
+  if (!empty($variables["entity_view_array"])) {
+    $variables["entity_view"] = drupal_render($variables["entity_view_array"]);
+  }
+}

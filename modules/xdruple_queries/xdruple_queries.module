@@ -124,6 +124,13 @@ function xdruple_queries_theme() {
     "template" => "theme/products-page-item",
     "file" => "theme/theme.inc",
   ];
+  $items["product_page"] = [
+    "variables" => [
+      "product" => NULL,
+    ],
+    "template" => "theme/product-page",
+    "file" => "theme/theme.inc",
+  ];
   $items["xdruple_queries_price"] = [
     "variables" => [
       "product" => NULL,

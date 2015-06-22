@@ -18,7 +18,10 @@ function xdruple_queries_product_page($product_id) {
   }
   try {
     $product = entity_load_single("commerce_product", $product_id);
-    $output = entity_view("commerce_product", [$product], "full", NULL, TRUE);
+    $output = [
+      "#theme" => "product_page",
+      "#product" => $product,
+    ];
   } catch (\Exception $e) {
     watchdog_exception("xdruple_queries", $e);
     drupal_not_found();
