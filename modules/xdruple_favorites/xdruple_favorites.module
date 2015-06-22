@@ -194,3 +194,24 @@ function xdruple_favorites_favorites_form_submit_ajax($form, $form_state) {
 function xdruple_favorites_favorite_products_page_title($variable, $default) {
   return t(variable_get($variable, $default));
 }
+
+/**
+ * Implements hook_preprocess_product_page().
+ *
+ * @param $variables
+ */
+function xdruple_favorites_preprocess_product_page(&$variables) {
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+    if (($customer = xdruple_rescued_session_get("customer"))
+      && ($ship_to = xdruple_rescued_session_get("ship_to"))
+    ) {
+      $form = xdruple_favorites_get_favorites_form($product->getId(), $customer, $ship_to);
+      $variables["context"]["add_to_standard"] = [
+        "#markup" => drupal_render($form),
+        "#weight" => 20,
+      ];
+    }
+  }
+}

@@ -225,14 +225,41 @@ function theme_xdruple_queries_add_to_cart_button(&$variables) {
 
 function template_preprocess_product_page(&$variables) {
   if (!empty($variables["product"])) {
-    $variables["entity_view_array"] = entity_view("commerce_product", [
-      $variables["product"],
+    $product = $variables["product"];
+    $variables["entity"] = entity_view("commerce_product", [
+      $product,
     ], "full", NULL, TRUE);
+    $variables["context"] = [];
+    $variables["context"]["product_price"] = [
+      "#theme" => "xdruple_queries_price",
+      "#product" => $product,
+      "#show_unit" => TRUE,
+      "#weight" => -10,
+    ];
+    $variables["context"]["add_to_cart"] = [
+      "#theme" => "xdruple_queries_add_to_cart_button",
+      "#product" => $product,
+      "#show_quantity" => TRUE,
+      "#context" => [
+        "commerce_product_page" => TRUE,
+      ],
+      "#weight" => -5,
+    ];
+    if (!empty($variables["entity"]["xt_url_image_field"])) {
+      $variables["context"]["xd_url_image_field"] = $variables["entity"]["xt_url_image_field"];
+    }
+    if (!empty($variables["entity"]["xt_url_file_field"])) {
+      $variables["context"]["xt_url_file_field"] = $variables["entity"]["xt_url_file_field"];
+    }
+    if (!empty($variables["entity"]["xt_url_link_field"])) {
+      $variables["context"]["xt_url_link_field"] = $variables["entity"]["xt_url_link_field"];
+    }
+    if (!empty($variables["entity"]["substitutes"])) {
+      $variables["bottom"]["substitutes"] = $variables["entity"]["substitutes"];
+    }
+    $variables['characteristics_title'] = t('Characteristics');
   }
 }
 
 function template_process_product_page(&$variables) {
-  if (!empty($variables["entity_view_array"])) {
-    $variables["entity_view"] = drupal_render($variables["entity_view_array"]);
-  }
 }

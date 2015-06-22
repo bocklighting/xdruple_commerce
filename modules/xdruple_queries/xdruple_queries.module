@@ -170,32 +170,6 @@ function xdruple_queries_extensions_theme() {
 }
 
 /**
- * Implements hook_entity_view_alter()
- *
- * @param $build
- * @param $type
- */
-function xdruple_queries_entity_view_alter(&$build, $type) {
-  if ($type == "commerce_product" && $build["#view_mode"] == "full") {
-    $build["product_price"] = [
-      "#theme" => "xdruple_queries_price",
-      "#product" => $build["#entity"],
-      "#show_unit" => TRUE,
-      "#weight" => 20,
-    ];
-    $build["add_to_cart"] = [
-      "#theme" => "xdruple_queries_add_to_cart_button",
-      "#product" => $build["#entity"],
-      "#show_quantity" => TRUE,
-      "#context" => [
-        "commerce_product_page" => TRUE,
-      ],
-      "#weight" => 20,
-    ];
-  }
-}
-
-/**
  * @param $entity_type string - e.g. xdcatalogrecentord
  *
  * @return array

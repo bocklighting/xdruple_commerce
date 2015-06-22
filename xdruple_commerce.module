@@ -1178,9 +1178,9 @@ function xdruple_commerce_checkout_review($variables) {
 function xdruple_commerce_entity_view_alter(&$build, $type) {
   if ($type == "commerce_product" && $build["#view_mode"] == "full") {
     $config = xdruple_commerce_get_product_display_config();
-    foreach ($build as $key => &$item) {
-      if (is_array($item) && !empty($item["#theme"]) && $item["#theme"] == "field") {
-        $item["#access"] = FALSE;
+    foreach (element_children($build) as $key) {
+      $item = &$build[$key];
+      if (!empty($item["#theme"]) && $item["#theme"] == "field") {
         if (!empty($config[$key])) {
           $field_config = $config[$key];
           if (!empty($field_config["title"])) {
@@ -1190,7 +1190,7 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
           $item["#weight"] = $field_config["weight"];
           if (!isset($item["#access"])) {
             $item["#access"] = TRUE;
-          } 
+          }
         }
       }
     }
