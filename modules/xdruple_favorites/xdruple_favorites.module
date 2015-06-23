@@ -208,7 +208,7 @@ function xdruple_favorites_preprocess_product_page(&$variables) {
       && ($ship_to = xdruple_rescued_session_get("ship_to"))
     ) {
       $form = xdruple_favorites_get_favorites_form($product->getId(), $customer, $ship_to);
-      $variables["context"]["add_to_standard"] = [
+      $variables["actions"]["add_to_standard"] = [
         "#markup" => drupal_render($form),
         "#weight" => 20,
       ];

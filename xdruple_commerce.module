@@ -1177,29 +1177,6 @@ function xdruple_commerce_checkout_review($variables) {
 
 function xdruple_commerce_entity_view_alter(&$build, $type) {
   if ($type == "commerce_product" && $build["#view_mode"] == "full") {
-    $config = xdruple_commerce_get_product_display_config();
-    if (!empty($build["event"])) {
-      $build["event"]["#access"] = FALSE;
-    }
-    foreach (element_children($build) as $key) {
-      $item = &$build[$key];
-      if (!empty($item["#theme"]) && $item["#theme"] == "field") {
-        if (empty($item[0]["#markup"])) {
-          $item["#access"] = FALSE;
-        }
-        if (!empty($config[$key])) {
-          $field_config = $config[$key];
-          if (!empty($field_config["title"])) {
-            $item["#title"] = t($field_config["title"]);
-          }
-          $item["#label_display"] = $field_config["label"];
-          $item["#weight"] = $field_config["weight"];
-          if (!isset($item["#access"])) {
-            $item["#access"] = TRUE;
-          }
-        }
-      }
-    }
     // Overriding any current value for xt_url_image_field display
     if (!empty($build["xt_url_image_field"]["#items"]) && $build["xt_url_image_field"]["#access"]) {
       $img_field = &$build["xt_url_image_field"];
@@ -1536,100 +1513,6 @@ function xdruple_commerce_views_default_views_alter(&$views) {
     unset($views[$commerce_orders]->display['shopping_carts']);
     unset($views[$commerce_orders]->display['default']->display_options['filters']);
   }
-}
-
-/**
- * Builds configuration for Product entity full display.
- *
- * @return array
- */
-function xdruple_commerce_get_product_display_config() {
-  $config = [
-    'title' => [
-      'title' => 'Description',
-      'label' => LABEL_INLINE,
-    ],
-    'classCode' => [
-      'title' => 'Manufacturer',
-      'label' => LABEL_INLINE,
-    ],
-    'productCategory' => [
-      'title' => 'Category',
-      'label' => LABEL_INLINE,
-    ],
-    'sku' => [
-      'title' => 'Part #',
-      'label' => LABEL_INLINE,
-    ],
-    'priceUnit' => [
-      'title' => 'Unit Price UOM',
-      'label' => LABEL_INLINE,
-    ],
-    'inventoryUnit' => [
-      'title' => 'Order Quantity UOM',
-      'label' => LABEL_INLINE,
-    ],
-    'productWidth' => [
-      'title' => 'Width',
-      'label' => LABEL_INLINE,
-    ],
-    'productLength' => [
-      'title' => 'Length',
-      'label' => LABEL_INLINE,
-    ],
-    'productHeight' => [
-      'title' => 'Height',
-      'label' => LABEL_INLINE,
-    ],
-    'dimensionUnit' => [
-      'title' => '',
-      'label' => LABEL_INLINE,
-    ],
-    'barcode' => [
-      'title' => 'UPC Code',
-      'label' => LABEL_INLINE,
-    ],
-    'xt_physical_weight' => [
-      'title' => 'Weight',
-      'label' => LABEL_INLINE,
-    ],
-    'xt_physical_dimension' => [
-      'title' => 'Dimension',
-      'label' => LABEL_INLINE,
-    ],
-    'extendedDescription' => [
-      'title' => 'Extended description',
-      'label' => LABEL_ABOVE,
-    ],
-    'xt_url_image_field' => [
-      'label' => LABEL_HIDDEN,
-    ],
-    'xt_url_file_field' => [
-      'title' => 'Product files',
-      'label' => LABEL_ABOVE,
-    ],
-    'xt_url_link_field' => [
-      'title' => 'Additional references',
-      'label' => LABEL_ABOVE,
-    ],
-    'substitutes' => [
-      'title' => 'Related products',
-      'label' => LABEL_ABOVE,
-    ],
-  ];
-
-  // Add default weight value
-  $weight = 0;
-  foreach ($config as &$item) {
-    $item += [
-      'title' => '',
-      'label' => LABEL_INLINE,
-      'weight' => $weight,
-    ];
-    $weight++;
-  }
-
-  return $config;
 }
 
 /**

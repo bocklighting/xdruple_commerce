@@ -225,46 +225,127 @@ function theme_xdruple_queries_add_to_cart_button(&$variables) {
 
 function template_preprocess_product_page(&$variables) {
   if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
-    $variables["entity"] = entity_view("commerce_product", [
-      $product,
-    ], "full", NULL, TRUE);
-    $variables["context"] = [];
-    $variables["context"]["product_price"] = [
+    $variables["content"] = [];
+    $variables["content"]["illustrations"] = [
+      "#theme" => "xdruple_product_illustrations",
+      "#product" => $product,
+      "#weight" => -20,
+    ];
+    $variables["content"]["product_price"] = [
       "#theme" => "xdruple_queries_price",
       "#product" => $product,
       "#show_unit" => TRUE,
       "#weight" => -10,
     ];
-    $variables["context"]["add_to_cart"] = [
+    $variables["content"]["description"] = [
+      "#theme" => "xdruple_product_description",
+      "#product" => $product,
+      "#weight" => 0,
+    ];
+    $variables["content"]["files"] = [
+      "#theme" => "xdruple_product_files",
+      "#product" => $product,
+      "#weight" => 10,
+    ];
+    $variables["content"]["links"] = [
+      "#theme" => "xdruple_product_links",
+      "#product" => $product,
+      "#weight" => 20,
+    ];
+    $variables["actions"] = [];
+    $variables["actions"]["add_to_cart"] = [
       "#theme" => "xdruple_queries_add_to_cart_button",
       "#product" => $product,
       "#show_quantity" => TRUE,
       "#context" => [
         "commerce_product_page" => TRUE,
       ],
-      "#weight" => -5,
+      "#weight" => -10,
     ];
-    if (!empty($variables["entity"]["xt_url_image_field"])) {
-      $variables["context"]["xd_url_image_field"] = $variables["entity"]["xt_url_image_field"];
-      unset($variables["entity"]["xt_url_image_field"]);
-    }
-    if (!empty($variables["entity"]["xt_url_file_field"])) {
-      $variables["context"]["xt_url_file_field"] = $variables["entity"]["xt_url_file_field"];
-      unset($variables["entity"]["xt_url_file_field"]);
-    }
-    if (!empty($variables["entity"]["xt_url_link_field"])) {
-      $variables["context"]["xt_url_link_field"] = $variables["entity"]["xt_url_link_field"];
-      unset($variables["entity"]["xt_url_link_field"]);
-    }
-    if (!empty($variables["entity"]["substitutes"])) {
-      $variables["bottom"]["substitutes"] = $variables["entity"]["substitutes"];
-    }
-    $variables["characteristics_title"] = t("Characteristics");
-    $variables["characteristics"] = $variables["entity"]["characteristics"];
-    unset($variables["entity"]["characteristics"]);
+    $variables["details"] = [];
+    $variables["details"]["packaging"] = [
+      "#theme" => "xdruple_product_packaging",
+      "#product" => $product,
+      "#weight" => -20,
+    ];
+    $variables["details"]["characteristics"] = [
+      "#theme" => "xdruple_product_characteristics",
+      "#product" => $product,
+      "#weight" => -10,
+    ];
+    $variables["details"]["substitutes"] = [
+      "#theme" => "xdruple_product_substitutes",
+      "#product" => $product,
+      "#weight" => 0,
+    ];
   }
 }
 
 function template_process_product_page(&$variables) {
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+    if ($product->get("marketingSeoKeywords")) {
+      drupal_add_html_head([
+        "#type" => "html_tag",
+        "#tag" => "meta",
+        "#attributes" => [
+          "name" => "keywords",
+          "content" => $product->get("marketingSeoKeywords"),
+        ],
+      ], "xdruple_product_keywords");
+    }
+    if ($product->get("marketingTeaser")) {
+      drupal_add_html_head([
+        "#type" => "html_tag",
+        "#tag" => "meta",
+        "#attributes" => [
+          "name" => "description",
+          "content" => $product->get("marketingTeaser"),
+        ],
+      ], "xdruple_product_description");
+    }
+  }
+}
+
+function template_preprocess_xdruple_product_description(&$variables) {
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+  }
+}
+
+function template_process_xdruple_product_description(&$variables) {
+}
+
+function template_preprocess_xdruple_product_illustrations(&$variables) {
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+  }
+}
+
+function template_process_xdruple_product_illustrations(&$variables) {
+}
+
+function template_preprocess_xdruple_product_packaging(&$variables) {
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+  }
+}
+
+function template_process_xdruple_product_packaging(&$variables) {
+}
+
+function template_preprocess_xdruple_product_characteristics(&$variables) {
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+  }
+}
+
+function template_process_xdruple_product_characteristics(&$variables) {
 }

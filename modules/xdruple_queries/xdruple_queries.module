@@ -131,6 +131,60 @@ function xdruple_queries_theme() {
     "template" => "theme/product-page",
     "file" => "theme/theme.inc",
   ];
+  $items["xdruple_product_description"] = [
+    "variables" => [
+      "product" => NULL,
+    ],
+    "template" => "theme/xdruple-product-description",
+    "file" => "theme/theme.inc",
+  ];
+  $items["xdruple_product_illustrations"] = [
+    "variables" => [
+      "product" => NULL,
+    ],
+    "template" => "theme/xdruple-product-illustrations",
+    "file" => "theme/theme.inc",
+  ];
+  $items["xdruple_product_files"] = [
+    "variables" => [
+      "product" => NULL,
+      "title" => "Available downloads",
+    ],
+    "template" => "theme/xdruple-product-files",
+    "file" => "theme/theme.inc",
+  ];
+  $items["xdruple_product_files"] = [
+    "variables" => [
+      "product" => NULL,
+      "title" => "Additional information",
+    ],
+    "template" => "theme/xdruple-product-links",
+    "file" => "theme/theme.inc",
+  ];
+  $items["xdruple_product_packaging"] = [
+    "variables" => [
+      "product" => NULL,
+      "title" => "Packaging",
+    ],
+    "template" => "theme/xdruple-product-packaging",
+    "file" => "theme/theme.inc",
+  ];
+  $items["xdruple_product_characteristics"] = [
+    "variables" => [
+      "product" => NULL,
+      "title" => "Characteristics",
+    ],
+    "template" => "theme/xdruple-product-characteristics",
+    "file" => "theme/theme.inc",
+  ];
+  $items["xdruple_product_substitutes"] = [
+    "variables" => [
+      "product" => NULL,
+      "title" => "Substitutes",
+    ],
+    "template" => "theme/xdruple-product-substitutes",
+    "file" => "theme/theme.inc",
+  ];
   $items["xdruple_queries_price"] = [
     "variables" => [
       "product" => NULL,
