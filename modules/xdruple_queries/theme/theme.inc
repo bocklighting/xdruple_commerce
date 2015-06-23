@@ -257,7 +257,9 @@ function template_preprocess_product_page(&$variables) {
     if (!empty($variables["entity"]["substitutes"])) {
       $variables["bottom"]["substitutes"] = $variables["entity"]["substitutes"];
     }
-    $variables['characteristics_title'] = t('Characteristics');
+    $variables["characteristics_title"] = t("Characteristics");
+    $variables["characteristics"] = $variables["entity"]["characteristics"];
+    unset($variables["entity"]["characteristics"]);
   }
 }
 

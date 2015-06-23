@@ -17,6 +17,14 @@
         <?php print drupal_render($context) ?>
       <?php endif; ?>
     </div>
+    <?php if (!empty($characteristics)): ?>
+      <div class="col-lg-12">
+        <?php if (!empty($characteristics_title)): ?>
+          <h4><?php print $characteristics_title ?></h4>
+        <?php endif; ?>
+        <?php print drupal_render($characteristics) ?>
+      </div>
+    <?php endif; ?>
     <?php if (!empty($bottom)): ?>
       <div class="col-lg-12">
         <?php print drupal_render($bottom); ?>
