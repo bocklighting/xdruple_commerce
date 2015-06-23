@@ -1178,9 +1178,15 @@ function xdruple_commerce_checkout_review($variables) {
 function xdruple_commerce_entity_view_alter(&$build, $type) {
   if ($type == "commerce_product" && $build["#view_mode"] == "full") {
     $config = xdruple_commerce_get_product_display_config();
+    if (!empty($build["event"])) {
+      $build["event"]["#access"] = FALSE;
+    }
     foreach (element_children($build) as $key) {
       $item = &$build[$key];
       if (!empty($item["#theme"]) && $item["#theme"] == "field") {
+        if (empty($item[0]["#markup"])) {
+          $item["#access"] = FALSE;
+        }
         if (!empty($config[$key])) {
           $field_config = $config[$key];
           if (!empty($field_config["title"])) {

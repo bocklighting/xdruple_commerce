@@ -247,12 +247,15 @@ function template_preprocess_product_page(&$variables) {
     ];
     if (!empty($variables["entity"]["xt_url_image_field"])) {
       $variables["context"]["xd_url_image_field"] = $variables["entity"]["xt_url_image_field"];
+      unset($variables["entity"]["xt_url_image_field"]);
     }
     if (!empty($variables["entity"]["xt_url_file_field"])) {
       $variables["context"]["xt_url_file_field"] = $variables["entity"]["xt_url_file_field"];
+      unset($variables["entity"]["xt_url_file_field"]);
     }
     if (!empty($variables["entity"]["xt_url_link_field"])) {
       $variables["context"]["xt_url_link_field"] = $variables["entity"]["xt_url_link_field"];
+      unset($variables["entity"]["xt_url_link_field"]);
     }
     if (!empty($variables["entity"]["substitutes"])) {
       $variables["bottom"]["substitutes"] = $variables["entity"]["substitutes"];
