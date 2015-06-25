@@ -37,7 +37,7 @@ function xdruple_favorites_remove_from_favorites_form_validate($form, &$form_sta
  * @param $form_state
  */
 function xdruple_favorites_remove_from_favorites_form_submit($form, &$form_state) {
-  $entity_type = 'xtuple_xdstdordproduct';
+  $entity_type = 'xtuple_xdstandardorderproduct';
 
   try {
     $values = $form_state['values'];
