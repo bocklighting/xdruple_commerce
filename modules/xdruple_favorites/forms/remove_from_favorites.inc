@@ -51,7 +51,7 @@ function xdruple_favorites_remove_from_favorites_form_submit($form, &$form_state
       entity_delete($entity_type, $uuid);
 
       // Invalidate cache.
-      $cid = 'xtuple_xdcatalogshiptostdord-' . $values['ship_to'];
+      $cid = 'xtuple_xdcatalogshiptostandardorder-' . $values['ship_to'];
       cache_clear_all($cid, 'cache');
     }
 

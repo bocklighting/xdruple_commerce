@@ -49,7 +49,7 @@ function xdruple_favorites_add_to_favorites_form_submit($form, &$form_state) {
     entity_save($entity_type, $std_order_product);
 
     // Invalidate cache.
-    $cid = 'xtuple_xdcatalogshiptostdord-' . $values['ship_to'];
+    $cid = 'xtuple_xdcatalogshiptostandardorder-' . $values['ship_to'];
     cache_clear_all($cid, 'cache');
 
     $product = entity_load_single('commerce_product', $values['product_id']);

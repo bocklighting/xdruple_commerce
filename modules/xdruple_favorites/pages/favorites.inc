@@ -24,7 +24,7 @@ function xdruple_favorites_favorite_products_page() {
     'products_favorite_page_item',
   ], $params);
 
-  $products_ids = _xdruple_queries_load_products_by_order_type('xdcatalogshiptostdord');
+  $products_ids = _xdruple_queries_load_products_by_order_type('xdcatalogshiptostandardorder');
   $list = _xdruple_prepare_products_list($products_ids, $params, 'products_page_item__favorite');
 
   $output .= theme('products_page', [
