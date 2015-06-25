@@ -19,7 +19,7 @@ function xdruple_recent_products_recent_page() {
   ];
   drupal_alter(['product_page_item', 'products_recent_page_item'], $params);
 
-  $products_ids = _xdruple_queries_load_products_by_order_type('xdcatalogrecentord');
+  $products_ids = _xdruple_queries_load_products_by_order_type('xdcatalogrecentorderproduct');
   $list = _xdruple_prepare_products_list($products_ids, $params, 'products_page_item');
 
   $output .= theme('products_page', [

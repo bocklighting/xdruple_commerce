@@ -27,6 +27,6 @@ function xdruple_recent_menu() {
  */
 function xdruple_recent_rescued_resources() {
   return [
-    "XdCatalogRecentOrd",
+    "XdCatalogRecentOrder",
   ];
 }

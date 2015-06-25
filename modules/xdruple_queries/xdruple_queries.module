@@ -224,7 +224,7 @@ function xdruple_queries_extensions_theme() {
 }
 
 /**
- * @param $entity_type string - e.g. xdcatalogrecentord
+ * @param $entity_type string - e.g. xdcatalogrecentorderproduct
  *
  * @return array
  */
@@ -252,7 +252,7 @@ function _xdruple_queries_load_orders($entity_type) {
 }
 
 /**
- * @param $order_type string - e.g. xdcatalogrecentord
+ * @param $order_type string - e.g. xdcatalogrecentorderproduct
  *
  * @return array
  */
