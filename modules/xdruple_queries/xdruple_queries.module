@@ -46,7 +46,7 @@ function xdruple_queries_menu() {
     "weight" => -10,
   ];
 
-  $items["products/%"] = [
+  $items["products/%xdruple_queries_product"] = [
     "title" => "Product",
     "title callback" => "xdruple_queries_product_page_title",
     "title arguments" => [1],

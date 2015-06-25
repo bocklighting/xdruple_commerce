@@ -5,45 +5,44 @@
  */
 
 /**
+ * @param $product_id
+ *
+ * @return bool|mixed
+ */
+function xdruple_queries_product_load($product_id) {
+  $product = FALSE;
+  if (is_numeric($product_id)) {
+    try {
+      $product = entity_load_single("commerce_product", $product_id);
+    } catch (\Exception $e) {
+      watchdog_exception("xdruple_queries", $e);
+    }
+  }
+  return $product;
+}
+
+/**
  * Page callback /products/% page
  *
- * @param $product_id
+ * @param $product
  *
  * @return array
  */
-function xdruple_queries_product_page($product_id) {
-  if (!is_numeric($product_id)) {
-    drupal_not_found();
-    return MENU_NOT_FOUND;
-  }
-  try {
-    $product = entity_load_single("commerce_product", $product_id);
-    $output = [
-      "#theme" => "product_page",
-      "#product" => $product,
-    ];
-  } catch (\Exception $e) {
-    watchdog_exception("xdruple_queries", $e);
-    drupal_not_found();
-    return MENU_NOT_FOUND;
-  }
+function xdruple_queries_product_page($product) {
+  $output = [
+    "#theme" => "product_page",
+    "#product" => $product,
+  ];
   return $output;
 }
 
 /**
  * Title callback for /products/% page
  *
- * @param $product_id
+ * @param $product
  *
  * @return string
  */
-function xdruple_queries_product_page_title($product_id) {
-  $title = "";
-  if (is_numeric($product_id)) {
-    $product = entity_load_single("commerce_product", $product_id);
-    if (!empty($product)) {
-      $title = $product->title;
-    }
-  }
-  return $title;
+function xdruple_queries_product_page_title($product) {
+  return $product->title;
 }
