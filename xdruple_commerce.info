@@ -22,7 +22,6 @@ dependencies[] = commerce_product_reference
 dependencies[] = commerce_product_ui
 dependencies[] = commerce_price_savings_formatter
 dependencies[] = email_registration
-dependencies[] = extensions
 dependencies[] = list
 dependencies[] = xdruple_fields
 
