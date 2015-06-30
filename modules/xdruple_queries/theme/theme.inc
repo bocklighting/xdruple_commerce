@@ -334,10 +334,54 @@ function template_preprocess_xdruple_product_packaging(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
+    $variables["data"] = [
+      "product_dimensions" => [
+        "#theme" => "xdruple_dimensions",
+        "#title" => "Product dimensions",
+        "#length" => $product->get("productLength"),
+        "#width" => $product->get("productWidth"),
+        "#height" => $product->get("productHeight"),
+        "#unit" => $product->get("dimensionUnit"),
+      ],
+      "product_weight" => [
+        "#theme" => "xdruple_weight",
+        "#title" => "Product weight",
+        "#weight" => $product->get("productWeight"),
+        "#unit" => $product->get("weightUnit"),
+      ],
+      "package_dimensions" => [
+        "#theme" => "xdruple_dimensions",
+        "#title" => "Package dimensions",
+        "#length" => $product->get("packageLength"),
+        "#width" => $product->get("packageWidth"),
+        "#height" => $product->get("packageHeight"),
+        "#unit" => $product->get("dimensionUnit"),
+      ],
+      "package_weight" => [
+        "#theme" => "xdruple_weight",
+        "#title" => "Package weight",
+        "#weight" => $product->get("packageWeight"),
+        "#unit" => $product->get("weightUnit"),
+      ],
+    ];
   }
 }
 
 function template_process_xdruple_product_packaging(&$variables) {
+  if (!empty($variables["data"])) {
+    $variables["info"] = [
+      "#theme" => "table",
+      "#rows" => [],
+    ];
+    foreach ($variables["data"] as $key => $value) {
+      $title = $value["#title"];
+      $value["#title"] = "";
+      $variables["info"]["#rows"][] = [
+        $title,
+        ["data" => $value],
+      ];
+    }
+  }
 }
 
 function template_preprocess_xdruple_product_characteristics(&$variables) {
