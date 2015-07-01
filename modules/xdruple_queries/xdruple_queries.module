@@ -156,7 +156,7 @@ function xdruple_queries_theme() {
     "template" => "theme/xdruple-product-files",
     "file" => "theme/theme.inc",
   ];
-  $items["xdruple_product_files"] = [
+  $items["xdruple_product_links"] = [
     "variables" => [
       "product" => NULL,
       "title" => "Additional information",

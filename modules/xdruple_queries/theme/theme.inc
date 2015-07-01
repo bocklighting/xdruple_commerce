@@ -367,7 +367,19 @@ function template_preprocess_xdruple_product_files(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
+    $files = $product->get("xt_url_file_field");
+    if (!empty($files["und"])) {
+      $variables["files"] = [];
+      foreach ($files["und"] as $file) {
+        $variables["files"][] = [
+          "#theme" => "file_link",
+          "#file" => (object) $file,
+        ];
+      }
+    }
   }
+  $variables["classes_array"]["panel"] = "panel";
+  $variables["classes_array"]["panel-default"] = "panel-default";
 }
 
 function template_process_xdruple_product_files(&$variables) {
