@@ -385,6 +385,33 @@ function template_preprocess_xdruple_product_files(&$variables) {
 function template_process_xdruple_product_files(&$variables) {
 }
 
+function template_preprocess_xdruple_product_links(&$variables) {
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+    $links = $product->get("xt_url_link_field");
+    if (!empty($links["und"])) {
+      $variables["links"] = [];
+      foreach ($links["und"] as $link) {
+        $variables["links"][] = [
+          "#theme" => "link",
+          "#text" => $link["title"],
+          "#path" => $link["url"],
+          "#options" => [
+            "html" => FALSE,
+            "attributes" => [],
+          ],
+        ];
+      }
+    }
+  }
+  $variables["classes_array"]["panel"] = "panel";
+  $variables["classes_array"]["panel-default"] = "panel-default";
+}
+
+function template_process_xdruple_product_links(&$variables) {
+}
+
 function template_preprocess_xdruple_product_packaging(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
