@@ -141,6 +141,9 @@ function xdruple_queries_theme() {
   $items["xdruple_product_illustrations"] = [
     "variables" => [
       "product" => NULL,
+      "thumbnail_style" => "",
+      "thumbnail_small_style" => "",
+      "full_image_style" => "",
     ],
     "template" => "theme/xdruple-product-illustrations",
     "file" => "theme/theme.inc",

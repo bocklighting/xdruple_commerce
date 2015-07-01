@@ -231,6 +231,9 @@ function template_preprocess_product_page(&$variables) {
     $variables["content"]["illustrations"] = [
       "#theme" => "xdruple_product_illustrations",
       "#product" => $product,
+      "#thumbnail_style" => "ft_commerce_product_page_thumb",
+      "#thumbnail_small_style" => "ft_commerce_product_page_thumb_small",
+      "#full_image_style" => "large",
       "#weight" => -20,
     ];
     $variables["content"]["product_price"] = [
@@ -324,10 +327,50 @@ function template_preprocess_xdruple_product_illustrations(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
+    $images = $product->get("xt_url_image_field");
+    if (!empty($images["und"])) {
+      $variables["images"] = [];
+      $class = drupal_clean_css_identifier(strtr("fancybox--xdruple-product-illustrations--product-%id", [
+        "%id" => $product->getId(),
+      ]));
+      foreach ($images["und"] as $i => $image) {
+        $variables["images"][] = [
+          "#theme" => "fancybox_formatter_default",
+          "#settings" => [
+            "preview" => $i == 0 ? $variables["thumbnail_style"] : $variables["thumbnail_small_style"],
+            "full" => $variables["full_image_style"],
+            "cyclic" => TRUE,
+            "title_show" => TRUE,
+            "title_position" => "over",
+          ],
+          "#item" => [
+            "path" => $image["uri"],
+            "width" => !empty($image["width"]) ? $image["width"] : NULL,
+            "style" => !empty($image["height"]) ? $image["height"] : NULL,
+            "alt" => !empty($image["alt"]) ? $image["alt"] : "",
+            "title" => !empty($image["title"]) ? $image["title"] : "",
+          ],
+          "#rel" => $class,
+          "#classes" => [
+            "img-thumbnail" => "img-thumbnail",
+          ],
+        ];
+      }
+    }
   }
 }
 
 function template_process_xdruple_product_illustrations(&$variables) {
+}
+
+function template_preprocess_xdruple_product_files(&$variables) {
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+  }
+}
+
+function template_process_xdruple_product_files(&$variables) {
 }
 
 function template_preprocess_xdruple_product_packaging(&$variables) {
