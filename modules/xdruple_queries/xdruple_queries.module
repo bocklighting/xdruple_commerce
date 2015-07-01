@@ -176,6 +176,7 @@ function xdruple_queries_theme() {
     "variables" => [
       "product" => NULL,
       "title" => "Characteristics",
+      "columns" => 2,
     ],
     "template" => "theme/xdruple-product-characteristics",
     "file" => "theme/theme.inc",

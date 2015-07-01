@@ -470,8 +470,53 @@ function template_preprocess_xdruple_product_characteristics(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
+    $chars = $product->get("xt_char");
+    if (!empty($chars["und"])) {
+      $variables["characteristics"] = [];
+      foreach ($chars["und"] as $char) {
+        $variables["characteristics"][] = [
+          "title" => $char["characteristic"],
+          "value" => $char["value"],
+          "class" => drupal_clean_css_identifier(
+            strtolower($char["characteristic"])
+          ),
+        ];
+      }
+    }
   }
+  $variables["classes_array"]["panel"] = "panel";
+  $variables["classes_array"]["panel-default"] = "panel-default";
+  $variables["characteristics_table"] = [
+    "#theme" => "table",
+    "#rows" => [],
+    "#attributes" => [
+      "class" => [
+        "table-condensed" => "table-condensed",
+      ],
+    ]
+  ];
 }
 
 function template_process_xdruple_product_characteristics(&$variables) {
+  if (!empty($variables["characteristics"])) {
+    $columns = $variables["columns"];
+    foreach ($variables["characteristics"] as $i => $characteristic) {
+      if ($i % $columns == 0) {
+        if (!empty($row)) {
+          $variables["characteristics_table"]["#rows"][] = $row;
+        }
+        $row = [];
+      }
+      $row[] = $characteristic["title"];
+      $row[] = $characteristic["value"];
+    }
+    if (!empty($row)) {
+      if ($missing_columns = ($columns * 2 - sizeof($row))) {
+        for ($i = 0; $i < $missing_columns; $i++) {
+          $row[] = "";
+        }
+      }
+      $variables["characteristics_table"]["#rows"][] = $row;
+    }
+  }
 }
