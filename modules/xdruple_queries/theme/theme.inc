@@ -447,6 +447,8 @@ function template_preprocess_xdruple_product_packaging(&$variables) {
       ],
     ];
   }
+  $variables["classes_array"]["panel"] = "panel";
+  $variables["classes_array"]["panel-default"] = "panel-default";
 }
 
 function template_process_xdruple_product_packaging(&$variables) {
