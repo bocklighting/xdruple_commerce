@@ -352,6 +352,7 @@ function template_preprocess_xdruple_product_illustrations(&$variables) {
           ],
           "#rel" => $class,
           "#classes" => [
+            "xdruple-product-illustration" => "xdruple-product-illustration", 
             "img-thumbnail" => "img-thumbnail",
           ],
         ];
