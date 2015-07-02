@@ -234,12 +234,6 @@ function template_preprocess_product_page(&$variables) {
       "#thumbnail_style" => "commerce_product_thumbnail_style",
       "#thumbnail_small_style" => "commerce_product_thumbnail_small_style",
       "#full_image_style" => "large",
-      "#weight" => -20,
-    ];
-    $variables["content"]["product_price"] = [
-      "#theme" => "xdruple_queries_price",
-      "#product" => $product,
-      "#show_unit" => TRUE,
       "#weight" => -10,
     ];
     $variables["content"]["description"] = [
@@ -247,17 +241,23 @@ function template_preprocess_product_page(&$variables) {
       "#product" => $product,
       "#weight" => 0,
     ];
-    $variables["content"]["files"] = [
-      "#theme" => "xdruple_product_files",
+    $variables["content"]["characteristics"] = [
+      "#theme" => "xdruple_product_characteristics",
       "#product" => $product,
       "#weight" => 10,
     ];
-    $variables["content"]["links"] = [
-      "#theme" => "xdruple_product_links",
+    $variables["content"]["delivery"] = [
+      "#theme" => "xdruple_product_delivery",
       "#product" => $product,
       "#weight" => 20,
     ];
     $variables["actions"] = [];
+    $variables["actions"]["product_price"] = [
+      "#theme" => "xdruple_queries_price",
+      "#product" => $product,
+      "#show_unit" => TRUE,
+      "#weight" => -20,
+    ];
     $variables["actions"]["add_to_cart"] = [
       "#theme" => "xdruple_queries_add_to_cart_button",
       "#product" => $product,
@@ -267,18 +267,19 @@ function template_preprocess_product_page(&$variables) {
       ],
       "#weight" => -10,
     ];
-    $variables["details"] = [];
-    $variables["details"]["delivery"] = [
-      "#theme" => "xdruple_product_delivery",
+    $variables["context"] = [];
+    $variables["context"]["files"] = [
+      "#theme" => "xdruple_product_files",
       "#product" => $product,
-      "#weight" => -20,
+      "#weight" => 0,
     ];
-    $variables["details"]["characteristics"] = [
-      "#theme" => "xdruple_product_characteristics",
+    $variables["context"]["links"] = [
+      "#theme" => "xdruple_product_links",
       "#product" => $product,
-      "#weight" => -10,
+      "#weight" => 10,
     ];
-    $variables["details"]["substitutes"] = [
+    $variables["extra"] = [];
+    $variables["extra"]["substitutes"] = [
       "#theme" => "xdruple_product_substitutes",
       "#product" => $product,
       "#weight" => 0,
@@ -359,6 +360,7 @@ function template_preprocess_xdruple_product_illustrations(&$variables) {
       }
     }
   }
+  $variables["classes_array"]["clearfix"] = "clearfix";
 }
 
 function template_process_xdruple_product_illustrations(&$variables) {
@@ -450,18 +452,23 @@ function template_preprocess_xdruple_product_delivery(&$variables) {
   }
   $variables["classes_array"]["panel"] = "panel";
   $variables["classes_array"]["panel-default"] = "panel-default";
+  $variables["delivery_table"] = [
+    "#theme" => "table",
+    "#rows" => [],
+    "#attributes" => [
+      "class" => [
+        "table-condensed" => "table-condensed",
+      ],
+    ]
+  ];
 }
 
 function template_process_xdruple_product_delivery(&$variables) {
   if (!empty($variables["data"])) {
-    $variables["info"] = [
-      "#theme" => "table",
-      "#rows" => [],
-    ];
     foreach ($variables["data"] as $key => $value) {
       $title = $value["#title"];
       $value["#title"] = "";
-      $variables["info"]["#rows"][] = [
+      $variables["delivery_table"]["#rows"][] = [
         $title,
         ["data" => $value],
       ];
