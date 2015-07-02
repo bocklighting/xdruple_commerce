@@ -1187,7 +1187,7 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
           "#settings" => [
             "cyclic" => TRUE,
             "full" => "large",
-            "preview" => "ft_commerce_product_page_thumb_small",
+            "preview" => "commerce_product_thumbnail_small_style",
             "title_position" => "over",
             "title_show" => TRUE,
           ],
@@ -1209,7 +1209,7 @@ function xdruple_commerce_entity_view_alter(&$build, $type) {
         $build["substitutes"][$i] = [
           "#theme" => "xdruple_commerce_similar_product_link_default",
           "#product_id" => $product_id,
-          "#style" => "ft_commerce_product_thumb",
+          "#style" => "commerce_product_thumbnail_wide_style",
         ];
       }
     }

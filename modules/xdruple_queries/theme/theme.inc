@@ -123,7 +123,7 @@ function template_preprocess_products_page_item(&$variables) {
   ];
   $variables['title'] = l($product->title, "products/{$product->product_id}");
   $variables['subtitle'] = $product->subTitle;
-  $variables['img'] = _xdruple_queries_product_image($product, 'ft_commerce_product_thumb');
+  $variables['img'] = _xdruple_queries_product_image($product, 'commerce_product_thumbnail_wide_style');
 
   if (!empty($params['fields']['add_to_cart'])) {
     $show_qty = FALSE;
@@ -231,8 +231,8 @@ function template_preprocess_product_page(&$variables) {
     $variables["content"]["illustrations"] = [
       "#theme" => "xdruple_product_illustrations",
       "#product" => $product,
-      "#thumbnail_style" => "ft_commerce_product_page_thumb",
-      "#thumbnail_small_style" => "ft_commerce_product_page_thumb_small",
+      "#thumbnail_style" => "commerce_product_thumbnail_style",
+      "#thumbnail_small_style" => "commerce_product_thumbnail_small_style",
       "#full_image_style" => "large",
       "#weight" => -20,
     ];
