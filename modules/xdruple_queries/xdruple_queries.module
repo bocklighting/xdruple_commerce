@@ -131,11 +131,28 @@ function xdruple_queries_theme() {
     "template" => "theme/product-page",
     "file" => "theme/theme.inc",
   ];
+  $items["xdruple_product_subtitle"] = [
+    "variables" => [
+      "product" => NULL,
+      "tag" => "h2",
+    ],
+    "file" => "theme/theme.inc",
+  ];
   $items["xdruple_product_description"] = [
     "variables" => [
       "product" => NULL,
+      "format" => "",
     ],
     "template" => "theme/xdruple-product-description",
+    "file" => "theme/theme.inc",
+  ];
+  $items["xdruple_product_notes"] = [
+    "variables" => [
+      "product" => NULL,
+      "title" => "",
+      "format" => "",
+    ],
+    "template" => "theme/xdruple-product-notes",
     "file" => "theme/theme.inc",
   ];
   $items["xdruple_product_illustrations"] = [

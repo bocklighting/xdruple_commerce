@@ -227,6 +227,10 @@ function template_preprocess_product_page(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
+    $variables["subtitle"] = [
+      "#theme" => "xdruple_product_subtitle",
+      "#product" => $product,
+    ];
     $variables["content"] = [];
     $variables["content"]["illustrations"] = [
       "#theme" => "xdruple_product_illustrations",
@@ -241,15 +245,20 @@ function template_preprocess_product_page(&$variables) {
       "#product" => $product,
       "#weight" => 0,
     ];
+    $variables["content"]["notes"] = [
+      "#theme" => "xdruple_product_notes",
+      "#product" => $product,
+      "#weight" => 10,
+    ];
     $variables["content"]["characteristics"] = [
       "#theme" => "xdruple_product_characteristics",
       "#product" => $product,
-      "#weight" => 10,
+      "#weight" => 20,
     ];
     $variables["content"]["delivery"] = [
       "#theme" => "xdruple_product_delivery",
       "#product" => $product,
-      "#weight" => 20,
+      "#weight" => 30,
     ];
     $variables["actions"] = [];
     $variables["actions"]["product_price"] = [
@@ -314,14 +323,82 @@ function template_process_product_page(&$variables) {
   }
 }
 
-function template_preprocess_xdruple_product_description(&$variables) {
+function template_preprocess_xdruple_product_subtitle(&$variables) {
+  $variables["subTitle"] = "";
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
+    $subTitle = $product->get("subTitle");
+    if ($product->get("marketingSubTitle")) {
+      $subTitle = $product->get("marketingSubTitle");
+    }
+    $variables["subTitle"] = [
+      "#theme" => "html_tag",
+      "#tag" => $variables["tag"],
+      "#value" => $subTitle,
+      "#attributes" => [
+        "class" => [
+          "xdruple-product-subtitle",
+        ],
+      ],
+    ];
+  }
+}
+
+function template_process_xdruple_product_subtitle(&$variables) {
+}
+
+function theme_xdruple_product_subtitle(&$variables) {
+  return drupal_render($variables["subTitle"]);
+}
+
+function template_preprocess_xdruple_product_description(&$variables) {
+  $variables["description"] = "";
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+    $variables["description"] = $product->get("extendedDescription");
+    if ($product->get("marketingDescription")) {
+      $variables["description"] = $product->get("marketingDescription");
+    }
+    $variables["classes_array"]["htmlpurified"] = "htmlpurified";
   }
 }
 
 function template_process_xdruple_product_description(&$variables) {
+  if (!empty($variables["format"])) {
+    $variables["description"] = check_markup($variables["description"], $variables["format"]);
+  }
+  else {
+    if (!empty($variables["description"])) {
+      $variables["description"] = strtr("<p>%description</p>", [
+        "%description" => check_plain($variables["description"]),
+      ]);
+    }
+  }
+}
+
+function template_preprocess_xdruple_product_notes(&$variables) {
+  $variables["notes"] = "";
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+    $variables["notes"] = $product->get("notes");
+    $variables["classes_array"]["htmlpurified"] = "htmlpurified";
+  }
+}
+
+function template_process_xdruple_product_notes(&$variables) {
+  if (!empty($variables["format"])) {
+    $variables["notes"] = check_markup($variables["notes"], $variables["format"]);
+  }
+  else {
+    if (!empty($variables["notes"])) {
+      $variables["notes"] = strtr("<p>%notes</p>", [
+        "%notes" => check_plain($variables["notes"]),
+      ]);
+    }
+  }
 }
 
 function template_preprocess_xdruple_product_illustrations(&$variables) {
@@ -353,7 +430,7 @@ function template_preprocess_xdruple_product_illustrations(&$variables) {
           ],
           "#rel" => $class,
           "#classes" => [
-            "xdruple-product-illustration" => "xdruple-product-illustration", 
+            "xdruple-product-illustration" => "xdruple-product-illustration",
             "img-thumbnail" => "img-thumbnail",
           ],
         ];
@@ -449,6 +526,11 @@ function template_preprocess_xdruple_product_delivery(&$variables) {
         "#unit" => $product->get("weightUnit"),
       ],
     ];
+    if (!empty($product->get("freightClass"))) {
+      $data["freight_class"] = [
+        "#value" => $product->get("freightClass"),
+      ];
+    }
   }
   $variables["classes_array"]["panel"] = "panel";
   $variables["classes_array"]["panel-default"] = "panel-default";
@@ -480,15 +562,34 @@ function template_preprocess_xdruple_product_characteristics(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
-    $chars = $product->get("xt_char");
-    if (!empty($chars["und"])) {
-      $variables["characteristics"] = [];
-      foreach ($chars["und"] as $char) {
+    $characteristics = [];
+    $characteristics[] = [
+      "characteristic" => "SKU",
+      "value" => $product->get("sku"),
+    ];
+    $characteristics[] = [
+      "characteristic" => "Barcode",
+      "value" => $product->get("barcode"),
+    ];
+    $characteristics[] = [
+      "characteristic" => "Class code",
+      "value" => $product->get("classCode"),
+    ];
+    $characteristics[] = [
+      "characteristic" => "Product category",
+      "value" => $product->get("productCategory"),
+    ];
+    if (!empty($product->get("characteristics"))) {
+      $characteristics = array_merge($characteristics, $product->get("characteristics"));
+    }
+    $variables["characteristics"] = [];
+    foreach ($characteristics as $characteristic) {
+      if (!empty($characteristic["value"]) || is_numeric($characteristic["value"])) {
         $variables["characteristics"][] = [
-          "title" => $char["characteristic"],
-          "value" => $char["value"],
+          "title" => $characteristic["characteristic"],
+          "value" => $characteristic["value"],
           "class" => drupal_clean_css_identifier(
-            strtolower($char["characteristic"])
+            strtolower($characteristic["characteristic"])
           ),
         ];
       }

@@ -39,10 +39,14 @@ function xdruple_queries_product_page($product) {
 /**
  * Title callback for /products/% page
  *
- * @param $product
+ * @param \Xtuple\Rescued\Controller\Entity $product
  *
  * @return string
  */
 function xdruple_queries_product_page_title($product) {
-  return $product->title;
+  $title = $product->get("title");
+  if ($product->get("marketingTitle")) {
+    $title = $product->get("marketingTitle");
+  }
+  return $title;
 }

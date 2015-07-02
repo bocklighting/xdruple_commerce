@@ -4,5 +4,8 @@
  * @var string $attributes
  */
 ?>
-<div class="<?php print $classes ?>"<?php print $attributes ?>>
-</div>
+<?php if (!empty($description)): ?>
+  <div class="<?php print $classes ?>"<?php print $attributes ?>>
+    <?php print $description ?>
+  </div>
+<?php endif; ?>
