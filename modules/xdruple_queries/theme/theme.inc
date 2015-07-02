@@ -623,3 +623,26 @@ function template_process_xdruple_product_characteristics(&$variables) {
     }
   }
 }
+
+function template_preprocess_xdruple_product_substitutes(&$variables) {
+  if (!empty($variables["product"])) {
+    /** @var \Xtuple\Rescued\Controller\Entity $product */
+    $product = $variables["product"];
+    if ($product->get("substitutes")) {
+      $variables["products"] = _xdruple_prepare_products_list($product->get("substitutes"));
+      foreach ($variables["products"] as &$product_array) {
+        $product_array["#params"]["fields"]["add_to_cart"]["show_quantity"] = TRUE;
+      }
+      $variables["columns"] = 3;
+    }
+  }
+}
+
+function template_process_xdruple_product_substitutes(&$variables) {
+  if (!empty($variables["products"])) {
+    $variables["substitutes"] = [
+      "#theme" => "products_page",
+      "#products" => $variables["products"],
+    ];
+  }
+}

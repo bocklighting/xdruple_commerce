@@ -26,11 +26,11 @@
       <?php endif; ?>
     </div>
   </div>
-  <div class="row">
-    <?php if (!empty($extra)): ?>
+  <?php if (!empty($extra)): ?>
+    <div class="row">
       <div class="col-lg-12">
         <?php print drupal_render($extra) ?>
       </div>
-    <?php endif; ?>
-  </div>
+    </div>
+  <?php endif; ?>
 </div>

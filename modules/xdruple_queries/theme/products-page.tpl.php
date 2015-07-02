@@ -1,12 +1,12 @@
-<div class="subcategories-list">
-  <?php if (!empty($subcategories)): ?>
+<?php if (!empty($subcategories)): ?>
+  <div class="subcategories-list">
     <h3><?php print t("Subcategories") ?></h3>
     <?php print $subcategories; ?>
-  <?php endif; ?>
-</div>
-<div class="view-ft-commerce-xd-products">
-  <div class="view-content">
-    <?php if (!empty($columns)): ?>
+  </div>
+<?php endif; ?>
+<?php if (!empty($columns)): ?>
+  <div class="view-ft-commerce-xd-products">
+    <div class="view-content">
       <?php if (!empty($subcategories)): ?>
         <h3><?php print t("Products") ?></h3>
       <?php endif; ?>
@@ -19,6 +19,6 @@
           <?php endforeach; ?>
         </div>
       <?php endforeach; ?>
-    <?php endif; ?>
+    </div>
   </div>
-</div>
+<?php endif; ?>
