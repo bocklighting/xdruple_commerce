@@ -164,12 +164,12 @@ function xdruple_queries_theme() {
     "template" => "theme/xdruple-product-links",
     "file" => "theme/theme.inc",
   ];
-  $items["xdruple_product_packaging"] = [
+  $items["xdruple_product_delivery"] = [
     "variables" => [
       "product" => NULL,
-      "title" => "Packaging",
+      "title" => "Delivery information",
     ],
-    "template" => "theme/xdruple-product-packaging",
+    "template" => "theme/xdruple-product-delivery",
     "file" => "theme/theme.inc",
   ];
   $items["xdruple_product_characteristics"] = [

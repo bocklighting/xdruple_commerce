@@ -268,8 +268,8 @@ function template_preprocess_product_page(&$variables) {
       "#weight" => -10,
     ];
     $variables["details"] = [];
-    $variables["details"]["packaging"] = [
-      "#theme" => "xdruple_product_packaging",
+    $variables["details"]["delivery"] = [
+      "#theme" => "xdruple_product_delivery",
       "#product" => $product,
       "#weight" => -20,
     ];
@@ -412,7 +412,7 @@ function template_preprocess_xdruple_product_links(&$variables) {
 function template_process_xdruple_product_links(&$variables) {
 }
 
-function template_preprocess_xdruple_product_packaging(&$variables) {
+function template_preprocess_xdruple_product_delivery(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
@@ -451,7 +451,7 @@ function template_preprocess_xdruple_product_packaging(&$variables) {
   $variables["classes_array"]["panel-default"] = "panel-default";
 }
 
-function template_process_xdruple_product_packaging(&$variables) {
+function template_process_xdruple_product_delivery(&$variables) {
   if (!empty($variables["data"])) {
     $variables["info"] = [
       "#theme" => "table",
