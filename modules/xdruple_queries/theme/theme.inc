@@ -458,8 +458,6 @@ function template_preprocess_xdruple_product_files(&$variables) {
       }
     }
   }
-  $variables["classes_array"]["panel"] = "panel";
-  $variables["classes_array"]["panel-default"] = "panel-default";
 }
 
 function template_process_xdruple_product_files(&$variables) {
@@ -485,8 +483,6 @@ function template_preprocess_xdruple_product_links(&$variables) {
       }
     }
   }
-  $variables["classes_array"]["panel"] = "panel";
-  $variables["classes_array"]["panel-default"] = "panel-default";
 }
 
 function template_process_xdruple_product_links(&$variables) {
@@ -532,8 +528,6 @@ function template_preprocess_xdruple_product_delivery(&$variables) {
       ];
     }
   }
-  $variables["classes_array"]["panel"] = "panel";
-  $variables["classes_array"]["panel-default"] = "panel-default";
   $variables["delivery_table"] = [
     "#theme" => "table",
     "#rows" => [],
@@ -595,8 +589,6 @@ function template_preprocess_xdruple_product_characteristics(&$variables) {
       }
     }
   }
-  $variables["classes_array"]["panel"] = "panel";
-  $variables["classes_array"]["panel-default"] = "panel-default";
   $variables["characteristics_table"] = [
     "#theme" => "table",
     "#rows" => [],

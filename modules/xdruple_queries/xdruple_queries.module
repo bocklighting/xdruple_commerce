@@ -184,7 +184,7 @@ function xdruple_queries_theme() {
   $items["xdruple_product_delivery"] = [
     "variables" => [
       "product" => NULL,
-      "title" => "Delivery information",
+      "title" => "Delivery details",
     ],
     "template" => "theme/xdruple-product-delivery",
     "file" => "theme/theme.inc",
@@ -192,7 +192,7 @@ function xdruple_queries_theme() {
   $items["xdruple_product_characteristics"] = [
     "variables" => [
       "product" => NULL,
-      "title" => "Characteristics",
+      "title" => "Product details",
       "columns" => 2,
     ],
     "template" => "theme/xdruple-product-characteristics",
