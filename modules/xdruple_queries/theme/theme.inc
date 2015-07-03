@@ -227,11 +227,16 @@ function template_preprocess_product_page(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
+    $variables += [
+      "content" => [],
+      "actions" => [],
+      "context" => [],
+      "extra" => [],
+    ];
     $variables["subtitle"] = [
       "#theme" => "xdruple_product_subtitle",
       "#product" => $product,
     ];
-    $variables["content"] = [];
     $variables["content"]["illustrations"] = [
       "#theme" => "xdruple_product_illustrations",
       "#product" => $product,
@@ -260,7 +265,6 @@ function template_preprocess_product_page(&$variables) {
       "#product" => $product,
       "#weight" => 30,
     ];
-    $variables["actions"] = [];
     $variables["actions"]["product_price"] = [
       "#theme" => "xdruple_queries_price",
       "#product" => $product,
@@ -276,7 +280,6 @@ function template_preprocess_product_page(&$variables) {
       ],
       "#weight" => -10,
     ];
-    $variables["context"] = [];
     $variables["context"]["files"] = [
       "#theme" => "xdruple_product_files",
       "#product" => $product,
@@ -287,7 +290,6 @@ function template_preprocess_product_page(&$variables) {
       "#product" => $product,
       "#weight" => 10,
     ];
-    $variables["extra"] = [];
     $variables["extra"]["substitutes"] = [
       "#theme" => "xdruple_product_substitutes",
       "#product" => $product,
@@ -489,13 +491,14 @@ function template_process_xdruple_product_links(&$variables) {
 }
 
 function template_preprocess_xdruple_product_delivery(&$variables) {
+  $rows = [];
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
-    $variables["data"] = [
+    $data = [
       "product_dimensions" => [
         "#theme" => "xdruple_dimensions",
-        "#title" => "Product dimensions",
+        "#title" => "",
         "#length" => $product->get("productLength"),
         "#width" => $product->get("productWidth"),
         "#height" => $product->get("productHeight"),
@@ -503,13 +506,13 @@ function template_preprocess_xdruple_product_delivery(&$variables) {
       ],
       "product_weight" => [
         "#theme" => "xdruple_weight",
-        "#title" => "Product weight",
+        "#title" => "",
         "#weight" => $product->get("productWeight"),
         "#unit" => $product->get("weightUnit"),
       ],
       "package_dimensions" => [
         "#theme" => "xdruple_dimensions",
-        "#title" => "Package dimensions",
+        "#title" => "",
         "#length" => $product->get("packageLength"),
         "#width" => $product->get("packageWidth"),
         "#height" => $product->get("packageHeight"),
@@ -517,20 +520,43 @@ function template_preprocess_xdruple_product_delivery(&$variables) {
       ],
       "package_weight" => [
         "#theme" => "xdruple_weight",
-        "#title" => "Package weight",
+        "#title" => "",
         "#weight" => $product->get("packageWeight"),
         "#unit" => $product->get("weightUnit"),
       ],
     ];
+    $rows = [
+      "product" => [
+        "Product dimensions",
+        [
+          "data" => $data["product_dimensions"],
+        ],
+        "Product weight",
+        [
+          "data" => $data["product_weight"],
+        ]
+      ],
+      "package" => [
+        "Package dimensions",
+        [
+          "data" => $data["package_dimensions"],
+        ],
+        "Package weight",
+        [
+          "data" => $data["package_weight"],
+        ],
+      ]
+    ];
     if (!empty($product->get("freightClass"))) {
-      $data["freight_class"] = [
+      $variables["data"]["freight_class"] = [
+        "#title" => "Freight Class",
         "#value" => $product->get("freightClass"),
       ];
     }
   }
   $variables["delivery_table"] = [
     "#theme" => "table",
-    "#rows" => [],
+    "#rows" => $rows,
     "#attributes" => [
       "class" => [
         "table-condensed" => "table-condensed",
@@ -546,7 +572,10 @@ function template_process_xdruple_product_delivery(&$variables) {
       $value["#title"] = "";
       $variables["delivery_table"]["#rows"][] = [
         $title,
-        ["data" => $value],
+        [
+          "data" => $value["#value"],
+          "colspan" => 3,
+        ],
       ];
     }
   }
