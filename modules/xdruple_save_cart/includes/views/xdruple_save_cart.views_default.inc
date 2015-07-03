@@ -34,65 +34,65 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = 25;
   $handler->display->display_options['style_plugin'] = 'table';
-  $handler->display->display_options['style_options']['columns'] = array(
+  $handler->display->display_options['style_options']['columns'] = [
     'order_number' => 'order_number',
     'created' => 'created',
     'changed' => 'changed',
     'commerce_order_total' => 'commerce_order_total',
     'status' => 'status',
-  );
+  ];
   $handler->display->display_options['style_options']['default'] = 'order_number';
-  $handler->display->display_options['style_options']['info'] = array(
-    'order_number' => array(
+  $handler->display->display_options['style_options']['info'] = [
+    'order_number' => [
       'sortable' => 1,
       'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'created' => array(
+    ],
+    'created' => [
       'sortable' => 1,
       'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'changed' => array(
+    ],
+    'changed' => [
       'sortable' => 1,
       'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'commerce_order_total' => array(
+    ],
+    'commerce_order_total' => [
       'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'status' => array(
+    ],
+    'status' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'xd_order_po_number' => array(
+    ],
+    'xd_order_po_number' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-    'xd_order_notes' => array(
+    ],
+    'xd_order_notes' => [
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
-    ),
-  );
+    ],
+  ];
   /* No results behavior: Global: Text area */
   $handler->display->display_options['empty']['text']['id'] = 'text';
   $handler->display->display_options['empty']['text']['table'] = 'views';
@@ -124,9 +124,9 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['fields']['commerce_order_total']['field'] = 'commerce_order_total';
   $handler->display->display_options['fields']['commerce_order_total']['label'] = 'Total';
   $handler->display->display_options['fields']['commerce_order_total']['click_sort_column'] = 'amount';
-  $handler->display->display_options['fields']['commerce_order_total']['settings'] = array(
+  $handler->display->display_options['fields']['commerce_order_total']['settings'] = [
     'calculation' => FALSE,
-  );
+  ];
   /* Field: Commerce Order: Operations */
   $handler->display->display_options['fields']['move_order']['id'] = 'move_order';
   $handler->display->display_options['fields']['move_order']['table'] = 'commerce_order';
@@ -143,16 +143,16 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['arguments']['uid_1']['specify_validation'] = TRUE;
   $handler->display->display_options['arguments']['uid_1']['validate']['type'] = 'current_user_or_role';
   $handler->display->display_options['arguments']['uid_1']['validate_options']['restrict_roles'] = TRUE;
-  $handler->display->display_options['arguments']['uid_1']['validate_options']['roles'] = array(
+  $handler->display->display_options['arguments']['uid_1']['validate_options']['roles'] = [
     3 => '3',
-  );
+  ];
   /* Filter criterion: Commerce Order: Order state */
   $handler->display->display_options['filters']['state']['id'] = 'state';
   $handler->display->display_options['filters']['state']['table'] = 'commerce_order';
   $handler->display->display_options['filters']['state']['field'] = 'state';
-  $handler->display->display_options['filters']['state']['value'] = array(
+  $handler->display->display_options['filters']['state']['value'] = [
     'saved_cart' => 'saved_cart',
-  );
+  ];
 
   /* Display: User Orders */
   $handler = $view->new_display('page', 'User Orders', 'order_page');
@@ -221,9 +221,9 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['fields']['xd_order_notes']['label'] = 'Notes';
   $handler->display->display_options['fields']['xd_order_notes']['hide_empty'] = TRUE;
   $handler->display->display_options['fields']['xd_order_notes']['type'] = 'text_summary_or_trimmed';
-  $handler->display->display_options['fields']['xd_order_notes']['settings'] = array(
+  $handler->display->display_options['fields']['xd_order_notes']['settings'] = [
     'trim_length' => '100',
-  );
+  ];
   /* Field: Commerce Order: Created date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'commerce_order';
@@ -246,9 +246,9 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['fields']['commerce_order_total']['element_type'] = 'span';
   $handler->display->display_options['fields']['commerce_order_total']['hide_empty'] = TRUE;
   $handler->display->display_options['fields']['commerce_order_total']['click_sort_column'] = 'amount';
-  $handler->display->display_options['fields']['commerce_order_total']['settings'] = array(
+  $handler->display->display_options['fields']['commerce_order_total']['settings'] = [
     'calculation' => FALSE,
-  );
+  ];
   /* Field: Commerce Order: Operations */
   $handler->display->display_options['fields']['move_order']['id'] = 'move_order';
   $handler->display->display_options['fields']['move_order']['table'] = 'commerce_order';
@@ -277,16 +277,16 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['arguments']['uid_1']['specify_validation'] = TRUE;
   $handler->display->display_options['arguments']['uid_1']['validate']['type'] = 'current_user_or_role';
   $handler->display->display_options['arguments']['uid_1']['validate_options']['restrict_roles'] = TRUE;
-  $handler->display->display_options['arguments']['uid_1']['validate_options']['roles'] = array(
+  $handler->display->display_options['arguments']['uid_1']['validate_options']['roles'] = [
     3 => '3',
-  );
+  ];
   /* Filter criterion: Commerce Order: Order state */
   $handler->display->display_options['filters']['state']['id'] = 'state';
   $handler->display->display_options['filters']['state']['table'] = 'commerce_order';
   $handler->display->display_options['filters']['state']['field'] = 'state';
-  $handler->display->display_options['filters']['state']['value'] = array(
+  $handler->display->display_options['filters']['state']['value'] = [
     'saved_cart' => 'saved_cart',
-  );
+  ];
 
   $views[$view->name] = $view;
 

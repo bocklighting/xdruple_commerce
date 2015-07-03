@@ -10,17 +10,17 @@
  */
 function xdruple_delivery_menu() {
   // xDruple Commerce Delivery Shipping Service settings page.
-  $items['admin/commerce/config/shipping/methods/xdruple_delivery/edit'] = array(
+  $items['admin/commerce/config/shipping/methods/xdruple_delivery/edit'] = [
     'title' => 'Edit',
     'description' => 'xDruple Commerce Delivery Shipping Service method settings.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('xdruple_delivery_settings_form'),
-    'access arguments' => array('administer shipping'),
+    'page arguments' => ['xdruple_delivery_settings_form'],
+    'access arguments' => ['administer shipping'],
     'file' => 'xdruple_delivery.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_INLINE,
     'weight' => 0,
-  );
+  ];
 
   return $items;
 }
@@ -29,12 +29,12 @@ function xdruple_delivery_menu() {
  * Implements hook_commerce_shipping_method_info().
  */
 function xdruple_delivery_commerce_shipping_method_info() {
-  $shipping_methods = array();
+  $shipping_methods = [];
 
-  $shipping_methods['xdruple_delivery'] = array(
+  $shipping_methods['xdruple_delivery'] = [
     'title' => t('Delivery Service'),
     'description' => t('Allows you to define Delivery Service for customers to choose during checkout.'),
-  );
+  ];
 
   return $shipping_methods;
 }
@@ -43,18 +43,18 @@ function xdruple_delivery_commerce_shipping_method_info() {
  * Implements hook_commerce_shipping_service_info().
  */
 function xdruple_delivery_commerce_shipping_service_info() {
-  $shipping_services = array();
+  $shipping_services = [];
 
-  $shipping_services['xdruple_delivery'] = array(
+  $shipping_services['xdruple_delivery'] = [
     'title' => t('Delivery Service'),
     'description' => t('Have this order delivered by our delivery service to your ship to address.'),
     'display_title' => t('Request Delivery Service'),
     'shipping_method' => 'xdruple_delivery',
     'price_component' => 'shipping',
-    'callbacks' => array(
+    'callbacks' => [
       'rate' => 'xdruple_delivery_service_rate',
-    )
-  );
+    ]
+  ];
 
   return $shipping_services;
 }
@@ -69,9 +69,9 @@ function xdruple_delivery_commerce_shipping_service_info() {
  * @return array
  */
 function xdruple_delivery_service_rate($shipping_service, $order) {
-  return array(
+  return [
     'amount' => variable_get('xdruple_delivery_service_amount', 0) * 100,
     'currency_code' => commerce_default_currency(),
-    'data' => array(),
-  );
+    'data' => [],
+  ];
 }

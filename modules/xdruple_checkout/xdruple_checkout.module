@@ -8,30 +8,30 @@
  */
 function xdruple_checkout_cpanel_alter(&$form, &$form_state) {
   if (empty($form['xdruple_commerce_store_settings'])) {
-    $form['xdruple_commerce_store_settings'] = array(
+    $form['xdruple_commerce_store_settings'] = [
       '#type' => 'fieldset',
       '#title' => t('Store settings'),
       '#group' => 'system_settings',
-    );
+    ];
   }
 
-  $form['xdruple_commerce_store_settings']['xdruple_checkout_message'] = array(
+  $form['xdruple_commerce_store_settings']['xdruple_checkout_message'] = [
     '#type' => 'textarea',
     '#title' => t('Anonymous user checkout redirect login message'),
     '#description' => t('The message that should be displayed on the login page in the checkout process.'),
     '#default_value' => variable_get('xdruple_checkout_message', t('You need to be logged in to be able to checkout.')),
     '#rows' => 2,
-  );
-  $form['xdruple_commerce_store_settings']['xdruple_checkout_anonymous'] = array(
+  ];
+  $form['xdruple_commerce_store_settings']['xdruple_checkout_anonymous'] = [
     '#type' => 'checkbox',
     '#title' => t('Continue without register'),
     '#description' => t('Allow anonymous checkout. This will also provide an Anonymous Checkout option as an alternative to logging in on the login form when a user has initiated the checkout process.'),
     '#default_value' => variable_get('xdruple_checkout_anonymous', FALSE),
-  );
+  ];
 
   $customers = xdruple_fields_get_customer_list();
   if (count($customers) > 0) {
-    $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer'] = array(
+    $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer'] = [
       '#type' => 'select',
       '#options' => $customers,
       '#default_value' => variable_get('xdruple_checkout_guest_customer', '- None -'),
@@ -39,7 +39,7 @@ function xdruple_checkout_cpanel_alter(&$form, &$form_state) {
       '#title' => t('Guest Customer'),
       '#description' => t('Select the Customer to use for guest checkout orders and/or anonymous user price quotes. All anonymous guest checkout orders will be created under this Customer in xTuple.'),
       '#required' => TRUE,
-    );
+    ];
 
     // The xTuple API only returns 100 results by default. If there are more than 98 customers, switch to a text field.
     if (count($customers) > 98) {
@@ -51,21 +51,21 @@ function xdruple_checkout_cpanel_alter(&$form, &$form_state) {
       unset($form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#empty_option']);
     }
   }
-  $form['xdruple_commerce_store_settings']['xdruple_checkout_use_guest_customer_price_schedule'] = array(
+  $form['xdruple_commerce_store_settings']['xdruple_checkout_use_guest_customer_price_schedule'] = [
     '#type' => 'checkbox',
     '#title' => t("Use Guest Customer's price schedule for anonymous users"),
     '#description' => t('When checked, anonymous users will not see the Item List Price. Instead a price quote will be fetched and whatever pricing schedule the Guest Customer above is assigned to will adjust prices accordingly.'),
     '#default_value' => variable_get('xdruple_checkout_use_guest_customer_price_schedule', FALSE),
-  );
+  ];
 
   if (variable_get('user_email_verification', TRUE)) {
-    $form['xdruple_commerce_store_settings']['xdruple_checkout_reset_password_message'] = array(
+    $form['xdruple_commerce_store_settings']['xdruple_checkout_reset_password_message'] = [
       '#type' => 'textarea',
       '#title' => t('Reset password checkout redirect message'),
       '#description' => t('The message that should be displayed on the reset password page for new accounts during the checkout process. When an anonymous users checks out and chooses to create a new account, they will be sent a one time login link to their email address. After clicking on it, they will be sent to the Reset Password page to create a password. This message will display on that page so they know they can continue their order after setting a password.'),
       '#default_value' => variable_get('xdruple_checkout_reset_password_message', t('Enter and save a new password and then you can continue with the checkout process.')),
       '#rows' => 2,
-    );
+    ];
   }
 }
 
@@ -137,7 +137,7 @@ function xdruple_checkout_commerce_checkout_pane_info_alter(&$checkout_panes) {
  * @param $form_id
  */
 function xdruple_checkout_form_alter(&$form, &$form_state, $form_id) {
-  if (in_array($form_id, array('user_login', 'user_login_block', 'user_profile_form', 'user_pass_reset'))) {
+  if (in_array($form_id, ['user_login', 'user_login_block', 'user_profile_form', 'user_pass_reset'])) {
     _xdruple_checkout_alter_user_forms($form, $form_state, $form_id);
   }
 
@@ -164,7 +164,7 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
       && empty($_SESSION['xdruple_checkout_bypass'])
       && !empty($_SESSION['xdruple_checkout_anonymous'])
     ) {
-      if (in_array($form_id, array('user_login', 'user_login_block', 'user_profile_form'))) {
+      if ($form_id == 'user_login') {
         // Append the checkout redirect function on user's forms.
         $form['#submit'][] = 'xdruple_checkout_anonymous_submit';
         unset($form['#action']);
@@ -172,52 +172,52 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
         // Anonymous checkout button.
         if (variable_get('xdruple_checkout_anonymous', FALSE)) {
           $form_state['#order'] = $order;
-          $form['actions']['continue_button'] = array(
+          $form['actions']['continue_button'] = [
             '#name' => 'continue_button',
             '#type' => 'submit',
             '#value' => 'Checkout without an account',
-            '#limit_validation_errors' => array(),
-            '#submit' => array('xdruple_checkout_anonymous_continue_checkout'),
-            '#states' => array(
-              'visible' => array(
-                ':input[name="have_pass"]' => array('value' => 0),
-              ),
-            ),
-          );
+            '#limit_validation_errors' => [],
+            '#submit' => ['xdruple_checkout_anonymous_continue_checkout'],
+            '#states' => [
+              'visible' => [
+                ':input[name="have_pass"]' => ['value' => 0],
+              ],
+            ],
+          ];
           // Anonymous checkout as alternative to login form.
-          $form['have_pass'] = array(
+          $form['have_pass'] = [
             '#type' => 'radios',
             '#title' => t('Do you have an account?'),
-            '#description' => t('Choose %yes to login, %no to checkout as a guest or you can ', array(
+            '#description' => t('Choose %yes to login, %no to checkout as a guest or you can ', [
                 '%yes' => t('Yes'),
                 '%no' => t('No')
-              )) . l(t('create a new account'), 'user/register') . '.',
-            '#options' => array(0 => t('Yes'), 1 => t('No')),
+              ]) . l(t('create a new account'), 'user/register') . '.',
+            '#options' => [0 => t('Yes'), 1 => t('No')],
             '#weight' => -10,
             '#default_value' => 0,
-          );
-          $form['pass']['#states'] = array(
-            'visible' => array(
-              ':input[name="have_pass"]' => array('value' => 0),
-            ),
-          );
-          $form['actions']['submit']['#states'] = array(
-            'visible' => array(
-              ':input[name="have_pass"]' => array('value' => 0),
-            ),
-          );
+          ];
+          $form['pass']['#states'] = [
+            'visible' => [
+              ':input[name="have_pass"]' => ['value' => 0],
+            ],
+          ];
+          $form['actions']['submit']['#states'] = [
+            'visible' => [
+              ':input[name="have_pass"]' => ['value' => 0],
+            ],
+          ];
           //$form['pass']['#weight'] = 10;
           $form['actions']['continue_button']['#value'] = t('Checkout without an account');
-          $form['actions']['continue_button']['#states'] = array(
-            'visible' => array(
-              ':input[name="have_pass"]' => array('value' => 1),
-            ),
-          );
+          $form['actions']['continue_button']['#states'] = [
+            'visible' => [
+              ':input[name="have_pass"]' => ['value' => 1],
+            ],
+          ];
 
           // Use the username as order email.
           // Email validation for the username form element
           $form['name']['#title'] = t('Email');
-          $form['actions']['continue_button']['#limit_validation_errors'] = array(array('name'));
+          $form['actions']['continue_button']['#limit_validation_errors'] = [['name']];
           $form['actions']['continue_button']['#validate'][] = 'xdruple_checkout_username_as_order_email_form_validate';
         }
       }
@@ -231,10 +231,10 @@ function _xdruple_checkout_alter_user_forms(&$form, &$form_state, $form_id) {
         }
 
         // "Continue with checkout" submit button.
-        $form['actions']['checkout'] = array(
+        $form['actions']['checkout'] = [
           '#type' => 'submit',
           '#value' => t('Continue with checkout'),
-        );
+        ];
 
         // Append the checkout redirect function on user's forms.
         $form['#submit'][] = 'xdruple_checkout_anonymous_submit';
@@ -265,7 +265,7 @@ function xdruple_checkout_anonymous_submit($form, &$form_state) {
       // @see user_pass_reset()
       if ($form_state['clicked_button']['#id'] == 'edit-checkout') {
         global $user;
-        $users = user_load_multiple(array($form_state['build_info']['args'][0]), array('status' => '1'));
+        $users = user_load_multiple([$form_state['build_info']['args'][0]], ['status' => '1']);
         $user = reset($users);
         $GLOBALS['user'] = $user;
         // User login with user_login_finalize().
@@ -303,24 +303,17 @@ function xdruple_checkout_username_as_order_email_form_validate($form, &$form_st
   }
   else {
     $mail_taken = (bool) db_select('users')
-      ->fields('users', array('uid'))
+      ->fields('users', ['uid'])
       ->condition('uid', $GLOBALS['user']->uid, '<>')
       ->condition('mail', db_like($form_state['values']['email']), 'LIKE')
       ->range(0, 1)
       ->execute()
       ->fetchField();
     if ($mail_taken) {
-      // Format error message dependent on whether the user is logged in or not.
-      // TODO: I'm not sure how this could be called by a user that is logged in.
-      if ($GLOBALS['user']->uid) {
-        form_set_error('name', t('The e-mail address %email is already taken.', array('%email' => $form_state['values']['email'])));
-      }
-      else {
-        form_set_error('name', t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array(
-          '%email' => $form_state['values']['email'],
-          '@password' => url('user/password')
-        )));
-      }
+      form_set_error('name', t('The e-mail address %email is already registered. !forgotten', [
+        '%email' => $form_state['values']['email'],
+        '!forgotten' => l("Have you forgotten your password?", "user/password"),
+      ]));
     }
   }
 }
@@ -378,11 +371,11 @@ function xdruple_checkout_items_in_cart() {
  * @return array
  */
 function xdruple_checkout_features_exclude() {
-  return array(
-    'variable' => array(
+  return [
+    'variable' => [
       'xdruple_checkout_manager_order_confirm_emails',
       'xdruple_checkout_message',
       'xdruple_checkout_reset_password_message',
-    ),
-  );
+    ],
+  ];
 }

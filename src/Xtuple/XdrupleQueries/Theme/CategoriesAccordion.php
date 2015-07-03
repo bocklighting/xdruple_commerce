@@ -17,27 +17,28 @@ class CategoriesAccordion extends AbstractThemeHook {
   public function preprocess() {
     $variables = parent::preprocess();
     $variables['catalog'] = Tree::getCatalog();
-    $variables['content_attributes_array'] = array(
-      'class' => array(
+    $variables['content_attributes_array'] = [
+      'class' => [
         'panel',
         'panel-' . $this->getContext(),
-      ),
-    );
-    $variables['attributes_array'] = array(
-      'class' => array(
+      ],
+    ];
+    $variables['attributes_array'] = [
+      'class' => [
         'b-categories-accordion',
-      ),
-    );
+      ],
+    ];
 
     return $variables;
   }
 
   /**
-   * @param int $weight
+   * @param int   $weight
    * @param array $variables
+   *
    * @return array
    */
-  public function render($weight = 0, array $variables = array()) {
+  public function render($weight = 0, array $variables = []) {
     $return = parent::render();
     $path = drupal_get_path("module", "xdruple_queries");
     $return["#attached"] = [

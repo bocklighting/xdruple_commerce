@@ -12,98 +12,98 @@ function xdruple_commerce_install() {
   drupal_static_reset();
 
   if (!field_info_field('xd_order_po_number')) {
-    $field = array(
+    $field = [
       'field_name' => 'xd_order_po_number',
       'type' => 'text',
       'cardinality' => 1,
       'module' => 'text',
-      'field_permissions' => array(
+      'field_permissions' => [
         'type' => 0,
-      ),
-    );
+      ],
+    ];
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_order', 'xd_order_po_number', 'commerce_order', array(
+    $instance = field_read_instance('commerce_order', 'xd_order_po_number', 'commerce_order', [
       'include_inactive' => TRUE,
       'include_deleted' => TRUE
-    ));
+    ]);
     if (empty($instance)) {
-      $instance = array(
+      $instance = [
         'field_name' => 'xd_order_po_number',
         'entity_type' => 'commerce_order',
         'bundle' => 'commerce_order',
         'label' => 'PO Number',
-        'widget' => array(
+        'widget' => [
           'weight' => -5,
           'type' => 'text_textfield',
           'module' => 'text',
           'active' => 1,
-          'settings' => array(
+          'settings' => [
             'size' => 30,
-          ),
-        ),
-        'settings' => array(
+          ],
+        ],
+        'settings' => [
           'text_processing' => 0,
           'user_register_form' => FALSE,
-        ),
-        'display' => array(
-          'default' => array(
+        ],
+        'display' => [
+          'default' => [
             'label' => 'above',
             'type' => 'text_default',
             'weight' => -5,
             'module' => 'text',
-          ),
-        ),
-      );
+          ],
+        ],
+      ];
       field_create_instance($instance);
     }
   }
 
   if (!field_info_field('xd_order_notes')) {
-    $field = array(
+    $field = [
       'field_name' => 'xd_order_notes',
       'type' => 'text_with_summary',
       'cardinality' => 1,
       'module' => 'text',
-      'field_permissions' => array(
+      'field_permissions' => [
         'type' => 0,
-      ),
-    );
+      ],
+    ];
     field_create_field($field);
 
-    $instance = field_read_instance('commerce_order', 'xd_order_notes', 'commerce_order', array(
+    $instance = field_read_instance('commerce_order', 'xd_order_notes', 'commerce_order', [
       'include_inactive' => TRUE,
       'include_deleted' => TRUE
-    ));
+    ]);
     if (empty($instance)) {
-      $instance = array(
+      $instance = [
         'field_name' => 'xd_order_notes',
         'entity_type' => 'commerce_order',
         'bundle' => 'commerce_order',
         'label' => 'Order Notes',
-        'widget' => array(
+        'widget' => [
           'weight' => -4,
           'type' => 'text_textarea_with_summary',
           'module' => 'text',
           'active' => 1,
-          'settings' => array(
+          'settings' => [
             'rows' => 3,
-          ),
-        ),
-        'settings' => array(
+          ],
+        ],
+        'settings' => [
           'display_summary' => 0,
           'text_processing' => 0,
           'user_register_form' => FALSE,
-        ),
-        'display' => array(
-          'default' => array(
+        ],
+        'display' => [
+          'default' => [
             'label' => 'above',
             'type' => 'text_default',
             'weight' => -4,
             'module' => 'text',
-          ),
-        ),
-      );
+          ],
+        ],
+      ];
       field_create_instance($instance);
     }
   }
@@ -125,7 +125,7 @@ function xdruple_commerce_update_7002() {
   $message = 'xDruple Favorites kept disabled';
 
   if ($enabled = variable_get('xdruple_queries_products_standard_page_enabled', FALSE)) {
-    module_enable(array('xdruple_favorites'));
+    module_enable(['xdruple_favorites']);
     $message = 'xDruple Favorites enabled';
   }
 
@@ -141,7 +141,7 @@ function xdruple_commerce_update_7003() {
   $message = 'xDruple Recent kept disabled';
 
   if ($enabled = variable_get('xdruple_queries_product_recent_page_enabled', FALSE)) {
-    module_enable(array('xdruple_recent'));
+    module_enable(['xdruple_recent']);
     $message = 'xDruple Recent enabled';
   }
 

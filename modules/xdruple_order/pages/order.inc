@@ -14,10 +14,10 @@
  */
 function xdruple_order_page($order_number) {
   $output = '';
-  $orders = array();
+  $orders = [];
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-  $session = extensions_get_session();
+  global $session;
   if (!empty($order_number) && is_numeric($order_number)) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'xtuple_salesorder')
@@ -48,11 +48,11 @@ function xdruple_order_page($order_number) {
     foreach ($orders['xtuple_salesorder'] as $order) {
       $currency = entity_load_single('xtuple_currency', $order->currency['abbreviation']);
 
-      $params = array(
+      $params = [
         'order' => $order,
         'remitto' => $remitto['xtuple_remitto'][key($remitto['xtuple_remitto'])],
         'currency' => $currency,
-      );
+      ];
 
       $output = theme('order_page', $params);
     }
@@ -71,9 +71,9 @@ function xdruple_order_page($order_number) {
 function xdruple_order_page_title($order_number) {
   $title = t('Order');
   if (!empty($order_number) && is_numeric($order_number)) {
-    $title = t('Order #!number', array(
+    $title = t('Order #!number', [
       '!number' => $order_number,
-    ));
+    ]);
   }
 
   return $title;

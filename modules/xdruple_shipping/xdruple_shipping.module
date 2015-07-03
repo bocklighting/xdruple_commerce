@@ -10,11 +10,11 @@ use Xtuple\Xdruple\Theme\PrintAddressInfoHandler;
  * Implements hook_rescued_resources().
  */
 function xdruple_shipping_rescued_resources() {
-  return array(
+  return [
     "FreightClass",
     "ShipVia",
     "Site",
-  );
+  ];
 }
 
 /**
@@ -27,19 +27,19 @@ function xdruple_shipping_cpanel_alter(&$form, &$form_state) {
   if (module_exists('commerce_pickup')) {
     $sites = entity_load('xtuple_site');
 
-    $options = array();
+    $options = [];
     foreach ($sites as $key => $site) {
       $options[$key] = $site->description;
     }
     if (count($sites) > 1) {
-      $form['xdruple_commerce_store_settings']['xdruple_shipping_allowed_pickup_sites'] = array(
+      $form['xdruple_commerce_store_settings']['xdruple_shipping_allowed_pickup_sites'] = [
         '#type' => 'checkboxes',
         '#options' => $options,
         '#title' => t('Allowed Pickup Sites'),
         '#description' => t('Limit the Sites customers are allowed to pickup from. If checked, a Customer can choose to pickup their order from this Site location.'),
         '#required' => TRUE,
-        '#default_value' => variable_get('xdruple_shipping_allowed_pickup_sites', array()),
-      );
+        '#default_value' => variable_get('xdruple_shipping_allowed_pickup_sites', []),
+      ];
     }
     else {
       drupal_set_message(t('Cannot find any Sites to set as allowed pickup locations.'), 'warning');
@@ -154,10 +154,10 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
 
             if (!empty($weight)) {
               // Associate that field with this product entity.
-              $entity->xt_physical_weight[LANGUAGE_NONE][0] = array(
+              $entity->xt_physical_weight[LANGUAGE_NONE][0] = [
                 'weight' => $weight,
                 'unit' => $weightUnit,
-              );
+              ];
             }
           }
           elseif ($type === 'physical_dimensions') {
@@ -173,24 +173,24 @@ function xdruple_shipping_field_storage_pre_load($entity_type, $entities, $age, 
               $dimensionUnit = $instances['widget']['settings']['default_unit'];
             }
 
-            if (property_exists($entity, 'packLength') && !empty($entity->packLength)) {
-              $length = $entity->packLength;
+            if (property_exists($entity, 'packageLength') && !empty($entity->packageLength)) {
+              $length = $entity->packageLength;
             }
-            if (property_exists($entity, 'packWidth') && !empty($entity->packWidth)) {
-              $width = $entity->packWidth;
+            if (property_exists($entity, 'packageWidth') && !empty($entity->packageWidth)) {
+              $width = $entity->packageWidth;
             }
-            if (property_exists($entity, 'packHeight') && !empty($entity->packHeight)) {
-              $height = $entity->packHeight;
+            if (property_exists($entity, 'packageHeight') && !empty($entity->packageHeight)) {
+              $height = $entity->packageHeight;
             }
 
             if (!empty($length) && !empty($width) && !empty($height)) {
               // Associate that field with this product entity.
-              $entity->xt_physical_dimension[LANGUAGE_NONE][0] = array(
+              $entity->xt_physical_dimension[LANGUAGE_NONE][0] = [
                 'length' => $length,
                 'width' => $width,
                 'height' => $height,
                 'unit' => $dimensionUnit,
-              );
+              ];
             }
           }
         }
@@ -318,8 +318,8 @@ function xdruple_shipping_map_ship_via($ship_label) {
 
   foreach ($ship_via as $code => $value) {
     // Remove and space, dashes, underscores.
-    $stripped_label = str_replace(array(' ', '-', '_'), '', $ship_label);
-    $stripped_description = str_replace(array(' ', '-', '_'), '', $value->description);
+    $stripped_label = str_replace([' ', '-', '_'], '', $ship_label);
+    $stripped_description = str_replace([' ', '-', '_'], '', $value->description);
 
     // Compare the two and return the code-description if they match.
     if ($stripped_label === $stripped_description) {
@@ -362,7 +362,7 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
   require_once DRUPAL_ROOT . '/includes/locale.inc';
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-  $session = extensions_get_session();
+  global $session;
 
   $id = $session->getRescued('site');
   $entity_type = 'xtuple_site';
@@ -396,7 +396,7 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
     }
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
-    watchdog('xdruple_commerce', $e->getMessage(), array(), WATCHDOG_ERROR);
+    watchdog('xdruple_commerce', $e->getMessage(), [], WATCHDOG_ERROR);
   }
 }
 
@@ -408,7 +408,7 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
  * @throws \Exception
  */
 function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_services) {
-  $allowed_pickup_sites = variable_get('xdruple_shipping_allowed_pickup_sites', array());
+  $allowed_pickup_sites = variable_get('xdruple_shipping_allowed_pickup_sites', []);
 
   foreach ($shipping_services as $key => $service) {
     if ($service['module'] === 'commerce_pickup') {
@@ -424,10 +424,10 @@ function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_servic
           $address = xdruple_addr_array_to_addr_info_obj($site->address);
 
           // Add the address to the description.
-          $shipping_services[$key]['description'] .= '<br />' . theme('xdruple_print_address_info', array(
+          $shipping_services[$key]['description'] .= '<br />' . theme('xdruple_print_address_info', [
               'printAddressInfoHandler' => new PrintAddressInfoHandler($address, ''),
               'class' => 'xdruple-print-address-info',
-            ));
+            ]);
         }
         else {
           // This site is not an allowed pickup site. Unset it from the shipping services.
@@ -442,42 +442,42 @@ function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_servic
  * Implements hook_rules_condition_info().
  */
 function xdruple_shipping_rules_condition_info() {
-  $conditions = array();
+  $conditions = [];
 
-  $conditions['xdruple_shipping_contains_freight_class_product'] = array(
+  $conditions['xdruple_shipping_contains_freight_class_product'] = [
     'label' => t('Order contains a product with a particular freight class'),
-    'parameter' => array(
-      'commerce_order' => array(
+    'parameter' => [
+      'commerce_order' => [
         'type' => 'commerce_order',
         'label' => t('Order'),
         'description' => t('The order whose line items should be checked for the specified product. If the specified order does not exist, the comparison will act as if it is against a quantity of 0.'),
-      ),
-      'freightClass' => array(
+      ],
+      'freightClass' => [
         'type' => 'list<text>',
         'label' => t('Freight Class'),
         'description' => t('The Freight Class of the product to look for on the order.'),
         'options list' => 'xdruple_fields_get_freight_class_list',
-      ),
-      'operator' => array(
+      ],
+      'operator' => [
         'type' => 'text',
         'label' => t('Operator'),
         'description' => t('The operator used with the quantity value below to compare the quantity of the specified product on the order.'),
         'default value' => '>=',
         'options list' => 'commerce_numeric_comparison_operator_options_list',
         'restriction' => 'input',
-      ),
-      'value' => array(
+      ],
+      'value' => [
         'type' => 'text',
         'label' => t('Quantity'),
         'default value' => '1',
         'description' => t('The value to compare against the quantity of the specified product on the order.'),
-      ),
-    ),
+      ],
+    ],
     'group' => t('Commerce Order'),
-    'callbacks' => array(
+    'callbacks' => [
       'execute' => 'xdruple_shipping_rules_contains_freight_class',
-    ),
-  );
+    ],
+  ];
 
   return $conditions;
 }

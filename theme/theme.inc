@@ -18,26 +18,22 @@ function template_preprocess_xdruple_commerce_similar_product_link_default(&$var
     $variables['title'] = l($product->title, $path);
     if (!empty($product->xt_url_image_field['und'][0])) {
       $image = $product->xt_url_image_field['und'][0];
-      $variables['image'] = l(theme('image_style', array(
+      $variables['image'] = l(theme('image_style', [
         'style_name' => $variables['style'],
         'path' => $image['uri'],
         'width' => !empty($image['width']) ? $image['width'] : NULL,
         'height' => !empty($image['height']) ? $image['height'] : NULL,
         'alt' => !empty($image['alt']) ? $image['alt'] : '',
         'title' => !empty($image['title']) ? $image['title'] : '',
-      )), $path, array(
+      ]), $path, [
         'html' => TRUE,
-      ));
+      ]);
     }
-
-    $units = xdruple_fields_get_uom_list();
-    $unit = $units[$product->inventoryUnit];
-    $variables['unit'] = $unit;
-
+    $variables['unit'] = xdruple_get_unit_by_code($product->inventoryUnit);
     $variables['attributes_array']['class'][] = 'b-product--teaser';
     $variables['title_attributes_array']['class'] = 'b-product-title';
-    $variables['thumbnail_attributes_array'] = array(
-      'class' => array('b-product-thumbnail'),
-    );
+    $variables['thumbnail_attributes_array'] = [
+      'class' => ['b-product-thumbnail'],
+    ];
   }
 }

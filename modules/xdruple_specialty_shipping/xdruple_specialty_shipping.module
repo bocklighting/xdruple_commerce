@@ -10,17 +10,17 @@
  */
 function xdruple_specialty_shipping_menu() {
   // xDruple Commerce Specialty Shipping Service settings page.
-  $items['admin/commerce/config/shipping/methods/xdruple_specialty_shipping/edit'] = array(
+  $items['admin/commerce/config/shipping/methods/xdruple_specialty_shipping/edit'] = [
     'title' => 'Edit',
     'description' => 'xDruple Commerce Specialty Shipping Service method settings.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('xdruple_specialty_shipping_settings_form'),
-    'access arguments' => array('administer shipping'),
+    'page arguments' => ['xdruple_specialty_shipping_settings_form'],
+    'access arguments' => ['administer shipping'],
     'file' => 'xdruple_specialty_shipping.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_INLINE,
     'weight' => 0,
-  );
+  ];
 
   return $items;
 }
@@ -43,7 +43,7 @@ function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
   else {
     // Paginate through all freight_classes.
     $pages = ceil($count / 100);
-    $freight_classes = array();
+    $freight_classes = [];
 
     $i = 0;
     while ($i < $pages) {
@@ -58,19 +58,19 @@ function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
     }
   }
 
-  $options = array();
+  $options = [];
   foreach ($freight_classes as $key => $freight_class) {
     $options[$key] = $freight_class->description;
   }
   if (count($freight_classes) > 1) {
-    $form['xdruple_commerce_store_settings']['xdruple_specialty_shipping_freight_classes'] = array(
+    $form['xdruple_commerce_store_settings']['xdruple_specialty_shipping_freight_classes'] = [
       '#type' => 'checkboxes',
       '#options' => $options,
       '#title' => t('Freight Classes that require Specialty Shipping'),
       '#description' => t('If checked, products with these freight classes will not show UPS Shipping Available icons.'),
       '#required' => TRUE,
-      '#default_value' => variable_get('xdruple_specialty_shipping_freight_classes', array()),
-    );
+      '#default_value' => variable_get('xdruple_specialty_shipping_freight_classes', []),
+    ];
   }
   else {
     drupal_set_message(t('Cannot find any Freight Classes.'), 'warning');
@@ -81,12 +81,12 @@ function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
  * Implements hook_commerce_shipping_method_info().
  */
 function xdruple_specialty_shipping_commerce_shipping_method_info() {
-  $shipping_methods = array();
+  $shipping_methods = [];
 
-  $shipping_methods['xdruple_specialty_shipping'] = array(
+  $shipping_methods['xdruple_specialty_shipping'] = [
     'title' => t('Specialty Shipping Service'),
     'description' => t('Allows you to define Specialty Shipping Service for customers to choose during checkout.'),
-  );
+  ];
 
   return $shipping_methods;
 }
@@ -95,18 +95,18 @@ function xdruple_specialty_shipping_commerce_shipping_method_info() {
  * Implements hook_commerce_shipping_service_info().
  */
 function xdruple_specialty_shipping_commerce_shipping_service_info() {
-  $shipping_services = array();
+  $shipping_services = [];
 
-  $shipping_services['xdruple_specialty_shipping'] = array(
+  $shipping_services['xdruple_specialty_shipping'] = [
     'title' => t('Specialty Shipping Service'),
     'description' => t('One of our representatives will be in touch with you to arrange shipping after your order is placed.'),
     'display_title' => t('Request Specialty Shipping Service'),
     'shipping_method' => 'xdruple_specialty_shipping',
     'price_component' => 'shipping',
-    'callbacks' => array(
+    'callbacks' => [
       'rate' => 'xdruple_specialty_shipping_service_rate',
-    )
-  );
+    ]
+  ];
 
   return $shipping_services;
 }
@@ -121,11 +121,11 @@ function xdruple_specialty_shipping_commerce_shipping_service_info() {
  * @return array
  */
 function xdruple_specialty_shipping_service_rate($shipping_service, $order) {
-  return array(
+  return [
     'amount' => variable_get('xdruple_specialty_shipping_service_amount', 0) * 100,
     'currency_code' => commerce_default_currency(),
-    'data' => array(),
-  );
+    'data' => [],
+  ];
 }
 
 /**
@@ -143,7 +143,7 @@ function xdruple_specialty_shipping_entity_load($entities, $type) {
       if ($entity->name == 'commerce_shipping_method_ups') {
         $freight_set = FALSE;
         $freight_key = -1;
-        $freight_classes = array_filter(variable_get('xdruple_specialty_shipping_freight_classes', array()));
+        $freight_classes = array_filter(variable_get('xdruple_specialty_shipping_freight_classes', []));
 
         /** @var RulesCondition $condition */
         foreach ($entity->conditions() as $key => $condition) {
@@ -156,12 +156,12 @@ function xdruple_specialty_shipping_entity_load($entities, $type) {
         // Theoretically, we should handle situation, when freight classes list is empty, and so remove any
         // condition related to it. But as Freight Classes is a mandatory field, we can skip it in current case.
         if (!empty($freight_classes)) {
-          $freight_settings = array(
+          $freight_settings = [
             'commerce_order:select' => 'commerce_order',
             'freightClass' => $freight_classes,
             'operator' => '>=',
             'value' => 1,
-          );
+          ];
 
           if (!$freight_set) {
             // Create missing condition
@@ -183,21 +183,21 @@ function xdruple_specialty_shipping_entity_load($entities, $type) {
 }
 
 function xdruple_specialty_shipping_form_xdruple_email_settings_form_alter(&$form, &$form_state) {
-  $form["xdruple_specialty_shipping_admin_notification"] = array(
+  $form["xdruple_specialty_shipping_admin_notification"] = [
     "#type" => "fieldset",
     "#group" => "emails",
     "#title" => t("Specialty shipping order admin notification"),
-  );
-  $form["xdruple_specialty_shipping_admin_notification"]["xdruple_specialty_shipping_admin_notification_emails"] = array(
+  ];
+  $form["xdruple_specialty_shipping_admin_notification"]["xdruple_specialty_shipping_admin_notification_emails"] = [
     "#type" => "textfield",
     "#title" => "E-mail",
     "#default_value" => variable_get("xdruple_specialty_shipping_admin_notification_emails", ""),
     "#description" => "Use comma to separate multiple addresses.",
-  );
-  $form["xdruple_specialty_shipping_admin_notification"]["xdruple_specialty_shipping_admin_notification_subject"] = array(
+  ];
+  $form["xdruple_specialty_shipping_admin_notification"]["xdruple_specialty_shipping_admin_notification_subject"] = [
     "#type" => "textfield",
     "#title" => "Subject",
     "#default_value" => variable_get("xdruple_specialty_shipping_admin_notification_subject"),
     "#required" => TRUE,
-  );
+  ];
 }

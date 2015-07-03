@@ -1,16 +1,16 @@
 <?php
 /**
- * @var $prodHeight
+ * @var $productHeight
  * @var $label
  */
 ?>
-<?php if ($prodHeight): ?>
+<?php if ($productHeight): ?>
   <div class="commerce-product-height">
     <?php if ($label): ?>
       <div class="commerce-product-title-label">
         <?php print $label; ?>
       </div>
     <?php endif; ?>
-    <?php print $prodHeight; ?>
+    <?php print $productHeight; ?>
   </div>
 <?php endif; ?>

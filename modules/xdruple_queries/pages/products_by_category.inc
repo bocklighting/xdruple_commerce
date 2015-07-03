@@ -5,63 +5,73 @@
  */
 
 /**
+ * @param $group_id
+ *
+ * @return bool|mixed
+ */
+function xdruple_queries_category_load($group_id) {
+  $category = FALSE;
+  if (is_numeric($group_id)) {
+    try {
+      $category = entity_load_single("xtuple_xdcatalog", $group_id);
+    } catch (\Exception $e) {
+      watchdog_exception("xdruple_queries", $e);
+    }
+  }
+  return $category;
+}
+
+/**
+ * Title callback for /products/categories/% page
+ *
+ * @param $group
+ *
+ * @return mixed
+ */
+function xdruple_queries_products_by_category_page_title($group) {
+  return $group->name;
+}
+
+/**
  * Page callback
  *
- * @param $group_id
+ * @param \Xtuple\Rescued\Controller\Entity $group
  *
  * @return string
  */
-function xdruple_queries_products_by_category_page($group_id) {
-  $output = '';
+function xdruple_queries_products_by_category_page($group) {
+  $output = "";
 
-  $category = \Xtuple\XdrupleQueries\Categories\Tree::buildCategory($group_id);
-  drupal_set_title($category->getName());
+  $category = \Xtuple\XdrupleQueries\Categories\Tree::buildCategory($group->getId());
+  $params = [
+    "fields" => [
+      "add_to_cart" => [
+        "show_quantity" => FALSE,
+      ],
+    ],
+  ];
 
-  $params = array(
-    'fields' => array(
-      'add_to_cart' => array(
-        'show_quantity' => FALSE,
-      ),
-    ),
-  );
+  drupal_alter([
+    "product_page_item",
+    "products_by_category_page_item"
+  ], $params);
 
-  drupal_alter(array(
-    'product_page_item',
-    'products_by_category_page_item'
-  ), $params);
-
-  $product_ids = array();
-  $group_products = entity_load('xtuple_xdcatalogproduct', NULL, array(
-    'parentGroup' => $group_id,
-  ));
+  $product_ids = [];
+  $group_products = entity_load("xtuple_xdcatalogproduct", NULL, [
+    "parentGroup" => $group->getId(),
+  ]);
   foreach ($group_products as $item) {
     $product_ids[] = $item->product;
   }
 
-  $vars = array(
-    'products' => _xdruple_prepare_products_list($product_ids, $params),
-  );
-
-  $catalog = entity_load('xtuple_xdcatalog');
-  foreach ($catalog as $cat) {
-    if ($cat->id == $group_id) {
-      $vars['category'] = $cat;
-    }
-  }
-
-  if (empty($vars['category']->groups)) {
-    $children = $category->getChildren();
-    if (!empty($children)) {
-      foreach ($children as $child) {
-        $vars['category']->groups[] = $child->getId();
-      }
-    }
-  }
-
-  $output .= theme('products_page', $vars);
+  $vars = [
+    "category" => $category,
+    "products" => _xdruple_prepare_products_list($product_ids, $params),
+  ];
+  $output .= theme("products_page", $vars);
 
   if (empty($_GET["search"])) {
-    $output .= theme('pager');
+    $output .= theme("pager");
   }
   return $output;
 }

@@ -1,16 +1,16 @@
 <?php
 /**
- * @var $packLength
+ * @var $packageLength
  * @var $label
  */
 ?>
-<?php if ($packLength): ?>
+<?php if ($packageLength): ?>
   <div class="commerce-product-pack-length">
     <?php if ($label): ?>
       <div class="commerce-product-title-label">
         <?php print $label; ?>
       </div>
     <?php endif; ?>
-    <?php print $packLength; ?>
+    <?php print $packageLength; ?>
   </div>
 <?php endif; ?>

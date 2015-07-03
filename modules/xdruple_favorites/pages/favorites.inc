@@ -12,24 +12,24 @@
 function xdruple_favorites_favorite_products_page() {
   $output = '';
 
-  $params = array(
-    'fields' => array(
-      'add_to_cart' => array(
+  $params = [
+    'fields' => [
+      'add_to_cart' => [
         'show_quantity' => FALSE,
-      ),
-    ),
-  );
-  drupal_alter(array(
+      ],
+    ],
+  ];
+  drupal_alter([
     'product_page_item',
     'products_favorite_page_item',
-  ), $params);
+  ], $params);
 
-  $products_ids = _xdruple_queries_load_products_by_order_type('xdcatalogshiptostdord');
+  $products_ids = _xdruple_queries_load_products_by_order_type('xdcatalogshiptostandardorder');
   $list = _xdruple_prepare_products_list($products_ids, $params, 'products_page_item__favorite');
 
-  $output .= theme('products_page', array(
+  $output .= theme('products_page', [
     'products' => $list,
-  ));
+  ]);
 
   if (empty($_GET["search"])) {
     $output .= theme('pager');

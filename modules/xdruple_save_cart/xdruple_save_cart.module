@@ -4,25 +4,25 @@
  * Implements hook_views_api().
  */
 function xdruple_save_cart_views_api() {
-  return array(
+  return [
     'api' => 3,
     'path' => drupal_get_path('module', 'xdruple_save_cart') . '/includes/views',
-  );
+  ];
 }
 
 /**
  * Implements hook_commerce_order_state_info().
  */
 function xdruple_save_cart_commerce_order_state_info() {
-  $order_states = array();
+  $order_states = [];
 
-  $order_states['saved_cart'] = array(
+  $order_states['saved_cart'] = [
     'name' => 'saved_cart',
     'title' => t('Saved Shopping Cart'),
     'description' => t('Orders in this state have not been completed by the customer yet and are not currently in the cart.'),
     'weight' => -5,
     'default_status' => 'saved_cart',
-  );
+  ];
 
   return $order_states;
 }
@@ -31,14 +31,14 @@ function xdruple_save_cart_commerce_order_state_info() {
  * Implements hook_commerce_order_status_info().
  */
 function xdruple_save_cart_commerce_order_status_info() {
-  $order_statuses = array();
+  $order_statuses = [];
 
-  $order_statuses['saved_cart'] = array(
+  $order_statuses['saved_cart'] = [
     'name' => 'saved_cart',
     'title' => t('Saved Shopping Cart'),
     'state' => 'saved_cart',
     'cart' => FALSE,
-  );
+  ];
 
   return $order_statuses;
 }
@@ -47,18 +47,18 @@ function xdruple_save_cart_commerce_order_status_info() {
  * Implements hook_menu()
  */
 function xdruple_save_cart_menu() {
-  $items = array();
+  $items = [];
 
-  $items['admin/commerce/orders/%commerce_order/move'] = array(
+  $items['admin/commerce/orders/%commerce_order/move'] = [
     'title' => 'Move to Active Cart',
     'page callback' => 'xdruple_save_cart_move_order_form_wrapper',
-    'page arguments' => array(3),
+    'page arguments' => [3],
     'access callback' => 'user_access',
-    'access arguments' => array('view own commerce_order entities'),
+    'access arguments' => ['view own commerce_order entities'],
     'type' => MENU_LOCAL_TASK,
     'weight' => 20,
     'context' => MENU_CONTEXT_INLINE,
-  );
+  ];
 
   return $items;
 }
@@ -68,9 +68,9 @@ function xdruple_save_cart_menu() {
  */
 function xdruple_save_cart_forms() {
   // Define a wrapper ID for the Saved Cart Orders move confirmation form.
-  $forms['xdruple_save_cart_move_order_form'] = array(
+  $forms['xdruple_save_cart_move_order_form'] = [
     'callback' => 'xdruple_save_cart_move_order_form',
-  );
+  ];
 
   return $forms;
 }
@@ -96,9 +96,9 @@ function xdruple_save_cart_form_alter(&$form, &$form_state, $form_id) {
       $form['actions']['save_cart']['#weight'] = -1;
       $form['actions']['save_cart']['#access'] = TRUE;
       $form['actions']['save_cart']['#submit'] = array_merge(
-        array('xdruple_fields_cart_form_submit'),
+        ['xdruple_fields_cart_form_submit'],
         $form['#submit'],
-        array('xdruple_save_cart_form_submit')
+        ['xdruple_save_cart_form_submit']
       );
     }
   }
@@ -136,9 +136,9 @@ function xdruple_save_cart_form_submit($form, &$form_state) {
     }
 
     $message = 'Your shopping cart has been moved to your !saved_carts_url.';
-    $message = t($message, array(
+    $message = t($message, [
         '!saved_carts_url' => l(t('Saved Carts'), "user/{$user->uid}/saved-carts"),
-      )
+      ]
     );
 
     drupal_set_message($message);
@@ -172,7 +172,7 @@ function xdruple_save_cart_move_order_form($form, &$form_state, $order) {
   $form['#submit'][] = 'xdruple_save_cart_move_order_form_submit';
 
   $form = confirm_form($form,
-    t('Are you sure you want to move order @number?', array('@number' => $order->order_number)),
+    t('Are you sure you want to move order @number?', ['@number' => $order->order_number]),
     '',
     '<p>' . t('Any active cart items will be moved to your saved carts.') . '</p>',
     t('Move'),
@@ -213,9 +213,9 @@ function xdruple_save_cart_move_order_form_submit($form, &$form_state) {
       commerce_order_save($curr_order);
 
       $message = 'Your old shopping cart has been moved to your !saved_carts_url.';
-      $message = t($message, array(
+      $message = t($message, [
           '!saved_carts_url' => l(t('Saved Carts'), "user/$user->uid/saved-carts"),
-        )
+        ]
       );
 
       drupal_set_message($message);
@@ -233,9 +233,9 @@ function xdruple_save_cart_move_order_form_submit($form, &$form_state) {
     }
 
     $message = 'The saved shopping cart you selected has been moved to your !active_cart_url.';
-    $message = t($message, array(
+    $message = t($message, [
         '!active_cart_url' => l(t('Active Cart'), "cart"),
-      )
+      ]
     );
 
     drupal_set_message($message);
@@ -250,6 +250,6 @@ function xdruple_save_cart_move_order_form_submit($form, &$form_state) {
     }
   }
   else {
-    drupal_set_message(t('Order @number could not be moved.', array('@number' => $order->order_number)), 'error');
+    drupal_set_message(t('Order @number could not be moved.', ['@number' => $order->order_number]), 'error');
   }
 }

@@ -7,22 +7,22 @@ function xdruple_shipping_install() {
   // Add xt_physical_weight.
   $field_name = 'xt_physical_weight';
   if (!field_info_field($field_name)) {
-    $field = array(
+    $field = [
       'field_name' => $field_name,
       'type' => 'physical_weight',
       'cardinality' => 1,
       'module' => 'physical',
-      'entity_types' => array(
+      'entity_types' => [
         'commerce_product',
         'xtuple_xdproduct',
-      ),
-      'storage' => array(
+      ],
+      'storage' => [
         'type' => 'xdfields_rest_storage',
-        'settings' => array(),
+        'settings' => [],
         'module' => 'xdfields_rest_storage',
         'active' => 1,
-      ),
-    );
+      ],
+    ];
 
     field_create_field($field);
     // field_create_field() breaks something withing caches so later entity_get_info('xtuple_unit') return empty result
@@ -41,17 +41,17 @@ function xdruple_shipping_install() {
     $default_unit = $default_unit ? $default_unit : 'oz';
 
     // Add 'commerce_product' instance.
-    $instance = field_read_instance('commerce_product', $field_name, 'product', array(
+    $instance = field_read_instance('commerce_product', $field_name, 'product', [
       'include_inactive' => TRUE,
       'include_deleted' => TRUE
-    ));
+    ]);
     if (empty($instance)) {
-      $instance = array(
+      $instance = [
         'field_name' => $field_name,
         'entity_type' => 'commerce_product',
         'bundle' => 'product',
         'label' => 'Product Physical Weight',
-      );
+      ];
       $instance['widget']['weight'] = -10;
       $instance['widget']['settings']['default_unit'] = $default_unit;
       $instance['widget']['settings']['unit_select_list'] = 0;
@@ -61,17 +61,17 @@ function xdruple_shipping_install() {
 
     // Add 'xtuple_xdproduct' instance.
     $entity_type = 'xtuple_xdproduct';
-    $instance = field_read_instance($entity_type, $field_name, $entity_type, array(
+    $instance = field_read_instance($entity_type, $field_name, $entity_type, [
       'include_inactive' => TRUE,
       'include_deleted' => TRUE
-    ));
+    ]);
     if (empty($instance)) {
-      $instance = array(
+      $instance = [
         'field_name' => $field_name,
         'entity_type' => $entity_type,
         'bundle' => $entity_type,
         'label' => 'Product Physical Weight',
-      );
+      ];
       $instance['widget']['weight'] = -10;
       $instance['widget']['settings']['default_unit'] = $default_unit;
       $instance['widget']['settings']['unit_select_list'] = 0;
@@ -83,22 +83,22 @@ function xdruple_shipping_install() {
   // Add xt_physical_dimension.
   $field_name = 'xt_physical_dimension';
   if (!field_info_field($field_name)) {
-    $field = array(
+    $field = [
       'field_name' => $field_name,
       'type' => 'physical_dimensions',
       'cardinality' => 1,
       'module' => 'physical',
-      'entity_types' => array(
+      'entity_types' => [
         'commerce_product',
         'xtuple_xdproduct',
-      ),
-      'storage' => array(
+      ],
+      'storage' => [
         'type' => 'xdfields_rest_storage',
-        'settings' => array(),
+        'settings' => [],
         'module' => 'xdfields_rest_storage',
         'active' => 1,
-      ),
-    );
+      ],
+    ];
 
     field_create_field($field);
   }
@@ -106,17 +106,17 @@ function xdruple_shipping_install() {
   // Add field instances.
   if (field_info_field($field_name)) {
     // Add 'commerce_product' instance.
-    $instance = field_read_instance('commerce_product', $field_name, 'product', array(
+    $instance = field_read_instance('commerce_product', $field_name, 'product', [
       'include_inactive' => TRUE,
       'include_deleted' => TRUE
-    ));
+    ]);
     if (empty($instance)) {
-      $instance = array(
+      $instance = [
         'field_name' => $field_name,
         'entity_type' => 'commerce_product',
         'bundle' => 'product',
         'label' => 'Package Physical Dimensions',
-      );
+      ];
       $instance['widget']['weight'] = -10;
       $instance['display']['default']['weight'] = -10;
       field_create_instance($instance);
@@ -124,17 +124,17 @@ function xdruple_shipping_install() {
 
     // Add 'xtuple_xdproduct' instance.
     $entity_type = 'xtuple_xdproduct';
-    $instance = field_read_instance($entity_type, $field_name, $entity_type, array(
+    $instance = field_read_instance($entity_type, $field_name, $entity_type, [
       'include_inactive' => TRUE,
       'include_deleted' => TRUE
-    ));
+    ]);
     if (empty($instance)) {
-      $instance = array(
+      $instance = [
         'field_name' => $field_name,
         'entity_type' => $entity_type,
         'bundle' => $entity_type,
         'label' => 'Product Physical Dimensions',
-      );
+      ];
       $instance['widget']['weight'] = -10;
       $instance['display']['default']['weight'] = -10;
       field_create_instance($instance);

@@ -37,31 +37,31 @@ function xdruple_favorites_remove_from_favorites_form_validate($form, &$form_sta
  * @param $form_state
  */
 function xdruple_favorites_remove_from_favorites_form_submit($form, &$form_state) {
-  $entity_type = 'xtuple_xdstdordproduct';
+  $entity_type = 'xtuple_xdstandardorderproduct';
 
   try {
     $values = $form_state['values'];
-    $std_order_product = entity_load($entity_type, FALSE, array(
+    $std_order_product = entity_load($entity_type, FALSE, [
       'product' => $values['product_id'],
       'customer' => $values['customer'],
-      'shipto' => $values['ship_to'],
-    ));
+      'shipTo' => $values['ship_to'],
+    ]);
     if (count($std_order_product) === 1) {
       $uuid = key($std_order_product);
       entity_delete($entity_type, $uuid);
 
       // Invalidate cache.
-      $cid = 'xtuple_xdcatalogshiptostdord-' . $values['ship_to'];
+      $cid = 'xtuple_xdcatalogshiptostandardorder-' . $values['ship_to'];
       cache_clear_all($cid, 'cache');
     }
 
     $product = entity_load_single('commerce_product', $values['product_id']);
-    drupal_set_message(t("Product !title removed from the !favorites", array(
+    drupal_set_message(t("Product !title removed from the !favorites", [
       '!title' => l($product->title, "products/{$product->product_id}"),
       '!favorites' => t(variable_get('xdruple_favorites_favorites_title', 'Favorite products')),
-    )), 'warning');
+    ]), 'warning');
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
-    watchdog('xdruple_favorites', $e->getMessage(), array(), WATCHDOG_ERROR);
+    watchdog('xdruple_favorites', $e->getMessage(), [], WATCHDOG_ERROR);
   }
 }
