@@ -30,7 +30,7 @@ function xdruple_queries_product_load($product_id) {
  */
 function xdruple_queries_product_page($product) {
   $output = [
-    "#theme" => "product_page",
+    "#theme" => "xdruple_product_page",
     "#product" => $product,
   ];
   return $output;
