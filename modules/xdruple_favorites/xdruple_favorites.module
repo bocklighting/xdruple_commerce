@@ -196,11 +196,11 @@ function xdruple_favorites_favorite_products_page_title($variable, $default) {
 }
 
 /**
- * Implements hook_preprocess_product_page().
+ * Implements hook_preprocess_xdruple_product_page().
  *
  * @param $variables
  */
-function xdruple_favorites_preprocess_product_page(&$variables) {
+function xdruple_favorites_preprocess_xdruple_product_page(&$variables) {
   if (!empty($variables["product"])) {
     /** @var \Xtuple\Rescued\Controller\Entity $product */
     $product = $variables["product"];
