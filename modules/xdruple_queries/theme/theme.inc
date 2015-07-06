@@ -265,21 +265,30 @@ function template_preprocess_product_page(&$variables) {
       "#product" => $product,
       "#weight" => 30,
     ];
-    $variables["actions"]["product_price"] = [
-      "#theme" => "xdruple_queries_price",
-      "#product" => $product,
-      "#show_unit" => TRUE,
-      "#weight" => -20,
-    ];
-    $variables["actions"]["add_to_cart"] = [
-      "#theme" => "xdruple_queries_add_to_cart_button",
-      "#product" => $product,
-      "#show_quantity" => TRUE,
-      "#context" => [
-        "commerce_product_page" => TRUE,
-      ],
-      "#weight" => -10,
-    ];
+    if (empty($product->get("event"))) {
+      $variables["actions"]["product_price"] = [
+        "#theme" => "xdruple_queries_price",
+        "#product" => $product,
+        "#show_unit" => TRUE,
+        "#weight" => -20,
+      ];
+      $variables["actions"]["add_to_cart"] = [
+        "#theme" => "xdruple_queries_add_to_cart_button",
+        "#product" => $product,
+        "#show_quantity" => TRUE,
+        "#context" => [
+          "commerce_product_page" => TRUE,
+        ],
+        "#weight" => -10,
+      ];
+    }
+    else {
+      $variables["extra"]["event_purchase"] = [
+        "#theme" => "xdruple_event_purchase",
+        "#product" => $product,
+        "#weight" => -10,
+      ];
+    }
     $variables["context"]["files"] = [
       "#theme" => "xdruple_product_files",
       "#product" => $product,
