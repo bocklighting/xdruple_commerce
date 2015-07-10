@@ -69,10 +69,22 @@ class Category {
   }
 
   /**
-   * @return Category[]
+   * @param bool $sorted
+   *
+   * @return \Xtuple\XdrupleQueries\Categories\Category[]
    */
-  public function getChildren() {
-    return $this->children;
+  public function getChildren($sorted = FALSE) {
+    if (!$sorted) {
+      return $this->children;
+    }
+    else {
+      $children = [];
+      foreach ($this->children as $child) {
+        $children[$child->getName()] = $child;
+      }
+      ksort($children, SORT_NATURAL);
+      return $children;
+    }
   }
 
   /**
