@@ -98,7 +98,7 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['empty']['text']['table'] = 'views';
   $handler->display->display_options['empty']['text']['field'] = 'area';
   $handler->display->display_options['empty']['text']['content'] = 'You have not placed any orders with us yet.';
-  $handler->display->display_options['empty']['text']['format'] = 'plain_text';
+  $handler->display->display_options['empty']['text']['format'] = 'textile';
   /* Field: Commerce Order: Order number */
   $handler->display->display_options['fields']['order_number']['id'] = 'order_number';
   $handler->display->display_options['fields']['order_number']['table'] = 'commerce_order';
@@ -199,7 +199,7 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['empty']['text']['table'] = 'views';
   $handler->display->display_options['empty']['text']['field'] = 'area';
   $handler->display->display_options['empty']['text']['content'] = 'You have not placed any orders with us yet.';
-  $handler->display->display_options['empty']['text']['format'] = 'plain_text';
+  $handler->display->display_options['empty']['text']['format'] = 'textile';
   /* Field: Commerce Order: Order number */
   $handler->display->display_options['fields']['order_number']['id'] = 'order_number';
   $handler->display->display_options['fields']['order_number']['table'] = 'commerce_order';
