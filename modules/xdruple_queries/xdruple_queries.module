@@ -200,7 +200,12 @@ function _xdruple_queries_load_products_by_order_type($order_type) {
 
   $orders = _xdruple_queries_load_orders($order_type);
   foreach ($orders as $order) {
-    $products = array_merge($products, $order->products);
+    if (is_numeric($order->product)) {
+      $products[] = $order->product;
+    }
+    elseif (is_array($order->products)) {
+      $products = array_merge($products, $order->products);
+    }
   }
 
   return $products;
