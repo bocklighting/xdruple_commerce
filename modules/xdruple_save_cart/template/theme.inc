@@ -26,6 +26,8 @@ function template_process_xdruple_saved_carts_block(&$variables) {
     $variables["content"] = drupal_render($variables["empty"]);
   }
   else {
+    unset($variables["content_attributes_array"]["class"]["panel-body"]);
+    $variables["content_attributes"] = drupal_attributes($variables["content_attributes_array"]);
     $variables["content"] = views_embed_view($variables["view"], "default", $variables["uid"]);
   }
 }
