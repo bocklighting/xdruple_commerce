@@ -3,6 +3,7 @@
 /**
  * @keeps theme callback
  */
+use Xtuple\ValueObject\String\String;
 
 /**
  * Preprocess variables for products-page.tpl.php
@@ -90,7 +91,7 @@ function template_preprocess_products_page(&$variables) {
           "#items" => $subcategories,
           "#attributes" => [
             "class" => [
-              "row" => "row"
+              "row" => "row",
             ],
           ],
         ];
@@ -111,18 +112,25 @@ function template_process_products_page(&$variables) {
  * @param $variables
  */
 function template_preprocess_products_page_item(&$variables) {
+  /** @var \Xtuple\Rescued\Controller\Entity $product */
   $product = $variables['product'];
   $params = $variables['params'];
-
-  $variables['id'] = $product->product_id;
-  $variables['unit'] = xdruple_get_unit_by_code($product->inventoryUnit);
+  $product_uri = new String("products/%product_id", [
+    "%product_id" => $product->get("product_id"),
+  ]);
+  $variables['id'] = $product->get("product_id");
+  $variables['unit'] = xdruple_get_unit_by_code($product->get("inventoryUnit"));
   $variables['price'] = [
     "#theme" => "xdruple_queries_price",
     "#product" => $product,
     "#label" => "",
   ];
-  $variables['title'] = l($product->title, "products/{$product->product_id}");
-  $variables['subtitle'] = $product->subTitle;
+  $variables['title'] = l($product->get("marketingTitle") ? $product->get("marketingTitle") : $product->get("title"), $product_uri);
+  $variables['subtitle'] = [
+    "#theme" => "xdruple_product_subtitle",
+    "#tag" => "div",
+    "#product" => $product,
+  ];
   $variables['img'] = _xdruple_queries_product_image($product, 'commerce_product_thumbnail_wide_style');
 
   if (!empty($params['fields']['add_to_cart'])) {
@@ -130,12 +138,10 @@ function template_preprocess_products_page_item(&$variables) {
     if (!empty($params['fields']['add_to_cart']['show_quantity'])) {
       $show_qty = $params['fields']['add_to_cart']['show_quantity'];
     }
-
     $qty = 1;
     if (isset($params['fields']['add_to_cart']['qty'])) {
       $qty = $params['fields']['add_to_cart']['qty'];
     }
-
     $order_id = 0;
     if (isset($params['fields']['add_to_cart']['order_id'])) {
       $order_id = $params['fields']['add_to_cart']['order_id'];
@@ -149,8 +155,7 @@ function template_preprocess_products_page_item(&$variables) {
       "#order_id" => $order_id,
     ];
   }
-
-  $variables['read_more'] = l('Read more', "products/$product->product_id", [
+  $variables['read_more'] = l('Read more', $product_uri, [
     'attributes' => [
       'class' => ['btn', 'btn-info'],
     ],
@@ -158,6 +163,9 @@ function template_preprocess_products_page_item(&$variables) {
 }
 
 function template_process_products_page_item(&$variables) {
+  if (!empty($variables['subtitle'])) {
+    $variables['subtitle'] = drupal_render($variables['subtitle']);
+  }
   if (!empty($variables["unit_price"])) {
     $variables["unit_price"] = drupal_render($variables["unit_price"]);
   }

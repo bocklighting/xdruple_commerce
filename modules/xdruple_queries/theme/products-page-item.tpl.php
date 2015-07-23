@@ -9,9 +9,7 @@
   </div>
 <?php endif; ?>
 <?php if (!empty($subtitle)): ?>
-  <div class="views-field views-field-subTitle">
-    <span class="field-content"><?php print $subtitle ?></span>
-  </div>
+  <?php print $subtitle ?>
 <?php endif; ?>
 <?php if (!empty($price)): ?>
   <h4 class="views-field views-field-commerce-price">
