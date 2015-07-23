@@ -9,9 +9,7 @@
   </div>
 <?php endif; ?>
 <?php if (!empty($subtitle)): ?>
-  <div class="views-field views-field-subTitle">
-    <span class="field-content"><?php print $subtitle ?></span>
-  </div>
+  <?php print $subtitle ?>
 <?php endif; ?>
 <?php if (!empty($price)): ?>
   <h4 class="views-field views-field-commerce-price">
@@ -19,16 +17,12 @@
   </h4>
 <?php endif; ?>
 <?php if (!empty($read_more)): ?>
-  <div class="views-field views-field-nothing">
-  <span class="field-content">
+  <div class="xdruple-products-page-item-read-more">
     <?php print $read_more ?>
-  </span>
   </div>
 <?php endif; ?>
 <?php if (!empty($add_to_cart)): ?>
-  <div class="views-field views-field-add-to-cart-form">
-  <span class="field-content">
+  <div class="xdruple-products-page-item-add-to-cart">
     <?php print $add_to_cart ?>
-  </span>
   </div>
 <?php endif; ?>

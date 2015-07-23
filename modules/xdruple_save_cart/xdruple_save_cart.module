@@ -11,6 +11,37 @@ function xdruple_save_cart_views_api() {
 }
 
 /**
+ * Implements hook_permission().
+ */
+function xdruple_save_cart_permission() {
+  return [
+    "save cart" => [
+      "title" => t("Allow user to save carts"),
+    ],
+  ];
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * @return array
+ */
+function xdruple_save_cart_theme() {
+  $items = [];
+  $path = drupal_get_path("module", "xdruple_save_cart");
+  $items["xdruple_saved_carts_block"] = [
+    "variables" => [
+      "title" => t("Saved carts"),
+      "view" => "xd_user_saved_carts_block",
+    ],
+    "template" => "xdruple-saved-carts-block",
+    "path" => "$path/template",
+    "file" => "theme.inc",
+  ];
+  return $items;
+}
+
+/**
  * Implements hook_commerce_order_state_info().
  */
 function xdruple_save_cart_commerce_order_state_info() {
@@ -54,7 +85,7 @@ function xdruple_save_cart_menu() {
     'page callback' => 'xdruple_save_cart_move_order_form_wrapper',
     'page arguments' => [3],
     'access callback' => 'user_access',
-    'access arguments' => ['view own commerce_order entities'],
+    'access arguments' => ["save cart"],
     'type' => MENU_LOCAL_TASK,
     'weight' => 20,
     'context' => MENU_CONTEXT_INLINE,
@@ -71,7 +102,6 @@ function xdruple_save_cart_forms() {
   $forms['xdruple_save_cart_move_order_form'] = [
     'callback' => 'xdruple_save_cart_move_order_form',
   ];
-
   return $forms;
 }
 

@@ -26,7 +26,7 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['title'] = 'Saved Carts';
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
-  $handler->display->display_options['access']['perm'] = 'view own commerce_order entities';
+  $handler->display->display_options['access']['perm'] = 'save cart';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['query']['options']['query_comment'] = FALSE;
@@ -185,7 +185,7 @@ function xdruple_save_cart_views_default_views() {
   $handler->display->display_options['title'] = 'Saved Carts';
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
-  $handler->display->display_options['access']['perm'] = 'view own commerce_order entities';
+  $handler->display->display_options['access']['perm'] = 'save cart';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['query']['options']['query_comment'] = FALSE;
