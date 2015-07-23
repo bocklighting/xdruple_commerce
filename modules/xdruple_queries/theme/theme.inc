@@ -13,38 +13,39 @@ use Xtuple\ValueObject\String\String;
  * @throws \Exception
  */
 function template_preprocess_products_page(&$variables) {
-  $products = $variables['products'];
+  $products = $variables["products"];
 
   $column_size = 3;
   $column = [];
   foreach ($products as $i => $product) {
     $column[] = $product;
     if (($i + 1) % $column_size === 0) {
-      $variables['columns'][] = $column;
+      $variables["columns"][] = $column;
       $column = [];
     }
   }
   if (!empty($column)) {
-    $variables['columns'][] = $column;
+    $variables["columns"][] = $column;
     unset($column);
   }
 
-  if (!empty($variables['category'])) {
+  if (!empty($variables["category"])) {
     /** @var \Xtuple\XdrupleQueries\Categories\Category $category */
-    $category = $variables['category'];
+    $category = $variables["category"];
     if (!empty($category->getChildren())) {
-      $cid = 'xtuple_xdcatalog-flat';
-      $cache = cache_get($cid, 'cache');
-      $entity_info = entity_get_info('xtuple_xdcatalog');
+      $cid = "xtuple_xdcatalog-flat";
+      $cache = cache_get($cid, "cache");
+      $entity_info = entity_get_info("xtuple_xdcatalog");
 
       if ((empty($cache) || xdruple_cache_expired($cache)) && !empty($entity_info)) {
         $query = new EntityFieldQuery();
-        $count = $query->entityCondition('entity_type', 'xtuple_xdcatalog')
-                       ->count()
-                       ->execute();
+        $count = $query
+          ->entityCondition("entity_type", "xtuple_xdcatalog")
+          ->count()
+          ->execute();
 
         if ($count <= 100) {
-          $xd_catalogs = entity_load('xtuple_xdcatalog');
+          $xd_catalogs = entity_load("xtuple_xdcatalog");
         }
         else {
           // Paginate through all catalogs.
@@ -54,16 +55,17 @@ function template_preprocess_products_page(&$variables) {
           $i = 0;
           while ($i < $pages) {
             $page_query = new EntityFieldQuery();
-            $catalogs = $page_query->entityCondition('entity_type', 'xtuple_xdcatalog')
-                                   ->range($i * 100, 100)
-                                   ->propertyOrderBy('id', 'ASC')
-                                   ->execute();
+            $catalogs = $page_query
+              ->entityCondition("entity_type", "xtuple_xdcatalog")
+              ->range($i * 100, 100)
+              ->propertyOrderBy("id", "ASC")
+              ->execute();
 
-            $xd_catalogs = $xd_catalogs + $catalogs['xtuple_xdcatalog'];
+            $xd_catalogs = $xd_catalogs + $catalogs["xtuple_xdcatalog"];
             $i++;
           }
         }
-        cache_set($cid, $xd_catalogs, 'cache', REQUEST_TIME + 60 * 60 * 1);
+        cache_set($cid, $xd_catalogs, "cache", REQUEST_TIME + 60 * 60 * 1);
       }
       else {
         if (!$cache || empty($cache->data)) {
@@ -78,10 +80,10 @@ function template_preprocess_products_page(&$variables) {
       foreach ($category->getChildren() as $child) {
         if (!empty($xd_catalogs[$child->getId()])) {
           $subcategories[$child->getId()] = [
-            'data' => l($xd_catalogs[$child->getId()]->name, 'products/categories/' . $child->getId()),
+            "data" => l($xd_catalogs[$child->getId()]->name, "products/categories/" . $child->getId()),
             "title" => $xd_catalogs[$child->getId()]->name,
-            "url" => 'products/categories/' . $child->getId(),
-            'class' => ['col-lg-4'],
+            "url" => "products/categories/" . $child->getId(),
+            "class" => ["col-lg-4"],
           ];
         }
       }
@@ -113,40 +115,40 @@ function template_process_products_page(&$variables) {
  */
 function template_preprocess_products_page_item(&$variables) {
   /** @var \Xtuple\Rescued\Controller\Entity $product */
-  $product = $variables['product'];
-  $params = $variables['params'];
+  $product = $variables["product"];
+  $params = $variables["params"];
   $product_uri = new String("products/%product_id", [
     "%product_id" => $product->get("product_id"),
   ]);
-  $variables['id'] = $product->get("product_id");
-  $variables['unit'] = xdruple_get_unit_by_code($product->get("inventoryUnit"));
-  $variables['price'] = [
+  $variables["id"] = $product->get("product_id");
+  $variables["unit"] = xdruple_get_unit_by_code($product->get("inventoryUnit"));
+  $variables["price"] = [
     "#theme" => "xdruple_queries_price",
     "#product" => $product,
     "#label" => "",
   ];
-  $variables['title'] = l($product->get("marketingTitle") ? $product->get("marketingTitle") : $product->get("title"), $product_uri);
-  $variables['subtitle'] = [
+  $variables["title"] = l($product->get("marketingTitle") ? $product->get("marketingTitle") : $product->get("title"), $product_uri);
+  $variables["subtitle"] = [
     "#theme" => "xdruple_product_subtitle",
     "#tag" => "div",
     "#product" => $product,
   ];
-  $variables['img'] = _xdruple_queries_product_image($product, 'commerce_product_thumbnail_wide_style');
+  $variables["img"] = _xdruple_queries_product_image($product, "commerce_product_thumbnail_wide_style");
 
-  if (!empty($params['fields']['add_to_cart'])) {
+  if (!empty($params["fields"]["add_to_cart"])) {
     $show_qty = FALSE;
-    if (!empty($params['fields']['add_to_cart']['show_quantity'])) {
-      $show_qty = $params['fields']['add_to_cart']['show_quantity'];
+    if (!empty($params["fields"]["add_to_cart"]["show_quantity"])) {
+      $show_qty = $params["fields"]["add_to_cart"]["show_quantity"];
     }
     $qty = 1;
-    if (isset($params['fields']['add_to_cart']['qty'])) {
-      $qty = $params['fields']['add_to_cart']['qty'];
+    if (isset($params["fields"]["add_to_cart"]["qty"])) {
+      $qty = $params["fields"]["add_to_cart"]["qty"];
     }
     $order_id = 0;
-    if (isset($params['fields']['add_to_cart']['order_id'])) {
-      $order_id = $params['fields']['add_to_cart']['order_id'];
+    if (isset($params["fields"]["add_to_cart"]["order_id"])) {
+      $order_id = $params["fields"]["add_to_cart"]["order_id"];
     }
-    $variables['add_to_cart'] = [
+    $variables["add_to_cart"] = [
       "#theme" => "xdruple_queries_add_to_cart_button",
       "#product" => $product,
       "#show_quantity" => $show_qty,
@@ -155,16 +157,16 @@ function template_preprocess_products_page_item(&$variables) {
       "#order_id" => $order_id,
     ];
   }
-  $variables['read_more'] = l('Read more', $product_uri, [
-    'attributes' => [
-      'class' => ['btn', 'btn-info'],
+  $variables["read_more"] = l("Read more", $product_uri, [
+    "attributes" => [
+      "class" => ["btn", "btn-info"],
     ],
   ]);
 }
 
 function template_process_products_page_item(&$variables) {
-  if (!empty($variables['subtitle'])) {
-    $variables['subtitle'] = drupal_render($variables['subtitle']);
+  if (!empty($variables["subtitle"])) {
+    $variables["subtitle"] = drupal_render($variables["subtitle"]);
   }
   if (!empty($variables["unit_price"])) {
     $variables["unit_price"] = drupal_render($variables["unit_price"]);
