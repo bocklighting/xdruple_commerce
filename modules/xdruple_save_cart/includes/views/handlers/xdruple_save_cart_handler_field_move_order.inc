@@ -20,7 +20,7 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
    * @return bool
    */
   protected function hasAccess() {
-    return user_access('view own commerce_order entities');
+    return user_access('save cart');
   }
 
   /**
