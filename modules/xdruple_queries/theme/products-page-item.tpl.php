@@ -8,9 +8,11 @@
     <span class="field-content"><?php print $title ?></span>
   </div>
 <?php endif; ?>
-<?php if (!empty($subtitle)): ?>
-  <?php print $subtitle ?>
-<?php endif; ?>
+<div class="xdruple-products-page-item-subtitle">
+  <?php if (!empty($subtitle)): ?>
+    <?php print $subtitle ?>
+  <?php endif; ?>
+</div>
 <?php if (!empty($price)): ?>
   <h4 class="views-field views-field-commerce-price">
     <span class="field-content"><?php print $price ?></span>
