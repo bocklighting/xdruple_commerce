@@ -211,10 +211,11 @@ class Category {
           else {
             try {
               if ($url = xdruple_fields_get_doc_url($document->target())) {
-                $file = system_retrieve_file($url["path"], $dir, $managed = TRUE);
-                $file->uuid = $document->uuid();
-                $file = file_save($file);
-                $files[$document->uuid()] = $file;
+                if ($file = system_retrieve_file($url["path"], $dir, $managed = TRUE)) {
+                  $file->uuid = $document->uuid();
+                  $file = file_save($file);
+                  $files[$document->uuid()] = $file;
+                }
               }
             } catch (\Exception $e) {
               watchdog_exception("xdruple_queries", $e);

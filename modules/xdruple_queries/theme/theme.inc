@@ -117,7 +117,7 @@ function template_preprocess_products_page_item(&$variables) {
   /** @var \Xtuple\Rescued\Controller\Entity $product */
   $product = $variables["product"];
   $params = $variables["params"];
-  $product_uri = new String("products/%product_id", [
+  $product_uri = (string) new String("products/%product_id", [
     "%product_id" => $product->get("product_id"),
   ]);
   $variables["id"] = $product->get("product_id");
