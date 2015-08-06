@@ -63,7 +63,7 @@ function _xdruple_queries_categories_build_html($tree) {
   foreach ($tree as $id => $category) {
     /** @var Xtuple\XdrupleQueries\Categories\Category $category */
     $html .= '<li>' . l($category->getName(), 'products/categories/' . $category->getId());
-    $children = $category->getChildren();
+    $children = $category->getChildren(TRUE);
     if (!empty($children)) {
       $html .= '<ul>' . _xdruple_queries_categories_build_html($children) . '</ul>';
     }
