@@ -73,7 +73,7 @@ class Category {
    *
    * @return \Xtuple\XdrupleQueries\Categories\Category[]
    */
-  public function getChildren($sorted = FALSE) {
+  public function getChildren($sorted = TRUE) {
     if (!$sorted) {
       return $this->children;
     }
