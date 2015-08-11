@@ -830,6 +830,21 @@ function xdruple_commerce_api_customer_exclusive_item_list($resource_name = 'XdP
     $customer = xdruple_rescued_session_get('customer');
     $shipto = xdruple_rescued_session_get('ship_to');
     $scheduled_date = xdruple_rescued_scheduled_date();
+    
+    $query = [];
+    if (!empty($opt_params["query"])) {
+      foreach ($opt_params["query"] as $key => $value) {
+        if (is_numeric($key)) {
+          $query[$value["column"]] = [
+            $value["operator"] => $value["value"],
+          ];
+        }
+        else {
+          $query[$key] = $value;
+        }
+      }
+    }
+    $opt_params["query"] = $query;
 
     if (!empty($customer)) {
       $opt_params['query']['customer'] = [
