@@ -40,8 +40,7 @@ function xdruple_queries_products_by_category_page_title($group) {
  * @return string
  */
 function xdruple_queries_products_by_category_page($group) {
-  $output = "";
-
+  $output = [];
   $category = \Xtuple\XdrupleQueries\Categories\Tree::buildCategory($group->getId());
   $params = [
     "fields" => [
@@ -50,12 +49,10 @@ function xdruple_queries_products_by_category_page($group) {
       ],
     ],
   ];
-
   drupal_alter([
     "product_page_item",
-    "products_by_category_page_item"
+    "products_by_category_page_item",
   ], $params);
-
   $product_ids = [];
   $group_products = entity_load("xtuple_xdcatalogproduct", NULL, [
     "parentGroup" => $group->getId(),
@@ -63,15 +60,15 @@ function xdruple_queries_products_by_category_page($group) {
   foreach ($group_products as $item) {
     $product_ids[] = $item->product;
   }
-
-  $vars = [
-    "category" => $category,
-    "products" => _xdruple_prepare_products_list($product_ids, $params),
+  $output[] = [
+    "#theme" => "xdruple_category_page",
+    "#category" => $category,
+    "#products" => _xdruple_prepare_products_list($product_ids, $params, FALSE),
   ];
-  $output .= theme("products_page", $vars);
-
   if (empty($_GET["search"])) {
-    $output .= theme("pager");
+    $output[] = [
+      "#theme" => "pager",
+    ];
   }
   return $output;
 }
