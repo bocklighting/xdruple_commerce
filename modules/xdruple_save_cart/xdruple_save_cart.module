@@ -124,7 +124,7 @@ function xdruple_save_cart_form_alter(&$form, &$form_state, $form_id) {
       $form['actions']['save_cart']['#value'] = t('Move to saved cart');
       $form["actions"]["save_cart"]["#name"] = "save-cart";
       $form['actions']['save_cart']['#weight'] = -1;
-      $form['actions']['save_cart']['#access'] = TRUE;
+      $form['actions']['save_cart']['#access'] = user_access("save cart");
       $form['actions']['save_cart']['#submit'] = array_merge(
         ['xdruple_fields_cart_form_submit'],
         $form['#submit'],
