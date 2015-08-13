@@ -13,14 +13,14 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
   function construct() {
     parent::construct();
 
-    $this->additional_fields['uid'] = 'uid';
+    $this->additional_fields["uid"] = "uid";
   }
 
   /**
    * @return bool
    */
   protected function hasAccess() {
-    return user_access('save cart');
+    return user_access("save cart");
   }
 
   /**
@@ -30,8 +30,8 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
    */
   protected function createOrder($values) {
     $order = commerce_order_new();
-    $order->order_id = $this->get_value($values, 'order_id');
-    $order->uid = $this->get_value($values, 'uid');
+    $order->order_id = $this->get_value($values, "order_id");
+    $order->uid = $this->get_value($values, "uid");
 
     return $order;
   }
@@ -40,7 +40,7 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
    * @return string
    */
   protected function getLinkText() {
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('Make active cart');
+    $text = !empty($this->options["text"]) ? $this->options["text"] : t("Make active cart");
 
     return $text;
   }
@@ -52,7 +52,7 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
    */
   protected function getLinkPath($values) {
     $order = $this->createOrder($values);
-    $link = 'admin/commerce/orders/' . $order->order_id . '/move';
+    $link = "admin/commerce/orders/" . $order->order_id . "/move";
 
     return $link;
   }
@@ -61,9 +61,15 @@ class xdruple_save_cart_handler_field_move_order extends commerce_order_handler_
    * @return array
    */
   protected function getLinkOptions() {
-    $destination = ['destination' => 'cart'];
+    $destination = ["destination" => "cart"];
     $options = [
-      'query' => $destination,
+      "query" => $destination,
+      "attributes" => [
+        "class" => [
+          "btn" => "btn",
+          "btn-primary" => "btn-primary",
+        ],
+      ],
     ];
 
     return $options;
