@@ -105,52 +105,6 @@ function xdruple_queries_rescued_resources() {
 }
 
 /**
- * Implements hook_theme()
- */
-function xdruple_queries_theme() {
-  $items = [];
-  $items["products_page"] = [
-    "variables" => [
-      "products" => [],
-    ],
-    "template" => "theme/products-page",
-    "file" => "theme/theme.inc",
-  ];
-  $items["products_page_item"] = [
-    "variables" => [
-      "product" => NULL,
-      "params" => [],
-    ],
-    "template" => "theme/products-page-item",
-    "file" => "theme/theme.inc",
-  ];
-  $items["xdruple_queries_price"] = [
-    "variables" => [
-      "product" => NULL,
-      "quantity" => 1,
-      "order_id" => 0,
-      "format" => TRUE,
-      "show_unit" => TRUE,
-      "unit_price" => FALSE,
-      "label" => "Price",
-    ],
-    "template" => "theme/xdruple-queries-price",
-    "file" => "theme/theme.inc",
-  ];
-  $items["xdruple_queries_add_to_cart_button"] = [
-    "variables" => [
-      "product" => NULL,
-      "quantity" => 1,
-      "show_quantity" => FALSE,
-      "context" => [],
-      "order_id" => 0,
-    ],
-    "file" => "theme/theme.inc",
-  ];
-  return $items;
-}
-
-/**
  * Implements hook_extensions_theme()
  *
  * @return array
@@ -213,12 +167,10 @@ function _xdruple_queries_load_products_by_order_type($order_type) {
 
 /**
  * @param $product_ids NULL|array - if NULL, show all products or filter by products ids if array
- * @param $params
- * @param $product_item_theme
  *
  * @return array
  */
-function _xdruple_prepare_products_list($product_ids = NULL, array $params = [], $product_item_theme = "products_page_item") {
+function _xdruple_prepare_products_list($product_ids = NULL) {
   /** @var stdClass $user */
   global $user;
 
@@ -324,40 +276,11 @@ function _xdruple_prepare_products_list($product_ids = NULL, array $params = [],
     }
 
     foreach ($products_list as $product) {
-      if ($product_item_theme !== FALSE) {
-        $list[] = [
-          "#theme" => $product_item_theme,
-          "#product" => $product,
-          "#params" => $params,
-        ];
-      }
-      else {
-        $list[] = $product;
-      }
+      $list[] = $product;
     }
   }
 
   return $list;
-}
-
-/**
- * Helper function to build Image field
- *
- * @param        $product
- * @param string $style
- *
- * @return string
- * @throws \Exception
- */
-function _xdruple_queries_product_image($product, $style = "") {
-  $img = !empty($product->xt_url_image_field[LANGUAGE_NONE][0]["uri"]) ? l(theme("image_style", [
-    "style_name" => $style,
-    "path" => $product->xt_url_image_field[LANGUAGE_NONE][0]["uri"],
-  ]), "products/{$product->product_id}", [
-    "html" => TRUE,
-  ]) : "";
-
-  return $img;
 }
 
 function _xdruple_queries_prepare_curl($product, $qty) {
