@@ -11,22 +11,11 @@
  */
 function xdruple_favorites_favorite_products_page() {
   $output = [];
-  $params = [
-    'fields' => [
-      'add_to_cart' => [
-        'show_quantity' => FALSE,
-      ],
-    ],
-  ];
-  drupal_alter([
-    'product_page_item',
-    'products_favorite_page_item',
-  ], $params);
-  $products_ids = _xdruple_queries_load_products_by_order_type('xdcatalogshiptostandardorder');
-  $list = _xdruple_prepare_products_list($products_ids, $params, FALSE);
   $output[] = [
     "#theme" => 'xdruple_products_page',
-    'products' => $list,
+    'products' => _xdruple_prepare_products_list(
+      _xdruple_queries_load_products_by_order_type('xdcatalogshiptostandardorder')
+    ),
   ];
   if (empty($_GET["search"])) {
     $output[] = [

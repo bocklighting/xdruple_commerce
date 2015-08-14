@@ -41,18 +41,6 @@ function xdruple_queries_products_by_category_page_title($group) {
  */
 function xdruple_queries_products_by_category_page($group) {
   $output = [];
-  $category = \Xtuple\XdrupleQueries\Categories\Tree::buildCategory($group->getId());
-  $params = [
-    "fields" => [
-      "add_to_cart" => [
-        "show_quantity" => FALSE,
-      ],
-    ],
-  ];
-  drupal_alter([
-    "product_page_item",
-    "products_by_category_page_item",
-  ], $params);
   $product_ids = [];
   $group_products = entity_load("xtuple_xdcatalogproduct", NULL, [
     "parentGroup" => $group->getId(),
@@ -62,8 +50,8 @@ function xdruple_queries_products_by_category_page($group) {
   }
   $output[] = [
     "#theme" => "xdruple_category_page",
-    "#category" => $category,
-    "#products" => _xdruple_prepare_products_list($product_ids, $params, FALSE),
+    "#category" => \Xtuple\XdrupleQueries\Categories\Tree::buildCategory($group->getId()),
+    "#products" => _xdruple_prepare_products_list($product_ids),
   ];
   if (empty($_GET["search"])) {
     $output[] = [
