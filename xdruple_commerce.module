@@ -1362,7 +1362,7 @@ function xdruple_commerce_checkout_completion_message_default() {
   $format = 'htmlpurifier_basic';
   if (filter_format_load($format)) {
     $value .= '<p>Your order number is <a href="[commerce-order:view-url]">[commerce-order:order-number]</a>.</p>';
-    $value .= '<p>You can <a href="[commerce-order:url]">view your order</a> on your <a href="user/[user:uid]/pending-orders">pending orders page</a> when logged in.</p>';
+    $value .= '<p>You can <a href="[commerce-order:url]">view your order</a> on your <a href="/user/[user:uid]/pending-orders">pending orders page</a> when logged in.</p>';
     $value .= '<p>We sent an order confirmation e-mail to you at <strong>[user:mail]</strong>.</p>';
     $value .= '<p><a href="[site:url]">Return to the front page.</a></p>';
   }
