@@ -2,6 +2,7 @@
 
 use CDD\Bootstrap\Common\Context;
 use CDD\Extensions\Theme\AbstractThemeHook;
+use Xtuple\XdrupleQueries\Categories\Category;
 use Xtuple\XdrupleQueries\Categories\Tree;
 
 class CategoriesAccordion extends AbstractThemeHook {
@@ -17,6 +18,10 @@ class CategoriesAccordion extends AbstractThemeHook {
   public function preprocess() {
     $variables = parent::preprocess();
     $variables['catalog'] = Tree::getCatalog();
+    /** @var Category $root_category */
+    foreach ($variables["catalog"] as $root_category) {
+      $variables["title"] = $root_category->getName();
+    }
     $variables['content_attributes_array'] = [
       'class' => [
         'panel',
