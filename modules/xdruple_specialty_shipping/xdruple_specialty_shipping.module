@@ -217,3 +217,17 @@ function xdruple_specialty_shipping_is_specialty_shipping_freight_class($freight
   $special_shipping = variable_get('xdruple_specialty_shipping_freight_classes', []);
   return in_array($freightClass, $special_shipping, TRUE);
 }
+
+/**
+ * @param $variables
+ */
+function xdruple_specialty_shipping_preprocess_xdruple_product_page(&$variables) {
+  /** @var \Xtuple\Rescued\Controller\Entity $product */
+  $product = $variables["product"];
+  if (xdruple_specialty_shipping_is_specialty_shipping_freight_class($product->get("freightClass"))) {
+    $variables["context"]["specialty_shipping"] = [
+      "#theme" => "xdruple_product_specialty_shipping",
+      "#weight" => -15,
+    ];
+  }
+}

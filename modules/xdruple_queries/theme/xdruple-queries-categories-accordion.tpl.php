@@ -10,7 +10,7 @@
     <div<?php print $attributes ?>>
       <div<?php print $content_attributes; ?>>
         <div class="panel-heading">
-          <h3 class="panel-title"><?php print $root_category->getName(); ?></h3>
+          <h3 class="panel-title"><?php print $title; ?></h3>
         </div>
         <div class="panel-body">
           <?php foreach ($root_category->getChildren() as $category): ?>
