@@ -36,10 +36,11 @@ function xdruple_queries_products_by_category_page_title($group) {
  * Page callback
  *
  * @param \Xtuple\Rescued\Controller\Entity $group
+ * @param                                   $limit
  *
  * @return string
  */
-function xdruple_queries_products_by_category_page($group) {
+function xdruple_queries_products_by_category_page($group, $limit) {
   $output = [];
   $product_ids = [];
   $group_products = entity_load("xtuple_xdcatalogproduct", NULL, [
@@ -51,7 +52,7 @@ function xdruple_queries_products_by_category_page($group) {
   $output[] = [
     "#theme" => "xdruple_category_page",
     "#category" => \Xtuple\XdrupleQueries\Categories\Tree::buildCategory($group->getId()),
-    "#products" => _xdruple_prepare_products_list($product_ids),
+    "#products" => _xdruple_prepare_products_list($product_ids, $limit),
   ];
   if (empty($_GET["search"])) {
     $output[] = [

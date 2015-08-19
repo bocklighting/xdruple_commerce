@@ -51,6 +51,9 @@ function xdruple_favorites_menu() {
     "title callback" => "xdruple_favorites_favorite_products_page_title",
     "title arguments" => ["xdruple_favorites_favorites_title", "Favorite products"],
     "page callback" => "xdruple_favorites_favorite_products_page",
+    "page arguments" => [
+      "limit" => "20",
+    ],
     "access callback" => "xdruple_access",
     "access arguments" => ["products/favorites", "view", "xtuple: access product lists"],
     "file" => "pages/favorites.inc",
@@ -246,7 +249,10 @@ function xdruple_favorites_preprocess_xdruple_products_table(&$variables) {
   ) {
     $variables["header"]["favorite"] = [
       "data" => t("Favorite"),
-      "class" => ["favorite"],
+      "class" => [
+        "favorite" => "favorite",
+        "no-wrap" => "no-wrap",
+      ],
       "weight" => 20,
     ];
     foreach ($variables["rows"] as $key => &$row) {

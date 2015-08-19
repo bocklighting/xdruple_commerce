@@ -34,6 +34,9 @@ function xdruple_queries_menu() {
   $items["products"] = [
     "title" => "Products",
     "page callback" => "xdruple_queries_products_page",
+    "page arguments" => [
+      "limit" => "20",
+    ],
     "access callback" => "xdruple_access",
     "access arguments" => ["products", "view", "xtuple: access product lists"],
     "file" => "pages/products.inc",
@@ -71,7 +74,10 @@ function xdruple_queries_menu() {
     "title callback" => "xdruple_queries_products_by_category_page_title",
     "title arguments" => [2],
     "page callback" => "xdruple_queries_products_by_category_page",
-    "page arguments" => [2],
+    "page arguments" => [
+      "category" => 2,
+      "limit" => "20",
+    ],
     "access callback" => "xdruple_access",
     "access arguments" => ["products/categories/%", "view", "xtuple: access product lists"],
     "file" => "pages/products_by_category.inc",
@@ -166,11 +172,12 @@ function _xdruple_queries_load_products_by_order_type($order_type) {
 }
 
 /**
- * @param $product_ids NULL|array - if NULL, show all products or filter by products ids if array
+ * @param NULL|array $product_ids - if NULL, show all products or filter by products ids if array
+ * @param int        $limit
  *
  * @return array
  */
-function _xdruple_prepare_products_list($product_ids = NULL) {
+function _xdruple_prepare_products_list($product_ids = NULL, $limit = 20) {
   /** @var stdClass $user */
   global $user;
 
@@ -194,7 +201,7 @@ function _xdruple_prepare_products_list($product_ids = NULL) {
 
     $query = new EntityFieldQuery();
     $query->entityCondition("entity_type", "commerce_product");
-    $query->pager(20);
+    $query->pager($limit);
 
     if (!empty($product_ids)) {
       $query->propertyCondition("product_id", $product_ids, "ANY");
