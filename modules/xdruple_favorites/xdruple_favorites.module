@@ -246,7 +246,10 @@ function xdruple_favorites_preprocess_xdruple_products_table(&$variables) {
   ) {
     $variables["header"]["favorite"] = [
       "data" => t("Favorite"),
-      "class" => ["favorite"],
+      "class" => [
+        "favorite" => "favorite",
+        "no-wrap" => "no-wrap",
+      ],
       "weight" => 20,
     ];
     foreach ($variables["rows"] as $key => &$row) {
