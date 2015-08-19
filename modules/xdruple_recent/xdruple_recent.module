@@ -10,13 +10,16 @@
 function xdruple_recent_menu() {
   $items = [];
 
-  $items['user/%user/recent'] = [
-    'title' => 'Recently ordered',
-    'page callback' => 'xdruple_recent_products_recent_page',
-    'access callback' => 'xdruple_access',
-    'access arguments' => ['products/recent', 'view', 'xtuple: access product lists'],
-    'file' => 'pages/products.inc',
-    'type' => MENU_LOCAL_TASK,
+  $items["user/%user/recent"] = [
+    "title" => "Recently ordered",
+    "page callback" => "xdruple_recent_products_recent_page",
+    "page arguments" => [
+      "limit" => "20",
+    ],
+    "access callback" => "xdruple_access",
+    "access arguments" => ["products/recent", "view", "xtuple: access product lists"],
+    "file" => "pages/products.inc",
+    "type" => MENU_LOCAL_TASK,
   ];
 
   return $items;
