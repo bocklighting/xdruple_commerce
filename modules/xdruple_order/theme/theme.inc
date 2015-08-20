@@ -47,7 +47,6 @@ function template_preprocess_order_page(&$variables) {
       PrintOrderInformation::ACCOUNT_NUMBER => t('Account #'),
       PrintOrderInformation::PURCHASE_ORDER_NUMBER => t('PO #'),
       PrintOrderInformation::ORDER_SCHEDULE_DATE => t('Scheduled date'),
-      PrintOrderInformation::TOTAL_DUE => t('Total due'),
     ]),
   ]);
 
