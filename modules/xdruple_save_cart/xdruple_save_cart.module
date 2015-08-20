@@ -164,7 +164,7 @@ function xdruple_save_cart_form_submit($form, &$form_state) {
         '!saved_carts_url' => l(t('Saved Carts'), "user/{$user->uid}/saved-carts"),
       ]
     );
-
+    xdruple_remove_message("/Line items saved/");
     drupal_set_message($message);
   }
 }
