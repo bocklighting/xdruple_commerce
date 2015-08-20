@@ -158,13 +158,7 @@ function xdruple_save_cart_form_submit($form, &$form_state) {
 
     commerce_order_save($form_state['order']);
 
-    $redirect = variable_get('xdruple_commerce_login_redirect_page', FALSE);
-    $redirect = !empty($redirect) ? $redirect : '<front>';
-    $form_state['redirect'] = $redirect;
-    if (isset($_GET['destination']) && $_GET['destination'] === 'cart') {
-      unset($_GET['destination']);
-    }
-
+    $form_state['redirect'] = "user/{$user->uid}/saved-carts";
     $message = 'Your shopping cart has been moved to your !saved_carts_url.';
     $message = t($message, [
         '!saved_carts_url' => l(t('Saved Carts'), "user/{$user->uid}/saved-carts"),
