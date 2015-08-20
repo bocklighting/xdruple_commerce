@@ -830,7 +830,7 @@ function xdruple_commerce_api_customer_exclusive_item_list($resource_name = 'XdP
     $customer = xdruple_rescued_session_get('customer');
     $shipto = xdruple_rescued_session_get('ship_to');
     $scheduled_date = xdruple_rescued_scheduled_date();
-    
+
     $query = [];
     if (!empty($opt_params["query"])) {
       foreach ($opt_params["query"] as $key => $value) {
@@ -1159,7 +1159,7 @@ function xdruple_commerce_checkout_review($variables) {
         '#attributes' => [
           'class' => [
             'checkout-review-fieldset',
-            'checkout-review-fieldset--' . drupal_clean_css_identifier($pane_id)
+            'checkout-review-fieldset--' . drupal_clean_css_identifier($pane_id),
           ],
         ],
       ],
@@ -1183,7 +1183,7 @@ function xdruple_commerce_checkout_review($variables) {
             'checkout-review-pane--' . drupal_clean_css_identifier($pane_id),
           ],
         ],
-      ]
+      ],
     ]);
   }
 
@@ -1319,38 +1319,14 @@ function xdruple_commerce_checkout_completion_message_pane_settings_form($checko
  * @return array
  */
 function xdruple_commerce_checkout_completion_message_pane_checkout_form($form, &$form_state, $checkout_pane, $order) {
-  $pane_form = [];
-  /** @var \stdClass $user */
+  /** @var \Xtuple\Drupal7\Proxy\User\CommerceUserProxy $user */
   global $user;
-
-  $message = variable_get('commerce_checkout_completion_message', xdruple_commerce_checkout_completion_message_default());
-
-  $message['value'] = commerce_i18n_string('commerce:checkout:complete:message', $message['value'], [
-    'sanitize' => FALSE,
-  ]);
-
-  // TODO: Add anonymous email template.
-  if ($user->uid === 0) {
-    $user->mail = $order->mail;
-  }
-
-  $message['value'] = token_replace($message['value'], [
-    'commerce-order' => $order,
-    'user' => $user,
-  ], [
-    'clear' => TRUE,
-  ]);
-
-  if ($user->uid === 0) {
-    unset($user->mail);
-  }
-
-  $message['value'] = check_markup($message['value'], $message['format']);
-
-  $pane_form['message'] = [
-    '#markup' => '<div class="checkout-completion-message">' . $message['value'] . '</div>',
+  $pane_form = [];
+  $pane_form["message"] = [
+    "#theme" => "xdruple_checkout_completion_message",
+    "#order" => $order,
+    "#account" => $user,
   ];
-
   return $pane_form;
 }
 
