@@ -255,13 +255,15 @@ function xdruple_favorites_preprocess_xdruple_products_table(&$variables) {
       ],
       "weight" => 20,
     ];
-    foreach ($variables["rows"] as $key => &$row) {
-      /** @var \Xtuple\Rescued\Controller\Entity $product */
-      $product = $variables["products"][$key];
-      $form = xdruple_favorites_get_favorites_form($product->get("product_id"), $customer, $ship_to);
-      $row["favorite"] = [
-        "data" => drupal_render($form),
-      ];
+    if (!empty($variables["rows"])) {
+      foreach ($variables["rows"] as $key => &$row) {
+        /** @var \Xtuple\Rescued\Controller\Entity $product */
+        $product = $variables["products"][$key];
+        $form = xdruple_favorites_get_favorites_form($product->get("product_id"), $customer, $ship_to);
+        $row["favorite"] = [
+          "data" => drupal_render($form),
+        ];
+      }
     }
   }
 }
