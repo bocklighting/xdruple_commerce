@@ -45,9 +45,8 @@ function xdruple_favorites_init() {
  */
 function xdruple_favorites_menu() {
   $items = [];
-
   $items["products/favorites"] = [
-    "title" => "Favorite products",
+    "title" => "Favorite Products",
     "title callback" => "xdruple_favorites_favorite_products_page_title",
     "title arguments" => ["xdruple_favorites_favorites_title", "Favorite products"],
     "page callback" => "xdruple_favorites_favorite_products_page",
@@ -59,7 +58,6 @@ function xdruple_favorites_menu() {
     "file" => "pages/favorites.inc",
     "type" => MENU_LOCAL_TASK,
   ];
-
   return $items;
 }
 
@@ -223,7 +221,7 @@ function xdruple_favorites_preprocess_xdruple_product_page(&$variables) {
 
 /**
  * Implements hook_preprocess_xdruple_event_purchase()
- * 
+ *
  * @param $variables
  */
 function xdruple_favorites_preprocess_xdruple_event_purchase(&$variables) {
