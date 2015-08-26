@@ -298,20 +298,19 @@ function xdruple_checkout_username_as_order_email_form_validate($form, &$form_st
   form_set_value($form['name'], $name, $form_state);
 
   // Validate the e-mail address, and check if it is taken by an existing user.
-  if ($error = user_validate_mail($form_state['values']['email'])) {
+  if ($error = user_validate_mail($form_state['values']['name'])) {
     form_set_error('name', $error);
   }
   else {
     $mail_taken = (bool) db_select('users')
       ->fields('users', ['uid'])
-      ->condition('uid', $GLOBALS['user']->uid, '<>')
-      ->condition('mail', db_like($form_state['values']['email']), 'LIKE')
+      ->condition('mail', $form_state['values']['name'])
       ->range(0, 1)
       ->execute()
       ->fetchField();
     if ($mail_taken) {
       form_set_error('name', t('The e-mail address %email is already registered. !forgotten', [
-        '%email' => $form_state['values']['email'],
+        '%email' => $form_state['values']['name'],
         '!forgotten' => l("Have you forgotten your password?", "user/password"),
       ]));
     }
