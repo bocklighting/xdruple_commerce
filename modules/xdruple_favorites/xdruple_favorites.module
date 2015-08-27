@@ -48,7 +48,7 @@ function xdruple_favorites_menu() {
   $items["products/favorites"] = [
     "title" => "Favorite Products",
     "title callback" => "xdruple_favorites_favorite_products_page_title",
-    "title arguments" => ["xdruple_favorites_favorites_title", "Favorite products"],
+    "title arguments" => ["xdruple_favorites_favorites_title", "Favorite Products"],
     "page callback" => "xdruple_favorites_favorite_products_page",
     "page arguments" => [
       "limit" => "20",
