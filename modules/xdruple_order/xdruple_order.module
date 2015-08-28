@@ -3,22 +3,6 @@
 include_once __DIR__ . '/pages/order.inc';
 
 /**
- * Implements hook_views_api().
- */
-function xdruple_order_views_api() {
-  return [
-    'api' => 3,
-    'path' => drupal_get_path('module', 'xdruple_order') . '/includes/views',
-  ];
-}
-
-/**
- * Implements hook_init()
- */
-function xdruple_order_init() {
-}
-
-/**
  * Implements hook_menu()
  */
 function xdruple_order_menu() {
@@ -72,48 +56,6 @@ function xdruple_order_rescued_resources() {
     "SalesOrderListItem",
     "RemitTo",
   ];
-}
-
-/**
- * Implements hook_views_pre_execute().
- *
- * @param $view
- */
-function xdruple_order_views_pre_execute($view) {
-  if ($view->name === 'xd_pending_orders') {
-    // Query on Customer.
-    /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-    global $session;
-    if ($session->getRescued('customer')) {
-      $view->query->query->propertyConditions[] = [
-        'column' => 'customer',
-        'value' => $session->getRescued('customer'),
-        'operator' => '=',
-      ];
-      $view->build_info['count_query']->propertyConditions[] = [
-        'column' => 'customer',
-        'value' => $session->getRescued('customer'),
-        'operator' => '=',
-      ];
-    }
-
-    // Query on Ship To.
-    if ($session->getRescued('ship_to')) {
-      // Get the Ship To Name.
-      $shipto_name = entity_load_single('xtuple_xdshipto', $session->getRescued('ship_to'));
-
-      $view->query->query->propertyConditions[] = [
-        'column' => 'shiptoName',
-        'value' => $shipto_name->name,
-        'operator' => '=',
-      ];
-      $view->build_info['count_query']->propertyConditions[] = [
-        'column' => 'shiptoName',
-        'value' => $shipto_name->name,
-        'operator' => '=',
-      ];
-    }
-  }
 }
 
 /**
