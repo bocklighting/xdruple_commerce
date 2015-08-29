@@ -42,6 +42,7 @@ class Category {
     $this->setId($id);
     $this->setName($name);
     $this->setChildren($children);
+    $documents = $documents ? $documents : [];
     $this->setDocuments($documents);
     $this->description = $description;
   }
