@@ -4,6 +4,3 @@ core = 7.x
 package = xDruple
 
 dependencies[] = xdruple_commerce
-
-; Views handlers
-files[] = includes/views/handlers/xdruple_order_handler_order_number_formatter.inc
