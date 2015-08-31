@@ -1082,50 +1082,6 @@ function xdruple_commerce_commerce_cart_line_item_refresh($line_item, $order_wra
 }
 
 /**
- * Helper function to format the Currency for this field.
- *
- * @param float  $amount
- *   The amount to format.
- * @param object $currency
- *   The Currency object.
- *
- * @return string $format - Formatted amount.
- */
-function _xdruple_commerce_currency_format($amount, $currency) {
-  // Add commas and round to two places.
-  $amount = number_format(round($amount, 2), 2);
-
-  $format = $currency->symbol . $amount;
-
-  return $format;
-}
-
-/**
- * Helper function to format a link to the product page.
- *
- * @param $item
- *
- * @return string - Formatted link to the product page.
- */
-function _xdruple_commerce_product_format($item) {
-  $query = new EntityFieldQuery();
-  $product = $query->entityCondition('entity_type', 'commerce_product')
-                   ->propertyCondition('sku', $item['number'], '=')
-                   ->execute();
-
-  if (count($product['commerce_product']) > 0) {
-    $product_id = key($product['commerce_product']);
-    // Create link to product page.
-    $format = l($product['commerce_product'][$product_id]->sku, 'products/' . $product_id);
-  }
-  else {
-    $format = $item['number'];
-  }
-
-  return $format;
-}
-
-/**
  * Implements hook_theme_registry_alter()
  *
  * @param $theme_registry
