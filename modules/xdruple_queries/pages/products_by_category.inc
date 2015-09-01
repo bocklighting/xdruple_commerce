@@ -52,7 +52,7 @@ function xdruple_queries_products_by_category_page($group, $limit) {
   $output[] = [
     "#theme" => "xdruple_category_page",
     "#category" => \Xtuple\XdrupleQueries\Categories\Tree::buildCategory($group->getId()),
-    "#products" => _xdruple_prepare_products_list($product_ids, $limit),
+    "#products" => _xdruple_products_list($product_ids, $limit),
   ];
   if (empty($_GET["search"])) {
     $output[] = [

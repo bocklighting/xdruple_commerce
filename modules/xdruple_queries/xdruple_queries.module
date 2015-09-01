@@ -4,15 +4,8 @@
  * @file keep Drupal hooks implementations
  */
 
+include_once __DIR__ . "/pages/categories.inc";
 include_once __DIR__ . "/pages/products_by_category.inc";
-include_once __DIR__ . "/pages/product.inc";
-
-/**
- * Implements hook_init()
- */
-function xdruple_queries_init() {
-  module_load_include("inc", "xdruple_queries", "pages/categories");
-}
 
 /**
  * Implements hook_compass_module()
@@ -30,37 +23,6 @@ function xdruple_queries_compass_module() {
  */
 function xdruple_queries_menu() {
   $items = [];
-
-  $items["products"] = [
-    "title" => "Products",
-    "page callback" => "xdruple_queries_products_page",
-    "page arguments" => [
-      "limit" => "20",
-    ],
-    "access callback" => "xdruple_access",
-    "access arguments" => ["products", "view", "xtuple: access product lists"],
-    "file" => "pages/products.inc",
-    "type" => MENU_NORMAL_ITEM,
-  ];
-
-  $items["products/list"] = [
-    "title" => "Products",
-    "type" => MENU_DEFAULT_LOCAL_TASK,
-    "weight" => -10,
-  ];
-
-  $items["products/%xdruple_queries_product"] = [
-    "title" => "Product",
-    "title callback" => "xdruple_queries_product_page_title",
-    "title arguments" => [1],
-    "page callback" => "xdruple_queries_product_page",
-    "page arguments" => [1],
-    "access callback" => "xdruple_access",
-    "access arguments" => ["products/%", "view", "xtuple: access product lists"],
-    "file" => "pages/product.inc",
-    "type" => MENU_CALLBACK,
-  ];
-
   $items["products/categories"] = [
     "title" => "Categories",
     "page callback" => "xdruple_queries_categories_page",
@@ -69,7 +31,6 @@ function xdruple_queries_menu() {
     "file" => "pages/categories.inc",
     "type" => MENU_LOCAL_TASK,
   ];
-
   $items["products/categories/%xdruple_queries_category"] = [
     "title callback" => "xdruple_queries_products_by_category_page_title",
     "title arguments" => [2],
@@ -83,20 +44,7 @@ function xdruple_queries_menu() {
     "file" => "pages/products_by_category.inc",
     "type" => MENU_CALLBACK,
   ];
-
   return $items;
-}
-
-/**
- * Implements hook_permission().
- */
-function xdruple_queries_permission() {
-  return [
-    "xtuple: access product lists" => [
-      "title" => t("Access xTuple Product Lists"),
-      "description" => t("Allow users to view lists of products."),
-    ],
-  ];
 }
 
 /**
@@ -104,7 +52,6 @@ function xdruple_queries_permission() {
  */
 function xdruple_queries_rescued_resources() {
   return [
-    "XdProduct",
     "XdCatalog",
     "XdCatalogProduct",
   ];
@@ -120,244 +67,4 @@ function xdruple_queries_extensions_theme() {
     "Xtuple\\XdrupleQueries\\Theme\\CategoriesDropdown",
     "Xtuple\\XdrupleQueries\\Theme\\CategoriesAccordion",
   ];
-}
-
-/**
- * @param $entity_type string - e.g. xdcatalogrecentorderproduct
- *
- * @return array
- */
-function _xdruple_queries_load_orders($entity_type) {
-  $orders = [];
-
-  if ($ship_to = xdruple_rescued_session_get("ship_to")) {
-    $cid = "xtuple_{$entity_type}-$ship_to";
-    $cache = cache_get($cid, "cache");
-
-    if (empty($cache) || xdruple_cache_expired($cache)) {
-      $conditions = [
-        "shipTo" => $ship_to,
-      ];
-
-      $orders = entity_load("xtuple_{$entity_type}", FALSE, $conditions);
-      cache_set($cid, $orders, "cache", REQUEST_TIME + 60 * 5); // Expires 5 minutes from now.
-    }
-    else {
-      $orders = $cache->data;
-    }
-  }
-
-  return $orders;
-}
-
-/**
- * @param $order_type string - e.g. xdcatalogrecentorderproduct
- *
- * @return array
- */
-function _xdruple_queries_load_products_by_order_type($order_type) {
-  $products = [];
-
-  $orders = _xdruple_queries_load_orders($order_type);
-  foreach ($orders as $order) {
-    if (is_numeric($order->product)) {
-      $products[] = $order->product;
-    }
-    elseif (is_array($order->products)) {
-      $products = array_merge($products, $order->products);
-    }
-  }
-
-  return $products;
-}
-
-/**
- * @param NULL|array $product_ids - if NULL, show all products or filter by products ids if array
- * @param int        $limit
- *
- * @return array
- */
-function _xdruple_prepare_products_list($product_ids = NULL, $limit = 20) {
-  /** @var stdClass $user */
-  global $user;
-
-  $list = [];
-
-  if ($product_ids === NULL || !empty($product_ids)) {
-    if ($user->uid === 0 && variable_get("xdruple_checkout_use_guest_customer_price_schedule", FALSE)) {
-      // Get anonymous checkout defaults from control panel.
-      $customer = variable_get("xdruple_checkout_guest_customer", NULL);
-      $ship_to = NULL;
-      $site = variable_get("xdruple_commerce_default_warehouse", NULL);
-    }
-    else {
-      /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-      global $session;
-      $customer = $session->getRescued("customer");
-      $ship_to = $session->getRescued("ship_to");
-      $site = $session->getRescued("site");
-    }
-    $scheduled_date = xdruple_rescued_session_get("scheduled_date");
-
-    $query = new EntityFieldQuery();
-    $query->entityCondition("entity_type", "commerce_product");
-    $query->pager($limit);
-
-    if (!empty($product_ids)) {
-      $query->propertyCondition("product_id", $product_ids, "ANY");
-    }
-
-    if (isset($_GET["search"])) {
-      $query->propertyCondition("q", str_replace("\\", "\\\\", urldecode($_GET["search"])), "CONTAINS");
-      $query->pager(50);
-    }
-
-    // Set a default order by so we don"t get bogus duplicate results from the xTuple API.
-    // TODO: User a URL query parameter to change "product_id" it different sort fields.
-    $query->propertyOrderBy("sku", "ASC");
-
-    $products = $query->execute();
-
-    // TODO: The rescued_entity_field_query_builder(EntityFieldQuery $query)
-    // function runs through entity_load to do the actual query. In theory,
-    // an EntityFieldQuery() could go directly to the API and then you would
-    // call entity_load() for the returned ids which will attach fields, etc.
-    // We can skip this call for now. This is one reason why the entity cache
-    // and EntityFieldQuery cache need to work together.
-    $products_list = [];
-    if (isset($products["commerce_product"])) {
-      foreach ($products["commerce_product"] as $product) {
-        $products_list[] = $product;
-      }
-    }
-
-    /** @var \Symfony\Component\Process\Process[] $processes */
-    $processes = [];
-    $qty = 1;
-    // Creating the list of processes
-    foreach ($products_list as $product) {
-      $product_id = $product->product_id;
-      $curl = _xdruple_queries_prepare_curl($product, $qty);
-      if ($curl !== NULL) {
-        $processes[$product_id] = new \Symfony\Component\Process\Process($curl);
-      }
-    }
-
-    // Starting all processes;
-    foreach ($processes as $product_id => $process) {
-      $process->start();
-    }
-
-    $finished_processes = [];
-
-    // Looping until all processes are done
-    while (sizeof($finished_processes) < sizeof($processes)) {
-      foreach ($processes as $product_id => $process) {
-        if (!$process->isRunning() && !array_key_exists($product_id, $finished_processes)) {
-          if (!$process->isSuccessful()) {
-            $out = $process->getErrorOutput();
-            $finished_processes[$product_id] = json_decode($out);
-          }
-          else {
-            $out = $process->getOutput();
-            $finished_processes[$product_id] = json_decode($out);
-
-            $product = $products["commerce_product"][$product_id];
-            /** @var \stdClass $line_item */
-            $line_item = commerce_product_line_item_new($product, $qty);
-            $line_item->data["context"]["product_ids"] = [$product->product_id];
-
-            // Cache the price
-            $cid = "xdruple_commerce_customer_line_item_price-" .
-              $customer . "-" .
-              $line_item->line_item_label . "-" .
-              strval($line_item->quantity) . "-" .
-              strval($scheduled_date) . "-" .
-              $ship_to . "-" .
-              $site;
-            cache_set($cid, $finished_processes[$product_id]->data->price, "cache", REQUEST_TIME + 60 * 60 * 10);
-          }
-        }
-        usleep(20000);
-      }
-    }
-
-    foreach ($products_list as $product) {
-      $list[] = $product;
-    }
-  }
-
-  return $list;
-}
-
-function _xdruple_queries_prepare_curl($product, $qty) {
-  /** @var stdClass $user */
-  global $user;
-
-  $product_id = $product->sku;
-
-  $scheduled_date = xdruple_rescued_session_get("scheduled_date");
-  if (empty($scheduled_date)) {
-    $scheduled_date = xdruple_rescued_scheduled_date("tomorrow");
-  }
-  $access_token = json_decode($_SESSION["access_token"]);
-  /** @var \stdClass $line_item */
-  $line_item = commerce_product_line_item_new($product, $qty);
-  $line_item->data["context"]["product_ids"] = [$product->product_id];
-  $price = xdruple_commerce_get_customer_line_item_price($line_item, TRUE);
-  if ($price === NULL) {
-    if ($user->uid === 0 && variable_get("xdruple_checkout_use_guest_customer_price_schedule", FALSE)) {
-      // Get anonymous checkout defaults from control panel.
-      $customer = variable_get("xdruple_checkout_guest_customer", NULL);
-      $ship_to = NULL;
-      $site = variable_get("xdruple_commerce_default_warehouse", NULL);
-    }
-    else {
-      /** @var Xtuple\Xdruple\Session\RescuedSession $session */
-      global $session;
-      $customer = $session->getRescued("customer");
-      $ship_to = $session->getRescued("ship_to");
-      $site = $session->getRescued("site");
-    }
-
-    if (empty($customer)) {
-      drupal_set_message("Cannot get a price quote without a Customer selected. Please set your order defaults.", "warning");
-    }
-    if (empty($site)) {
-      drupal_set_message("Cannot get a price quote without a Warehouse/Site selected. Please set your order defaults.", "warning");
-    }
-    if (empty($scheduled_date)) {
-      drupal_set_message("Cannot get a price quote without a Scheduled Date selected. Please set your order defaults.", "warning");
-    }
-
-    $d_array = [
-      "attributes" => [
-        $customer,
-        $product_id,
-        $qty,
-        [
-          "asOf" => $scheduled_date,
-          "siteId" => $site,
-          "effective" => date("Y-m-d"),
-        ],
-      ],
-    ];
-
-    if (!empty($ship_to)) {
-      $d_array["attributes"][3]["shiptoId"] = $ship_to;
-    }
-
-    $d = json_encode($d_array);
-
-    $config = rescued_get_configuration();
-
-    $uri = $config->apiUrl() . "/services/customer/item-price";
-    $debug_flag = variable_get("rescued_debug_mode", FALSE) ? " -k" : "";
-    $curl = "curl$debug_flag -X POST -H \"Content-Type: application/json\" -d '$d' $uri?access_token={$access_token->access_token}";
-
-    return $curl;
-  }
-  else {
-    return NULL;
-  }
 }
