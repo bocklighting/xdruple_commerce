@@ -24,7 +24,7 @@ function xdruple_queries_categories_page() {
 function xdruple_queries_categories_tree_block() {
   $output = '';
 
-  if (xdruple_access('products', 'view', 'xtuple: access product lists')) {
+  if (user_access('xtuple: access product lists')) {
     $cats = \Xtuple\XdrupleQueries\Categories\Tree::getCatalog();
     $output .= _xdruple_queries_categories_build_list_group_items($cats['tree'], $cats['catalog']);
   }

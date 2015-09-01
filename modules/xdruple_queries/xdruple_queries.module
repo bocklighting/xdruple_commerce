@@ -26,8 +26,7 @@ function xdruple_queries_menu() {
   $items["products/categories"] = [
     "title" => "Categories",
     "page callback" => "xdruple_queries_categories_page",
-    "access callback" => "xdruple_access",
-    "access arguments" => ["products/categories", "view", "xtuple: access product lists"],
+    "access arguments" => ["xtuple: access product lists"],
     "file" => "pages/categories.inc",
     "type" => MENU_LOCAL_TASK,
   ];
@@ -39,8 +38,7 @@ function xdruple_queries_menu() {
       "category" => 2,
       "limit" => "20",
     ],
-    "access callback" => "xdruple_access",
-    "access arguments" => ["products/categories/%", "view", "xtuple: access product lists"],
+    "access arguments" => ["xtuple: access product lists"],
     "file" => "pages/products_by_category.inc",
     "type" => MENU_CALLBACK,
   ];

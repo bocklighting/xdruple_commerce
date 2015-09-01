@@ -61,57 +61,6 @@ function xdruple_commerce_entity_info_alter(&$info) {
 }
 
 /**
- * Implements hook_menu_alter().
- *
- * Wrap any 'access checkout' or 'access content' items in our custom callback
- * so we can dynamically grant it.
- *
- * @param $items
- */
-function xdruple_commerce_menu_alter(&$items) {
-  if (!empty($items['checkout'])) {
-    array_unshift(
-      $items['checkout']['access arguments'],
-      'checkout',
-      'create'
-    );
-    $items['checkout']['access callback'] = 'xdruple_access';
-  }
-  if (!empty($items['checkout/%commerce_order'])) {
-    array_unshift(
-      $items['checkout/%commerce_order']['access arguments'],
-      'checkout/%commerce_order',
-      'update'
-    );
-    $items['checkout/%commerce_order']['access callback'] = 'xdruple_access';
-  }
-  if (!empty($items['checkout/%commerce_order/%commerce_checkout_page'])) {
-    array_unshift(
-      $items['checkout/%commerce_order/%commerce_checkout_page']['access arguments'],
-      'checkout/%commerce_order/%commerce_checkout_page',
-      'update'
-    );
-    $items['checkout/%commerce_order/%commerce_checkout_page']['access callback'] = 'xdruple_access';
-  }
-  if (!empty($items['cart'])) {
-    array_unshift(
-      $items['cart']['access arguments'],
-      'cart',
-      'update'
-    );
-    $items['cart']['access callback'] = 'xdruple_access';
-  }
-  if (!empty($items['cart/my'])) {
-    array_unshift(
-      $items['cart/my']['access arguments'],
-      'cart/my',
-      'update'
-    );
-    $items['cart/my']['access callback'] = 'xdruple_access';
-  }
-}
-
-/**
  * Implements hook_commerce_line_item_summary_link_info_alter().
  *
  * Wrap any 'access checkout' items in 'access xtuple checkout' so we can
@@ -121,11 +70,7 @@ function xdruple_commerce_menu_alter(&$items) {
  */
 function xdruple_commerce_commerce_line_item_summary_link_info_alter(&$links) {
   if (!empty($links['checkout'])) {
-    $links['checkout']['access'] = xdruple_access(
-      'commerce_line_item_summary_link_info',
-      'view',
-      'access checkout'
-    );
+    $links['checkout']['access'] = user_access('access checkout');
   }
 }
 
@@ -324,11 +269,7 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
     $view = reset($form_state['build_info']['args']);
 
     if (!empty($view->result)) {
-      $form['actions']['checkout']['#access'] = xdruple_access(
-        'views_form_commerce_cart_form',
-        'view',
-        'access checkout'
-      );
+      $form['actions']['checkout']['#access'] = user_access('access checkout');
     }
   }
 }
