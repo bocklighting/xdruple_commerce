@@ -5,13 +5,6 @@ define('LABEL_ABOVE', 'above');
 define('LABEL_HIDDEN', 'hidden');
 
 /**
- * Implements hook_compass_module()
- */
-function xdruple_commerce_compass_module() {
-  return new \CDD\Compass\DrupalModule('xdruple_commerce', ['xdruple_commerce']);
-}
-
-/**
  * Implements hook_user_login().
  *
  * @param $edit
@@ -68,57 +61,6 @@ function xdruple_commerce_entity_info_alter(&$info) {
 }
 
 /**
- * Implements hook_menu_alter().
- *
- * Wrap any 'access checkout' or 'access content' items in our custom callback
- * so we can dynamically grant it.
- *
- * @param $items
- */
-function xdruple_commerce_menu_alter(&$items) {
-  if (!empty($items['checkout'])) {
-    array_unshift(
-      $items['checkout']['access arguments'],
-      'checkout',
-      'create'
-    );
-    $items['checkout']['access callback'] = 'xdruple_access';
-  }
-  if (!empty($items['checkout/%commerce_order'])) {
-    array_unshift(
-      $items['checkout/%commerce_order']['access arguments'],
-      'checkout/%commerce_order',
-      'update'
-    );
-    $items['checkout/%commerce_order']['access callback'] = 'xdruple_access';
-  }
-  if (!empty($items['checkout/%commerce_order/%commerce_checkout_page'])) {
-    array_unshift(
-      $items['checkout/%commerce_order/%commerce_checkout_page']['access arguments'],
-      'checkout/%commerce_order/%commerce_checkout_page',
-      'update'
-    );
-    $items['checkout/%commerce_order/%commerce_checkout_page']['access callback'] = 'xdruple_access';
-  }
-  if (!empty($items['cart'])) {
-    array_unshift(
-      $items['cart']['access arguments'],
-      'cart',
-      'update'
-    );
-    $items['cart']['access callback'] = 'xdruple_access';
-  }
-  if (!empty($items['cart/my'])) {
-    array_unshift(
-      $items['cart/my']['access arguments'],
-      'cart/my',
-      'update'
-    );
-    $items['cart/my']['access callback'] = 'xdruple_access';
-  }
-}
-
-/**
  * Implements hook_commerce_line_item_summary_link_info_alter().
  *
  * Wrap any 'access checkout' items in 'access xtuple checkout' so we can
@@ -128,11 +70,7 @@ function xdruple_commerce_menu_alter(&$items) {
  */
 function xdruple_commerce_commerce_line_item_summary_link_info_alter(&$links) {
   if (!empty($links['checkout'])) {
-    $links['checkout']['access'] = xdruple_access(
-      'commerce_line_item_summary_link_info',
-      'view',
-      'access checkout'
-    );
+    $links['checkout']['access'] = user_access('access checkout');
   }
 }
 
@@ -277,265 +215,6 @@ function xdruple_commerce_field_extra_fields_alter(&$info) {
 }
 
 /**
- * Lets modules add extra fields to product entities without using
- * hook_field_extra_field_alter because of how product_reference calls
- * commerce_product_field_extra_fields() directly instead of using
- * field_info_extra_fields().
- *
- * @See: commerce_product_reference_field_extra_fields()
- *
- * @param $extra
- *   Extra fields from commerce_product_field_extra_fields()
- *
- * @return
- *   Modified extra fields array with your additions/changes.
- */
-function xdruple_commerce_commerce_product_add_extra_fields_alter(&$extra) {
-  // Modify $extra here to add the extra xTuple specific entity properties.
-
-  foreach (commerce_product_types() as $type => $product_type) {
-    $form = [
-      'subTitle' => [
-        'label' => t('Product Sub-Title'),
-        'description' => t('Product module sub-title form element'),
-        'weight' => -4,
-      ],
-      'productWeight' => [
-        'label' => t('Product Weight'),
-        'description' => t('Product module product weight form element'),
-        'weight' => -4,
-      ],
-      'packageWeight' => [
-        'label' => t('Package Weight'),
-        'description' => t('Product module package weight form element'),
-        'weight' => -4,
-      ],
-      'productLength' => [
-        'label' => t('Length'),
-        'description' => t('Product module length form element'),
-        'weight' => -4,
-      ],
-      'productWidth' => [
-        'label' => t('Width'),
-        'description' => t('Product module width form element'),
-        'weight' => -4,
-      ],
-      'productHeight' => [
-        'label' => t('Height'),
-        'description' => t('Product module height form element'),
-        'weight' => -4,
-      ],
-      'packageLength' => [
-        'label' => t('Package Length'),
-        'description' => t('Product module package length form element'),
-        'weight' => -4,
-      ],
-      'packageWidth' => [
-        'label' => t('Package Width'),
-        'description' => t('Product module package width form element'),
-        'weight' => -4,
-      ],
-      'packageHeight' => [
-        'label' => t('Package Height'),
-        'description' => t('Product module package height form element'),
-        'weight' => -4,
-      ],
-      'classCode' => [
-        'label' => t('Class Code'),
-        'description' => t('Product module class code form element'),
-        'weight' => -4,
-      ],
-      'productCategory' => [
-        'label' => t('Product Category'),
-        'description' => t('Product module product category form element'),
-        'weight' => -4,
-      ],
-      'inventoryUnit' => [
-        'label' => t('Order Quantity UOM'),
-        'description' => t('Product module inventory unit form element'),
-        'weight' => -4,
-      ],
-      'priceUnit' => [
-        'label' => t('Unit Price UOM'),
-        'description' => t('Product module price unit form element'),
-        'weight' => -4,
-      ],
-      'uomRatio' => [
-        'label' => t('UOM Ratio'),
-        'description' => t('Product module UOM ratio form element'),
-        'weight' => -4,
-      ],
-      'weightUnit' => [
-        'label' => t('Weight Unit'),
-        'description' => t('Product module weight unit form element'),
-        'weight' => -4,
-      ],
-      'dimensionUnit' => [
-        'label' => t('Dimension Unit'),
-        'description' => t('Product module dimension unit form element'),
-        'weight' => -4,
-      ],
-      'physicalProductUnit' => [
-        'label' => t('Product Dimensions Unit'),
-        'description' => t('Product module product dimensions unit form element'),
-        'weight' => -4,
-      ],
-      'physicalPackageUnit' => [
-        'label' => t('Package Dimensions Unit'),
-        'description' => t('Product module package dimensions unit form element'),
-        'weight' => -4,
-      ],
-      'notes' => [
-        'label' => t('Notes'),
-        'description' => t('Product module notes form element'),
-        'weight' => -3,
-      ],
-      'extendedDescription' => [
-        'label' => t('Extended Description'),
-        'description' => t('Product module extended description form element'),
-        'weight' => -3,
-      ],
-      'urls' => [
-        'label' => t('URLs'),
-        'description' => t('Product file URLs'),
-        'weight' => -3,
-      ],
-    ];
-
-    $display = [
-      'subTitle' => [
-        'label' => t('Product Sub-Title'),
-        'description' => t('Product sub-title'),
-        'theme' => 'xdruple_commerce_sub_title',
-        'weight' => -4,
-      ],
-      'productWeight' => [
-        'label' => t('Product Weight'),
-        'description' => t('Weight of the product'),
-        'theme' => 'xdruple_commerce_product_weight',
-        'weight' => -4,
-      ],
-      'packageWeight' => [
-        'label' => t('Package Weight'),
-        'description' => t('Weight of the empty package this product comes in'),
-        'theme' => 'xdruple_commerce_package_weight',
-        'weight' => -4,
-      ],
-      'productLength' => [
-        'label' => t('Length'),
-        'description' => t('Product module length form element'),
-        'theme' => 'xdruple_commerce_length',
-        'weight' => -4,
-      ],
-      'productWidth' => [
-        'label' => t('Width'),
-        'description' => t('Product module width form element'),
-        'theme' => 'xdruple_commerce_width',
-        'weight' => -4,
-      ],
-      'productHeight' => [
-        'label' => t('Height'),
-        'description' => t('Product module height form element'),
-        'theme' => 'xdruple_commerce_height',
-        'weight' => -4,
-      ],
-      'packageLength' => [
-        'label' => t('Package Length'),
-        'description' => t('Product module package length form element'),
-        'theme' => 'xdruple_commerce_pack_length',
-        'weight' => -4,
-      ],
-      'packageWidth' => [
-        'label' => t('Package Width'),
-        'description' => t('Product module package width form element'),
-        'theme' => 'xdruple_commerce_pack_width',
-        'weight' => -4,
-      ],
-      'packageHeight' => [
-        'label' => t('Package Height'),
-        'description' => t('Product module package height form element'),
-        'theme' => 'xdruple_commerce_pack_height',
-        'weight' => -4,
-      ],
-      'classCode' => [
-        'label' => t('Class Code'),
-        'description' => t('Class Code the product belongs to'),
-        'theme' => 'xdruple_commerce_class_code',
-        'weight' => -4,
-      ],
-      'productCategory' => [
-        'label' => t('Product Category'),
-        'description' => t('Product Category the product belongs to'),
-        'theme' => 'xdruple_commerce_product_category',
-        'weight' => -4,
-      ],
-      'inventoryUnit' => [
-        'label' => t('Order Quantity UOM'),
-        'description' => t('Unit of measure used for inventory'),
-        'theme' => 'xdruple_commerce_inventory_unit',
-        'weight' => -4,
-      ],
-      'priceUnit' => [
-        'label' => t('Unit Price UOM'),
-        'description' => t('Unit of measure used for the price calculation'),
-        'theme' => 'xdruple_commerce_price_unit',
-        'weight' => -4,
-      ],
-      'uomRatio' => [
-        'label' => t('UOM Ratio'),
-        'description' => t('Unit of measure ratio between price and inventory'),
-        'theme' => 'xdruple_commerce_uom_ratio',
-        'weight' => -4,
-      ],
-      'weightUnit' => [
-        'label' => t('Weight Unit'),
-        'description' => t('Unit of measure used for the weight calculation'),
-        'theme' => 'xdruple_commerce_weight_unit',
-        'weight' => -4,
-      ],
-      'dimensionUnit' => [
-        'label' => t('Dimension Unit'),
-        'description' => t('Product module dimension unit form element'),
-        'theme' => 'xdruple_commerce_dimension_unit',
-        'weight' => -4,
-      ],
-      'physicalProductUnit' => [
-        'label' => t('Product Dimensions Unit'),
-        'description' => t('Product module product dimensions unit form element'),
-        'weight' => -4,
-      ],
-      'physicalPackageUnit' => [
-        'label' => t('Package Dimensions Unit'),
-        'description' => t('Product module package dimensions unit form element'),
-        'weight' => -4,
-      ],
-      'notes' => [
-        'label' => t('Notes'),
-        'description' => t('Additional notes for the product'),
-        'theme' => 'xdruple_commerce_notes',
-        'weight' => -3,
-      ],
-      'extendedDescription' => [
-        'label' => t('Extended Description'),
-        'description' => t('Extended description of the product'),
-        'theme' => 'xdruple_commerce_ex_descrip',
-        'weight' => -3,
-      ],
-      'urls' => [
-        'label' => t('URLs'),
-        'description' => t('Product file URLs'),
-        'weight' => -3,
-      ],
-    ];
-
-    $extra['commerce_product'][$type]['form'] = array_merge($extra['commerce_product'][$type]['form'], $form);
-    $extra['commerce_product'][$type]['display'] = array_merge($extra['commerce_product'][$type]['display'], $display);
-  }
-
-  return $extra;
-}
-
-/**
  * Implements hook_form_alter()
  *
  * Resolve a problem with undefined commerce_checkout_form on AJAX calls
@@ -590,11 +269,7 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
     $view = reset($form_state['build_info']['args']);
 
     if (!empty($view->result)) {
-      $form['actions']['checkout']['#access'] = xdruple_access(
-        'views_form_commerce_cart_form',
-        'view',
-        'access checkout'
-      );
+      $form['actions']['checkout']['#access'] = user_access('access checkout');
     }
   }
 }
@@ -604,106 +279,6 @@ function xdruple_commerce_form_alter(&$form, &$form_state, $form_id) {
  */
 function xdruple_commerce_theme() {
   $items = [
-    'xdruple_commerce_sub_title' => [
-      'variables' => ['subTitle' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-sub-title',
-    ],
-    'xdruple_commerce_product_weight' => [
-      'variables' => ['productWeight' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-product-weight',
-    ],
-    'xdruple_commerce_length' => [
-      'variables' => ['productLength' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-length',
-    ],
-    'xdruple_commerce_width' => [
-      'variables' => ['productWidth' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-width',
-    ],
-    'xdruple_commerce_height' => [
-      'variables' => ['productHeight' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-height',
-    ],
-    'xdruple_commerce_package_weight' => [
-      'variables' => ['packageWeight' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-package-weight',
-    ],
-    'xdruple_commerce_pack_length' => [
-      'variables' => ['packageLength' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-pack-length',
-    ],
-    'xdruple_commerce_pack_width' => [
-      'variables' => ['packageWidth' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-pack-width',
-    ],
-    'xdruple_commerce_pack_height' => [
-      'variables' => ['packageHeight' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-pack-height',
-    ],
-    'xdruple_commerce_class_code' => [
-      'variables' => ['classCode' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-class-code',
-    ],
-    'xdruple_commerce_product_category' => [
-      'variables' => ['productCategory' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-product-category',
-    ],
-    'xdruple_commerce_inventory_unit' => [
-      'variables' => ['inventoryUnit' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-inventory-unit',
-    ],
-    'xdruple_commerce_price_unit' => [
-      'variables' => ['priceUnit' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-price-unit',
-    ],
-    'xdruple_commerce_uom_ratio' => [
-      'variables' => ['uomRatio' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-uom-ratio',
-    ],
-    'xdruple_commerce_dimension_unit' => [
-      'variables' => ['dimensionUnit' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-dimension-unit',
-    ],
-    'xdruple_commerce_weight_unit' => [
-      'variables' => ['weightUnit' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-weight-unit',
-    ],
-    'xdruple_commerce_physical_prod_unit' => [
-      'variables' => ['physicalProductUnit' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-physical-prod-unit',
-    ],
-    'xdruple_commerce_physical_pack_unit' => [
-      'variables' => ['physicalPackageUnit' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-physical-pack-unit',
-    ],
-    'xdruple_commerce_notes' => [
-      'variables' => ['notes' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-notes',
-    ],
-    'xdruple_commerce_ex_descrip' => [
-      'variables' => ['extendedDescription' => NULL, 'label' => NULL, 'product' => NULL],
-      'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-      'template' => 'xdruple-commerce-ext-descrip',
-    ],
     'xdruple_commerce_cart_dropdown' => [
       'variables' => [
         'link' => NULL,
@@ -735,40 +310,6 @@ function xdruple_commerce_theme() {
 
 
   return $items;
-}
-
-/**
- * Implements hook_field_attach_submit.
- *
- * @param $entity_type
- * @param $entity
- * @param $form
- * @param $form_state
- */
-function xdruple_commerce_field_attach_submit($entity_type, $entity, $form, $form_state) {
-  if ($entity_type === 'commerce_product') {
-    // Save xTuple parameters back into the product entity object.
-    $entity->subTitle = $form_state['values']['subTitle'];
-    $entity->notes = $form_state['values']['notes'];
-    $entity->extendedDescription = $form_state['values']['extendedDescription'];
-    $entity->productWeight = $form_state['values']['productWeight'];
-    $entity->productLength = $form_state['values']['productLength'];
-    $entity->productWidth = $form_state['values']['productWidth'];
-    $entity->productHeight = $form_state['values']['productHeight'];
-    $entity->packageWeight = $form_state['values']['packageWeight'];
-    $entity->packageLength = $form_state['values']['packageLength'];
-    $entity->packageWidth = $form_state['values']['packageWidth'];
-    $entity->packageHeight = $form_state['values']['packageHeight'];
-    $entity->classCode = $form_state['values']['classCode'];
-    $entity->productCategory = $form_state['values']['productCategory'];
-    $entity->priceUnit = $form_state['values']['priceUnit'];
-    $entity->uomRatio = $form_state['values']['uomRatio'];
-    $entity->inventoryUnit = $form_state['values']['inventoryUnit'];
-    $entity->weightUnit = $form_state['values']['weightUnit'];
-    $entity->dimensionUnit = $form_state['values']['dimensionUnit'];
-    $entity->physicalProductUnit = $form_state['values']['physicalProductUnit'];
-    $entity->physicalPackageUnit = $form_state['values']['physicalPackageUnit'];
-  }
 }
 
 /**
@@ -1144,50 +685,6 @@ function xdruple_commerce_checkout_review($variables) {
   }
 
   return implode('', $rows);
-}
-
-function xdruple_commerce_entity_view_alter(&$build, $type) {
-  if ($type == "commerce_product" && $build["#view_mode"] == "full") {
-    // Overriding any current value for xt_url_image_field display
-    if (!empty($build["xt_url_image_field"]["#items"]) && $build["xt_url_image_field"]["#access"]) {
-      $img_field = &$build["xt_url_image_field"];
-      $img_field["#formatter"] = "fancybox";
-      foreach ($img_field["#items"] as $i => $item) {
-        $img_field[$i] = [
-          "#theme" => "fancybox_formatter_default",
-          "#settings" => [
-            "cyclic" => TRUE,
-            "full" => "large",
-            "preview" => "commerce_product_thumbnail_small_style",
-            "title_position" => "over",
-            "title_show" => TRUE,
-          ],
-          "#item" => [
-            "path" => $item["uri"],
-            "width" => $item["width"],
-            "height" => $item["height"],
-            "alt" => $item["alt"],
-            "title" => $item["title"],
-          ],
-          "#class" => ["fancybox-commerce-product-product-xt-url-image-field"],
-          "#rel" => "fancybox-commerce-product-product-xt-url-image-field",
-        ];
-      }
-    }
-    // Overriding default substitutes property to be themed
-    if (!empty($build["substitutes"]["#items"])) {
-      foreach ($build["substitutes"]["#items"] as $i => $product_id) {
-        $build["substitutes"][$i] = [
-          "#theme" => "xdruple_commerce_similar_product_link_default",
-          "#product_id" => $product_id,
-          "#style" => "commerce_product_thumbnail_wide_style",
-        ];
-      }
-    }
-    else {
-      $build["substitutes"]["#access"] = FALSE;
-    }
-  }
 }
 
 /**
