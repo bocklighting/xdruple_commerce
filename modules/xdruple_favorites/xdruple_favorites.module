@@ -98,7 +98,7 @@ function xdruple_favorites_get_favorites_form($product_id, $customer, $ship_to) 
 function _xdruple_favorites_get_favorites_form_id($product_id) {
   $form_id = 'xdruple_favorites_add_to_favorites_form_' . $product_id;
 
-  if (in_array($product_id, _xdruple_queries_load_products_by_order_type('xdcatalogshiptostandardorder'))) {
+  if (in_array($product_id, _xdruple_load_products_by_order_type('xdcatalogshiptostandardorder'))) {
     $form_id = 'xdruple_favorites_remove_from_favorites_form_' . $product_id;
   }
 
