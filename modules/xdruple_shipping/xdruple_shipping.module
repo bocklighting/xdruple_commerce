@@ -3,8 +3,7 @@
 /**
  * @keeps theme callback
  */
-
-use Xtuple\Xdruple\Theme\PrintAddressInfoHandler;
+use Xtuple\REST\Resource\Site\SiteResource;
 
 /**
  * Implements hook_rescued_resources().
@@ -417,19 +416,14 @@ function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_servic
 
       if (count($service_parts) === 3) {
         if (isset($allowed_pickup_sites[$service_parts[2]]) && $allowed_pickup_sites[$service_parts[2]] !== 0) {
-          // Load the site.
-          $site = entity_load_single('xtuple_site', $service_parts[2]);
-
-          // Extract the address.
-          $address = xdruple_addr_array_to_addr_info_obj($site->address);
-
+          $siteResource = SiteResource::read(xdruple_commerce_application()->dataSource(), $service_parts[2]);
+          $site = $siteResource->value();
           $shipping_services[$key]["display_title"] = t("Customer Pickup at @site", [
-            "@site" => $site->description ? $site->description : $site->code,
+            "@site" => $site->description() ? $site->description() : $site->code(),
           ]);
-          $shipping_services[$key]['description'] = theme('xdruple_print_address_info', [
-              'printAddressInfoHandler' => new PrintAddressInfoHandler($address, ''),
-              'class' => 'xdruple-print-address-info',
-            ]);
+          $shipping_services[$key]["description"] = theme("xdruple_address", [
+            "address" => $site->address(),
+          ]);
         }
         else {
           // This site is not an allowed pickup site. Unset it from the shipping services.
