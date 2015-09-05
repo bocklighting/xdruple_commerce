@@ -23,6 +23,3 @@ dependencies[] = commerce_product_ui
 dependencies[] = commerce_price_savings_formatter
 dependencies[] = list
 dependencies[] = xdruple_fields
-
-; Views handlers
-files[] = includes/views/handlers/xdruple_commerce_handler_currency_formatter.inc
