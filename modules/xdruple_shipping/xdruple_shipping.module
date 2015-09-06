@@ -3,6 +3,7 @@
 /**
  * @keeps theme callback
  */
+use Xtuple\REST\Resource\ShipVia\ShipViaResource;
 use Xtuple\REST\Resource\Site\SiteResource;
 
 /**
@@ -24,13 +25,13 @@ function xdruple_shipping_rescued_resources() {
  */
 function xdruple_shipping_cpanel_alter(&$form, &$form_state) {
   if (module_exists('commerce_pickup')) {
-    $sites = entity_load('xtuple_site');
+    $siteList = SiteResource::readAll(xdruple_commerce_application()->dataSource());
 
     $options = [];
-    foreach ($sites as $key => $site) {
-      $options[$key] = $site->description;
+    foreach ($siteList as $site) {
+      $options[$site->code()] = $site->description();
     }
-    if (count($sites) > 1) {
+    if (!empty($options)) {
       $form['xdruple_commerce_store_settings']['xdruple_shipping_allowed_pickup_sites'] = [
         '#type' => 'checkboxes',
         '#options' => $options,
@@ -312,17 +313,16 @@ function xdruple_shipping_map_physical_dimension_units($unit, $valid_units) {
  *   The matching xTuple's Ship Via code or pass through $ship_label if not found.
  */
 function xdruple_shipping_map_ship_via($ship_label) {
-  $entity_type = 'xtuple_shipvia';
-  $ship_via = entity_load($entity_type);
+  $ship_via_list = ShipViaResource::readAll(xdruple_commerce_application()->dataSource());
 
-  foreach ($ship_via as $code => $value) {
+  foreach ($ship_via_list as $ship_via) {
     // Remove and space, dashes, underscores.
     $stripped_label = str_replace([' ', '-', '_'], '', $ship_label);
-    $stripped_description = str_replace([' ', '-', '_'], '', $value->description);
+    $stripped_description = str_replace([' ', '-', '_'], '', $ship_via->description());
 
     // Compare the two and return the code-description if they match.
     if ($stripped_label === $stripped_description) {
-      return $code . '-' . $value->description;
+      return $ship_via->code() . '-' . $ship_via->description();
     }
   }
 
@@ -359,39 +359,30 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
   // Necessary for country_get_list().
   /** @noinspection PhpIncludeInspection */
   require_once DRUPAL_ROOT . '/includes/locale.inc';
-
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
   global $session;
 
-  $id = $session->getRescued('site');
-  $entity_type = 'xtuple_site';
-
-  if (!empty($id)) {
-    $site = entity_load_single($entity_type, $id);
-  }
-  else {
-    // Default site from control panel to support anonymous checkout.
-    $id = variable_get('xdruple_commerce_default_warehouse', NULL);
-    $site = entity_load_single($entity_type, $id);
-  }
-
+  $id = $session->getRescued('site') ? $session->getRescued('site') : variable_get('xdruple_commerce_default_warehouse', NULL);
   try {
-    if (!empty($site) && $site_address = $site->address) {
-      $countries = country_get_list();
-      $country_match = array_keys($countries, $site_address['country']);
-      if (count($country_match) === 1) {
-        $country_code = $country_match[0];
-      }
-      else {
-        $country_code = 'US';
-      }
+    if (!empty($id)) {
+      $site = SiteResource::read(xdruple_commerce_application()->dataSource(), $id)->value();
+      if (!empty($site) && $site_address = $site->address()) {
+        $countries = country_get_list();
+        $country_match = array_keys($countries, $site_address->country());
+        if (count($country_match) === 1) {
+          $country_code = $country_match[0];
+        }
+        else {
+          $country_code = 'US';
+        }
 
-      $ship_from_address['thoroughfare'] = $site_address['line1'];
-      $ship_from_address['premise'] = $site_address['line2'];
-      $ship_from_address['locality'] = $site_address['city'];
-      $ship_from_address['administrative_area'] = $site_address['state'];
-      $ship_from_address['postal_code'] = $site_address['postalCode'];
-      $ship_from_address['country'] = $country_code;
+        $ship_from_address['thoroughfare'] = $site_address->line1();
+        $ship_from_address['premise'] = $site_address->line2();
+        $ship_from_address['locality'] = $site_address->city();
+        $ship_from_address['administrative_area'] = $site_address->state();
+        $ship_from_address['postal_code'] = $site_address->postalCode();
+        $ship_from_address['country'] = $country_code;
+      }
     }
   } catch (\Exception $e) {
     drupal_set_message($e->getMessage(), 'error');

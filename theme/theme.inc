@@ -1,4 +1,5 @@
 <?php
+use Xtuple\REST\Resource\Unit\UnitResource;
 
 /**
  * @file keeps theming functions
@@ -29,7 +30,7 @@ function template_preprocess_xdruple_commerce_similar_product_link_default(&$var
         'html' => TRUE,
       ]);
     }
-    $variables['unit'] = xdruple_get_unit_by_code($product->inventoryUnit);
+    $variables['unit'] = UnitResource::read(xdruple_commerce_application()->dataSource(), $unit)->value()->description();
     $variables['attributes_array']['class'][] = 'b-product--teaser';
     $variables['title_attributes_array']['class'] = 'b-product-title';
     $variables['thumbnail_attributes_array'] = [
