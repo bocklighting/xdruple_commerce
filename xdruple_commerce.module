@@ -61,20 +61,6 @@ function xdruple_commerce_entity_info_alter(&$info) {
 }
 
 /**
- * Implements hook_commerce_line_item_summary_link_info_alter().
- *
- * Wrap any 'access checkout' items in 'access xtuple checkout' so we can
- * dynamically grant it.
- *
- * @param $links
- */
-function xdruple_commerce_commerce_line_item_summary_link_info_alter(&$links) {
-  if (!empty($links['checkout'])) {
-    $links['checkout']['access'] = user_access('access checkout');
-  }
-}
-
-/**
  * Implements hook_rescued_resources().
  */
 function xdruple_commerce_rescued_resources() {
@@ -593,36 +579,6 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
 }
 
 /**
- * Implements hook_commerce_product_calculate_sell_price_line_item_alter().
- *
- * @param $line_item
- *   The product line item used for sell price calculation.
- */
-function xdruple_commerce_commerce_product_calculate_sell_price_line_item_alter($line_item) {
-  // Alter the list price.
-  if ($line_item->type === 'product') {
-    xdruple_commerce_get_customer_line_item_price($line_item);
-  }
-}
-
-
-/**
- * Implements hook_commerce_cart_line_item_refresh().
- *
- * @param $line_item
- *   The product line item used for sell price calculation.
- *
- * @param $order_wrapper
- *   The order.
- */
-function xdruple_commerce_commerce_cart_line_item_refresh($line_item, $order_wrapper) {
-  // Alter the list price.
-  if ($line_item->type === 'product') {
-    xdruple_commerce_get_customer_line_item_price($line_item);
-  }
-}
-
-/**
  * Implements hook_theme_registry_alter()
  *
  * @param $theme_registry
@@ -685,33 +641,6 @@ function xdruple_commerce_checkout_review($variables) {
   }
 
   return implode('', $rows);
-}
-
-/**
- * Implements hook_commerce_checkout_pane_info()
- */
-function xdruple_commerce_commerce_checkout_pane_info() {
-  $checkout_panes = [];
-
-  $checkout_panes['purchased_items'] = [
-    'title' => t('Purchased items'),
-    'base' => 'xdruple_commerce_checkout_purchased_items_pane',
-    'page' => 'complete',
-    'fieldset' => TRUE,
-    'locked' => FALSE,
-    'weight' => 1,
-  ];
-
-  return $checkout_panes;
-}
-
-/**
- * Implements hook_commerce_checkout_pane_info_alter()
- *
- * @param $checkout_panes
- */
-function xdruple_commerce_commerce_checkout_pane_info_alter(&$checkout_panes) {
-  $checkout_panes['checkout_completion_message']['base'] = 'xdruple_commerce_checkout_completion_message_pane';
 }
 
 /**
