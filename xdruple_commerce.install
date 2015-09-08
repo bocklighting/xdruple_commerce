@@ -149,3 +149,13 @@ function xdruple_commerce_update_7003() {
 
   return t($message);
 }
+
+/**
+ * Disable Commerce Price Savings Formatter module
+ */
+function xdruple_commerce_update_7004() {
+  module_disable([
+    "commerce_price_savings_formatter"
+  ]);
+  return t("Commerce Price Savings Formatter disabled");
+}
