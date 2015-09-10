@@ -28,29 +28,13 @@ function xdruple_checkout_cpanel_alter(&$form, &$form_state) {
     '#description' => t('Allow anonymous checkout. This will also provide an Anonymous Checkout option as an alternative to logging in on the login form when a user has initiated the checkout process.'),
     '#default_value' => variable_get('xdruple_checkout_anonymous', FALSE),
   ];
-
-  $customers = xdruple_fields_get_customer_list();
-  if (count($customers) > 0) {
-    $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer'] = [
-      '#type' => 'select',
-      '#options' => $customers,
-      '#default_value' => variable_get('xdruple_checkout_guest_customer', '- None -'),
-      '#empty_option' => '- None -',
-      '#title' => t('Guest Customer'),
-      '#description' => t('Select the Customer to use for guest checkout orders and/or anonymous user price quotes. All anonymous guest checkout orders will be created under this Customer in xTuple.'),
-      '#required' => TRUE,
-    ];
-
-    // The xTuple API only returns 100 results by default. If there are more than 98 customers, switch to a text field.
-    if (count($customers) > 98) {
-      $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#type'] = 'textfield';
-      $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#default_value'] = variable_get('xdruple_checkout_guest_customer', NULL);
-      $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#description'] =
-        t('Enter the Customer Number of the Customer to use for all guest checkout orders. All anonymous guest checkout orders will be created under this Customer in xTuple.');
-      unset($form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#options']);
-      unset($form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer']['#empty_option']);
-    }
-  }
+  $form['xdruple_commerce_store_settings']['xdruple_checkout_guest_customer'] = [
+    '#type' => 'textfield',
+    '#default_value' => variable_get('xdruple_checkout_guest_customer', ''),
+    '#title' => t('Guest Customer'),
+    '#description' => t('Enter the Customer Number of the Customer to use for all guest checkout orders. All anonymous guest checkout orders will be created under this Customer in xTuple.'),
+    '#required' => TRUE,
+  ];
   $form['xdruple_commerce_store_settings']['xdruple_checkout_use_guest_customer_price_schedule'] = [
     '#type' => 'checkbox',
     '#title' => t("Use Guest Customer's price schedule for anonymous users"),
