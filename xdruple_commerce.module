@@ -1,5 +1,7 @@
 <?php
 
+use Xtuple\REST\Resource\Site\SiteResource;
+
 define('LABEL_INLINE', 'inline');
 define('LABEL_ABOVE', 'above');
 define('LABEL_HIDDEN', 'hidden');
@@ -103,7 +105,13 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
     '#default_value' => variable_get('xdruple_commerce_filter_exclusive_items', FALSE),
   ];
 
-  $sites = xdruple_fields_get_site_list();
+  $siteList = SiteResource::readAll(
+    xdruple_commerce_application()->dataSource()
+  );
+  $sites = [];
+  foreach ($siteList as $site) {
+    $sites[$site->code()] = $site->description();
+  }
   if (count($sites) === 1) {
     variable_set('xdruple_commerce_default_warehouse', array_shift(array_keys($sites)));
   }
