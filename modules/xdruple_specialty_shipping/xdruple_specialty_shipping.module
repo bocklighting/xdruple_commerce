@@ -4,6 +4,7 @@
  * @file
  * Create a Drupal Commerce Specialty Shipping Service
  */
+use Xtuple\Drupal7\Application\Entity\CommerceProduct\CommerceProductProxy;
 
 /**
  * Implements hook_menu().
@@ -197,9 +198,9 @@ function xdruple_specialty_shipping_is_specialty_shipping_freight_class($freight
  * @param $variables
  */
 function xdruple_specialty_shipping_preprocess_xdruple_product_page(&$variables) {
-  /** @var \Xtuple\Rescued\Controller\Entity $product */
+  /** @var CommerceProductProxy $product */
   $product = $variables["product"];
-  if (xdruple_specialty_shipping_is_specialty_shipping_freight_class($product->get("freightClass"))) {
+  if (xdruple_specialty_shipping_is_specialty_shipping_freight_class($product->xdProduct()->freightClass())) {
     $variables["context"]["specialty_shipping"] = [
       "#theme" => "xdruple_product_specialty_shipping",
       "#weight" => -15,
