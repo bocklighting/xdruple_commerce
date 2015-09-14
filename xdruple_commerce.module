@@ -286,16 +286,6 @@ function xdruple_commerce_theme() {
     ],
   ];
 
-  $items['xdruple_commerce_similar_product_link_default'] = [
-    'variables' => [
-      'product_id' => 0,
-      'style' => '',
-    ],
-    'path' => drupal_get_path('module', 'xdruple_commerce') . '/theme',
-    'file' => 'theme.inc',
-    'template' => 'xdruple-commerce-similar-product-link-default',
-  ];
-
   $items += \CDD\OpenCDD\Theme\Block::themeDefinition('cart_dropdown', [
     'hide_empty_title' => TRUE,
     'hide_empty_content' => TRUE,
