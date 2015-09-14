@@ -446,15 +446,18 @@ function xdruple_commerce_api_customer_item_price($resource_name = 'Customer', $
   return !empty($result["price"]) ? $result["price"] : NULL;
 }
 
+/**
+ * @param \stdClass  $line_item
+ * @param bool $cache_only
+ *
+ * @return float|int|null
+ */
 function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only = FALSE) {
   /** @var stdClass $user */
   global $user;
 
-  // Load the product so we can do a UOM conversion to inventoryUnit.
-  $product = entity_load_single('commerce_product', $line_item->commerce_product[LANGUAGE_NONE]['0']['product_id']);
-
+  $product = xdruple_product_entity_load($line_item->commerce_product[LANGUAGE_NONE]['0']['product_id']);
   $price = 0;
-
   // Do a conversion to the inventoryUnit.
   if (!empty($line_item->commerce_unit_price[LANGUAGE_NONE]['0']) &&
     isset($line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount']) &&
@@ -464,7 +467,9 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
     // Drupal Commerce doesn't use decimals. When getting the price from the
     // line_item, convert to decimal first.
     $price = $price / 100;
-    $price = _xdruple_commerce_convert_uom_price($price, $product->uomRatio);
+    if ($xdProduct = $product->xdProduct()) {
+      $price = _xdruple_commerce_convert_uom_price($price, $xdProduct->uomRatio());
+    }
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
   }
@@ -487,7 +492,9 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
 
   if (isset($price) && $price >= 0) {
     // Do a conversion to the inventoryUnit.
-    $price = _xdruple_commerce_convert_uom_price($price, $product->uomRatio);
+    if ($xdProduct = $product->xdProduct()) {
+      $price = _xdruple_commerce_convert_uom_price($price, $xdProduct->uomRatio());
+    }
 
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['amount'] = $price;
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
