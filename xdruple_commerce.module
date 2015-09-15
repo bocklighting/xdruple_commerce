@@ -63,21 +63,6 @@ function xdruple_commerce_entity_info_alter(&$info) {
 }
 
 /**
- * Implements hook_rescued_resources().
- */
-function xdruple_commerce_rescued_resources() {
-  return [
-    "XdCustomerRelation",
-    "Customer",
-    "XdCustomer",
-    "XdProduct",
-    "XdCatalog",
-    "XdCatalogGroup",
-    "SalesOrder",
-  ];
-}
-
-/**
  * Implements hook_cpanel_alter()
  *
  * @param $form

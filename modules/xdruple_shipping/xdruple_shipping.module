@@ -1,21 +1,7 @@
 <?php
 
-/**
- * @keeps theme callback
- */
 use Xtuple\REST\Resource\ShipVia\ShipViaResource;
 use Xtuple\REST\Resource\Site\SiteResource;
-
-/**
- * Implements hook_rescued_resources().
- */
-function xdruple_shipping_rescued_resources() {
-  return [
-    "FreightClass",
-    "ShipVia",
-    "Site",
-  ];
-}
 
 /**
  * Implements hook_cpanel_alter()
