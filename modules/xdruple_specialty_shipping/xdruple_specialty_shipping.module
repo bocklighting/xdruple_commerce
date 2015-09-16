@@ -78,6 +78,7 @@ function xdruple_specialty_shipping_commerce_shipping_service_info() {
     'description' => t('One of our representatives will be in touch with you to arrange shipping after your order is placed.'),
     'display_title' => t('Request Specialty Shipping Service'),
     'shipping_method' => 'xdruple_specialty_shipping',
+    "rules_component" => FALSE,
     'price_component' => 'shipping',
     'callbacks' => [
       'rate' => 'xdruple_specialty_shipping_service_rate',
@@ -102,60 +103,6 @@ function xdruple_specialty_shipping_service_rate($shipping_service, $order) {
     'currency_code' => commerce_default_currency(),
     'data' => [],
   ];
-}
-
-/**
- * Implements hook_entity_load().
- *
- * Automatically create (and always keep) condition to block UPS delivery for specialty shipping items.
- *
- * @param $entities
- * @param $type
- */
-function xdruple_specialty_shipping_entity_load($entities, $type) {
-  if ($type == 'rules_config') {
-    /** @var RulesReactionRule $entity */
-    foreach ($entities as $entity) {
-      if ($entity->name == 'commerce_shipping_method_ups') {
-        $freight_set = FALSE;
-        $freight_key = -1;
-        $freight_classes = array_filter(variable_get('xdruple_specialty_shipping_freight_classes', []));
-
-        /** @var RulesCondition $condition */
-        foreach ($entity->conditions() as $key => $condition) {
-          if ($condition->getElementName() == 'xdruple_shipping_contains_freight_class_product') {
-            $freight_set = TRUE;
-            $freight_key = $key;
-          }
-        }
-
-        // Theoretically, we should handle situation, when freight classes list is empty, and so remove any
-        // condition related to it. But as Freight Classes is a mandatory field, we can skip it in current case.
-        if (!empty($freight_classes)) {
-          $freight_settings = [
-            'commerce_order:select' => 'commerce_order',
-            'freightClass' => $freight_classes,
-            'operator' => '>=',
-            'value' => 1,
-          ];
-
-          if (!$freight_set) {
-            // Create missing condition
-            $condition = new RulesCondition('xdruple_shipping_contains_freight_class_product', $freight_settings);
-            $condition->negate();
-            $entity->condition($condition);
-          }
-          else {
-            // Update existing one
-            $entity->conditions()->seek($freight_key);
-            $condition = $entity->conditions()->current();
-            $condition->settings = $freight_settings;
-            $condition->negate();
-          }
-        }
-      }
-    }
-  }
 }
 
 /**
@@ -205,5 +152,56 @@ function xdruple_specialty_shipping_preprocess_xdruple_product_page(&$variables)
       "#theme" => "xdruple_product_specialty_shipping",
       "#weight" => -15,
     ];
+  }
+}
+
+/**
+ * Implements hook_commerce_shipping_method_collect_rates().
+ *
+ * @param $method
+ * @param $order
+ *
+ * @throws \EntityMetadataWrapperException
+ */
+function xdruple_specialty_shipping_commerce_shipping_method_collect_rates($method, $order) {
+  if ($method == "xdruple_specialty_shipping") {
+    if (!empty($order->shipping_rates)) {
+      $hasSpecialtyShipping = FALSE;
+      foreach ($order->commerce_line_items["und"] as $item) {
+        $line_item = commerce_line_item_load($item["line_item_id"]);
+        if ($line_item->type == "product") {
+          $product = xdruple_product_entity_load($line_item->commerce_product["und"][0]["product_id"]);
+          if (xdruple_specialty_shipping_is_specialty_shipping_freight_class($product->xdProduct()->freightClass())) {
+            $hasSpecialtyShipping = TRUE;
+            break;
+          }
+        }
+      }
+      if ($hasSpecialtyShipping) {
+        foreach ($order->shipping_rates as $key => $shipping_line_item) {
+          if (!empty($shipping_line_item->data["shipping_service"]["shipping_method"])
+            && $shipping_line_item->data["shipping_service"]["shipping_method"] == "ups"
+          ) {
+            unset($order->shipping_rates[$key]);
+          }
+        }
+      }
+    }
+    foreach (commerce_shipping_services($method) as $service) {
+      /** @var string $callback */
+      if ($callback = commerce_shipping_service_callback($service, "rate")) {
+        $price = $callback($service, $order);
+        if ($price) {
+          /** @var \stdClass $line_item */
+          $line_item = commerce_shipping_service_rate_calculate($service["name"], $price, $order->order_id);
+          /** @var \EntityDrupalWrapper $line_item_wrapper */
+          $line_item_wrapper = entity_metadata_wrapper("commerce_line_item", $line_item);
+          if (!is_null($line_item_wrapper->get("commerce_unit_price")->amount->value())) {
+            $line_item->weight = empty($service["weight"]) ? 0 : $service["weight"];
+            $order->shipping_rates[$service["name"]] = $line_item;
+          }
+        }
+      }
+    }
   }
 }
