@@ -4,10 +4,6 @@
  * Implements hook_install()
  */
 function xdruple_commerce_install() {
-  // Call rescued_field_extra_fields() so all erp fields get created.
-  // Then we set them up below.
-  rescued_field_extra_fields();
-
   drupal_flush_all_caches();
   drupal_static_reset();
 
