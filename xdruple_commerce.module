@@ -32,37 +32,6 @@ function xdruple_commerce_user_login(&$edit, $account) {
 }
 
 /**
- * Implements hook_entity_info_alter().
- *
- * Override Drupal Commerce's entities to use xTuple ones.
- *
- * @param $info
- */
-function xdruple_commerce_entity_info_alter(&$info) {
-  // TODO: Get wsclient name. Assuming 'xtuple_' here.
-
-  if (isset($info['xtuple_xdproduct'], $info['commerce_product']) && TRUE) {
-    // Cache original to reset some key settings.
-    $original = $info['commerce_product'];
-
-    // Override 'api-list-callback' to support exclusive items.
-    $info['xtuple_xdproduct']['api-list-callback'] = 'xdruple_commerce_api_customer_exclusive_item_list'; // @todo: call rescued_api_resource_list statically
-
-    // TODO: Break the reference: (array)clone(object)$operation_info['xtuple_xdproduct']
-    $info['commerce_product'] = $info['xtuple_xdproduct'];
-    $info['commerce_product']['entity keys']['bundle'] = 'type';
-    $info['commerce_product']['entity keys']['name'] = 'product_id';
-
-    // Preserve some of the original entity_info settings.
-    $info['commerce_product']['label'] = $original['label'];
-    $info['commerce_product']['bundles']['product'] = $original['bundles']['product'];
-    $info['commerce_product']['view modes'] = $original['view modes'];
-    $info['commerce_product']['uri callback'] = $original['uri callback'];
-    $info['commerce_product']['access callback'] = $original['access callback'];
-  }
-}
-
-/**
  * Implements hook_cpanel_alter()
  *
  * @param $form
@@ -148,47 +117,10 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
  * @param array $info The associative array of entity properties.
  */
 function xdruple_commerce_entity_property_info_alter(&$info) {
-  if (isset($info['xtuple_xdproduct'], $info['xtuple_xdproduct']['properties'], $info['commerce_product'])) {
-    foreach ($info['xtuple_xdproduct']['properties'] as $prop_name => $prop_value) {
-      if (!isset($info['commerce_product']['properties'][$prop_name])) {
-        // Set product property to match xTuple's entity.
-        // TODO: Break the reference: (array)clone(object)$prop_value
-        $info['commerce_product']['properties'][$prop_name] = $prop_value;
-      }
-    }
-  }
-
   if (isset($info['commerce_order'], $info['commerce_order']['properties'])) {
     if (isset($info['commerce_order']['properties']['mail']['validation callback'])) {
       // Change this validation callback to our own that support multiple emails on one line.
       $info['commerce_order']['properties']['mail']['validation callback'] = 'xdruple_valid_multiple_email_address';
-    }
-  }
-}
-
-/**
- * Implements hook_field_extra_fields_alter()
- *
- * Expose our custom xTuple properties as fields.
- *
- * @param array $info The associative array of 'pseudo-field' components.
- */
-function xdruple_commerce_field_extra_fields_alter(&$info) {
-  if (isset($info['xtuple_xdproduct'],
-    $info['xtuple_xdproduct']['xtuple_xdproduct'],
-    $info['commerce_product'],
-    $info['commerce_product']['product'])) {
-
-    foreach ($info['xtuple_xdproduct']['xtuple_xdproduct'] as $view_name => $view_fields) {
-      if (isset($info['commerce_product']['product'][$view_name])) {
-        foreach ($view_fields as $field_name => $field_values) {
-          if (!isset($info['commerce_product']['product'][$view_name][$field_name])) {
-            // Set product fields to match xTuple's entity.
-            // TODO: Break the reference: (array)clone(object)$field_values
-            $info['commerce_product']['product'][$view_name][$field_name] = $field_values;
-          }
-        }
-      }
     }
   }
 }
@@ -282,117 +214,6 @@ function xdruple_commerce_theme() {
 }
 
 /**
- * Implements hook_entity_query_alter.
- *
- * EntityFieldQuery used in _commerce_product_match_products_standard() does not
- * allow OR clauses. Alter the query to string match on sku OR title.
- *
- * @param EntityFieldQuery $query
- */
-function xdruple_commerce_entity_query_alter(&$query) {
-  if (isset($query->tags['commerce_sku_or_title_match'])) {
-    $string = $query->metaData['commerce_sku_or_title_match']->string;
-    $match = $query->metaData['commerce_sku_or_title_match']->match;
-
-    if (isset($string, $match)) {
-      // Build a where clause matching on either the SKU or title.
-
-      // TODO: xTuple doesn't currently support an operator.
-      switch ($match) {
-        case 'contains':
-          $query->propertyCondition('q', $string, 'CONTAINS');
-          break;
-
-        case 'starts_with':
-          $query->propertyCondition('q', $string, 'CONTAINS');
-          break;
-
-        case 'equals':
-        default:
-          $query->propertyCondition('q', $string, '=');
-          break;
-      }
-    }
-  }
-}
-
-/**
- * XM.XdProduct.XdProductFetch POST query.
- *
- * Query the dispatch function XM.XdProduct.XdProductFetch to
- * get a filtered list of items that a Customer is allowed to see.
- *
- * @param string $resource_name The API resource name. e.g. 'ItemSiteListItem'
- * @param array  $opt_params    The structured query to perform.
- *
- * @param bool   $data_only
- *
- * @return array The query result response.
- */
-function xdruple_commerce_api_customer_exclusive_item_list($resource_name = 'XdProduct', $opt_params = [], $data_only = TRUE) {
-  // When exclusive_items setting is off, just query rescued_api_resource_list().
-  if (!variable_get('xdruple_commerce_filter_exclusive_items', FALSE)) {
-    $result = rescued_api_resource_list($resource_name, $opt_params, FALSE);
-  }
-  else {
-    $client = rescued_api_get_client();
-
-    $customer = xdruple_rescued_session_get('customer');
-    $shipto = xdruple_rescued_session_get('ship_to');
-    $scheduled_date = xdruple_rescued_scheduled_date();
-
-    $query = [];
-    if (!empty($opt_params["query"])) {
-      foreach ($opt_params["query"] as $key => $value) {
-        if (is_numeric($key)) {
-          $query[$value["column"]] = [
-            $value["operator"] => $value["value"],
-          ];
-        }
-        else {
-          $query[$key] = $value;
-        }
-      }
-    }
-    $opt_params["query"] = $query;
-
-    if (!empty($customer)) {
-      $opt_params['query']['customer'] = [
-        'EQUALS' => $customer,
-      ];
-    }
-    if (!empty($shipto)) {
-      $opt_params['query']['shipto'] = [
-        'EQUALS' => $shipto,
-      ];
-    }
-    if (!empty($scheduled_date)) {
-      $opt_params['query']['effectiveDate'] = [
-        'EQUALS' => $scheduled_date,
-      ];
-    }
-
-    $postBody = [
-      'attributes' => [
-        rescued_format_post_query_options($opt_params),
-      ],
-    ];
-
-    $params = ['postBody' => $postBody];
-    if ($resource_name = $client->resource($resource_name)) {
-      $result = $resource_name->__call("xdProductFetch", [$params]);
-    }
-  }
-
-  if ($data_only) {
-    return isset($result['data']) ? $result['data'] : [];
-  }
-  else {
-    return isset($result) ? $result : [];
-  }
-}
-
-/**
  * Helper function to perform a Unit of Measure conversions on prices.
  *
  * @param float $price     The base price to convert.
@@ -432,8 +253,8 @@ function xdruple_commerce_api_customer_item_price($resource_name = 'Customer', $
 }
 
 /**
- * @param \stdClass  $line_item
- * @param bool $cache_only
+ * @param \stdClass $line_item
+ * @param bool      $cache_only
  *
  * @return float|int|null
  */
