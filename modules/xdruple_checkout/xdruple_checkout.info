@@ -2,7 +2,3 @@ name = xTuple's Drupal Commerce Checkout Integration Module
 description = Adds custom xTuple fields and other checkout integration.
 core = 7.x
 package = xDruple
-
-dependencies[] = rescued
-dependencies[] = xdruple
-dependencies[] = xdruple_commerce
