@@ -1,5 +1,6 @@
 <?php
 
+use Xtuple\REST\Resource\Customer\CustomerResource;
 use Xtuple\REST\Resource\Site\SiteResource;
 
 define('LABEL_INLINE', 'inline');
@@ -204,30 +205,6 @@ function _xdruple_commerce_convert_uom_price($price, $uom_ratio) {
 }
 
 /**
- * XM.Customer.itemPrice POST query.
- *
- * Query the dispatch function XM.Customer.itemPrice to get a item price quote.
- *
- * @param string $resource_name The API resource name. e.g. 'Customer'
- * @param array  $postBody      The structured query to perform.
- * @param array  $optParams     Additional option parameters.
- *
- * @return float The query result response.
- */
-function xdruple_commerce_api_customer_item_price($resource_name = 'Customer', $postBody, $optParams = []) {
-  $client = rescued_api_get_client();
-
-  $params = ['postBody' => $postBody];
-  $params = array_merge($params, $optParams);
-
-  $result = NULL;
-  if ($resource_name = $client->resource($resource_name)) {
-    $result = $resource_name->__call("itemPrice", [$params]);
-  }
-  return !empty($result["price"]) ? $result["price"] : NULL;
-}
-
-/**
  * @param \stdClass $line_item
  * @param bool      $cache_only
  *
@@ -336,21 +313,19 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
       $options['shiptoId'] = $shipto;
     }
 
-    $postBody = [
-      'attributes' => [
-        $customer,
-        $line_item->line_item_label,
-        $line_item->quantity,
-        $options,
-      ],
-    ];
 
     // Make the itemPrice service request.
     if (!$cache_only) {
-      $price = xdruple_commerce_api_customer_item_price('Customer', $postBody);
-
+      $price = CustomerResource::readItemPrice(
+        xdruple_commerce_application()->dataSource(),
+        new \Xtuple\Persistence\Query\MethodQuery([
+          $customer,
+          $line_item->line_item_label,
+          $line_item->quantity,
+          $options,
+        ])
+      );
       cache_set($cid, $price, 'cache', REQUEST_TIME + 60 * 60 * 10);
-
       return $price;
     }
     else {
