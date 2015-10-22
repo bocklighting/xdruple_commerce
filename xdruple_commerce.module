@@ -234,9 +234,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
   global $session;
-  if ((!$session->getRescued('customer') || !$session->getRescued('ship_to') || !$session->getRescued('site'))
-    && $user->uid !== 0
-  ) {
+  if ((!$session->getRescued('customer') || !$session->getRescued('site'))) {
     // We cannot get a price quote without all of these set.
     return $price;
   }
