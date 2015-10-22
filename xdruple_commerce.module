@@ -234,9 +234,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
   global $session;
-  if ((!$session->getRescued('customer') || !$session->getRescued('ship_to') || !$session->getRescued('site'))
-    && $user->uid !== 0
-  ) {
+  if ((!$session->getRescued('customer') || !$session->getRescued('site'))) {
     // We cannot get a price quote without all of these set.
     return $price;
   }
@@ -510,7 +508,8 @@ function xdruple_commerce_checkout_purchased_items_pane_checkout_form($form, &$f
   $pane_form = [];
 
   module_load_include('inc', 'commerce_cart', 'includes/commerce_cart.checkout_pane');
-  if (user_access('view own commerce_order entities')) {
+  list($view_id, $display_id) = explode('|', variable_get('commerce_cart_contents_pane_view', 'commerce_cart_summary|default'));
+  if (views_get_view_result($view_id, $display_id, $order->order_id)) {
     $pane_form['cart_contents'] = [
       '#markup' => commerce_cart_contents_pane_review($form, $form_state, $checkout_pane, $order),
     ];
