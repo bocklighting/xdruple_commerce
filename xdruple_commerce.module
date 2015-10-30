@@ -269,13 +269,13 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
  * @return float
  */
 function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only = FALSE) {
-  /** @var stdClass $user */
+  /** @var \Xtuple\Drupal7\Proxy\User\CommerceUserProxy $user */
   global $user;
 
   /** @var Xtuple\Xdruple\Session\RescuedSession $session */
   global $session;
 
-  if ($user->uid === 0) {
+  if ($user->isAnonymous()) {
     // Get anonymous checkout defaults from control panel.
     $customer = variable_get('xdruple_checkout_guest_customer', NULL);
     $shipto = NULL;
@@ -283,6 +283,9 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
   }
   else {
     $customer = $session->getRescued('customer');
+    if ($user->isProspect()) {
+      $customer = variable_get('xdruple_checkout_guest_customer', NULL);
+    }
     $shipto = $session->getRescued('ship_to');
     $site = $session->getRescued('site');
   }
