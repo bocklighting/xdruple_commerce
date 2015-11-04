@@ -171,7 +171,7 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
   // Necessary for country_get_list().
   /** @noinspection PhpIncludeInspection */
   require_once DRUPAL_ROOT . '/includes/locale.inc';
-  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  /** @var Xtuple\Drupal7\Session\RescuedSession $session */
   global $session;
 
   $id = $session->getRescued('site') ? $session->getRescued('site') : variable_get('xdruple_commerce_default_warehouse', NULL);

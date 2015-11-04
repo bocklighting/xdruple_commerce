@@ -232,7 +232,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
   }
 
-  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  /** @var Xtuple\Drupal7\Session\RescuedSession $session */
   global $session;
   if ((!$session->getRescued('customer') || !$session->getRescued('site'))) {
     // We cannot get a price quote without all of these set.
@@ -272,7 +272,7 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
   /** @var \Xtuple\Drupal7\Proxy\User\CommerceUserProxy $user */
   global $user;
 
-  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  /** @var Xtuple\Drupal7\Session\RescuedSession $session */
   global $session;
 
   if ($user->isAnonymous()) {
