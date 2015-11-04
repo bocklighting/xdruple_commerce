@@ -319,7 +319,7 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
     if (!$cache_only) {
       $price = CustomerResource::readItemPrice(
         xdruple_commerce_application()->dataSource(),
-        new \Xtuple\Persistence\Query\MethodQuery([
+        new \Xtuple\Storage\Query\MethodQuery([
           $customer,
           $line_item->line_item_label,
           $line_item->quantity,
