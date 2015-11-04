@@ -53,7 +53,7 @@ function xdruple_delivery_commerce_shipping_service_info() {
     'price_component' => 'shipping',
     'callbacks' => [
       'rate' => 'xdruple_delivery_service_rate',
-    ]
+    ],
   ];
 
   return $shipping_services;
