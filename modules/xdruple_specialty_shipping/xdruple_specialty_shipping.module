@@ -33,7 +33,7 @@ function xdruple_specialty_shipping_menu() {
  * @param $form_state
  */
 function xdruple_specialty_shipping_cpanel_alter(&$form, &$form_state) {
-  $freightClassList = \Xtuple\REST\Resource\FreightClass\FreightClassResource::readAll(xdruple_commerce_application()->dataSource());
+  $freightClassList = \Xtuple\REST\Resource\FreightClass\FreightClassResource::readAll(xdruple_commerce_application()->storage());
   $options = [];
   foreach ($freightClassList as $freightClass) {
     $options[$freightClass->code()] = $freightClass->description();

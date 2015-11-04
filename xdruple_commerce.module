@@ -36,7 +36,7 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
   ];
 
   $siteList = SiteResource::readAll(
-    xdruple_commerce_application()->dataSource()
+    xdruple_commerce_application()->storage()
   );
   $sites = [];
   foreach ($siteList as $site) {
@@ -318,7 +318,7 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
     // Make the itemPrice service request.
     if (!$cache_only) {
       $price = CustomerResource::readItemPrice(
-        xdruple_commerce_application()->dataSource(),
+        xdruple_commerce_application()->storage(),
         new \Xtuple\Storage\Query\MethodQuery([
           $customer,
           $line_item->line_item_label,
