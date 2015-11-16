@@ -1,7 +1,4 @@
 <?php
-use Xtuple\Persistence\Query\Condition\ConditionList;
-use Xtuple\Persistence\Query\Condition\Operator\Equals;
-use Xtuple\REST\Resource\Unit\UnitResource;
 
 /**
  * Implements hook_install().

@@ -1,7 +1,7 @@
 <?php
 
 use Xtuple\REST\Resource\Customer\CustomerResource;
-use Xtuple\REST\Resource\Site\SiteResource;
+use Xtuple\REST\Resource\Site\SiteList;
 
 define('LABEL_INLINE', 'inline');
 define('LABEL_ABOVE', 'above');
@@ -35,8 +35,8 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
     '#default_value' => variable_get('xdruple_commerce_filter_exclusive_items', FALSE),
   ];
 
-  $siteList = SiteResource::readAll(
-    xdruple_commerce_application()->dataSource()
+  $siteList = SiteList::all(
+    xdruple_commerce_application()->storage()
   );
   $sites = [];
   foreach ($siteList as $site) {
@@ -232,7 +232,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
     $line_item->commerce_unit_price[LANGUAGE_NONE]['0']['data']['components']['0']['price']['amount'] = $price;
   }
 
-  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  /** @var Xtuple\Drupal7\Session\RescuedSession $session */
   global $session;
   if ((!$session->getRescued('customer') || !$session->getRescued('site'))) {
     // We cannot get a price quote without all of these set.
@@ -272,7 +272,7 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
   /** @var \Xtuple\Drupal7\Proxy\User\CommerceUserProxy $user */
   global $user;
 
-  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  /** @var Xtuple\Drupal7\Session\RescuedSession $session */
   global $session;
 
   if ($user->isAnonymous()) {
@@ -318,8 +318,8 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
     // Make the itemPrice service request.
     if (!$cache_only) {
       $price = CustomerResource::readItemPrice(
-        xdruple_commerce_application()->dataSource(),
-        new \Xtuple\Persistence\Query\MethodQuery([
+        xdruple_commerce_application()->storage(),
+        new \Xtuple\Storage\Query\MethodQuery([
           $customer,
           $line_item->line_item_label,
           $line_item->quantity,

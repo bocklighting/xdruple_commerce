@@ -14,7 +14,7 @@ function template_preprocess_block_cart_dropdown(&$variables) {
     $variables['attributes_array'] += [
       'class' => [
         $base_class,
-        $instance_class
+        $instance_class,
       ],
     ];
 

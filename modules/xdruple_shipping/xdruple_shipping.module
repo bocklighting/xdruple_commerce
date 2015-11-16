@@ -1,6 +1,7 @@
 <?php
 
-use Xtuple\REST\Resource\ShipVia\ShipViaResource;
+use Xtuple\REST\Resource\ShipVia\ShipViaList;
+use Xtuple\REST\Resource\Site\SiteList;
 use Xtuple\REST\Resource\Site\SiteResource;
 
 /**
@@ -11,7 +12,7 @@ use Xtuple\REST\Resource\Site\SiteResource;
  */
 function xdruple_shipping_cpanel_alter(&$form, &$form_state) {
   if (module_exists('commerce_pickup')) {
-    $siteList = SiteResource::readAll(xdruple_commerce_application()->dataSource());
+    $siteList = SiteList::all(xdruple_commerce_application()->storage());
 
     $options = [];
     foreach ($siteList as $site) {
@@ -144,7 +145,7 @@ function xdruple_shipping_map_physical_dimension_units($unit, $valid_units) {
  *   The matching xTuple's Ship Via code or pass through $ship_label if not found.
  */
 function xdruple_shipping_map_ship_via($ship_label) {
-  $ship_via_list = ShipViaResource::readAll(xdruple_commerce_application()->dataSource());
+  $ship_via_list = ShipViaList::all(xdruple_commerce_application()->storage());
 
   foreach ($ship_via_list as $ship_via) {
     // Remove and space, dashes, underscores.
@@ -171,13 +172,13 @@ function xdruple_shipping_commerce_ups_ship_from_address_alter(&$ship_from_addre
   // Necessary for country_get_list().
   /** @noinspection PhpIncludeInspection */
   require_once DRUPAL_ROOT . '/includes/locale.inc';
-  /** @var Xtuple\Xdruple\Session\RescuedSession $session */
+  /** @var Xtuple\Drupal7\Session\RescuedSession $session */
   global $session;
 
   $id = $session->getRescued('site') ? $session->getRescued('site') : variable_get('xdruple_commerce_default_warehouse', NULL);
   try {
     if (!empty($id)) {
-      $site = SiteResource::read(xdruple_commerce_application()->dataSource(), $id)->value();
+      $site = SiteResource::read(xdruple_commerce_application()->storage(), $id)->value();
       if (!empty($site) && $site_address = $site->address()) {
         $countries = country_get_list();
         $country_match = array_keys($countries, $site_address->country());
@@ -219,7 +220,7 @@ function xdruple_shipping_commerce_shipping_service_info_alter(&$shipping_servic
 
       if (count($service_parts) === 3) {
         if (isset($allowed_pickup_sites[$service_parts[2]]) && $allowed_pickup_sites[$service_parts[2]] !== 0) {
-          $siteResource = SiteResource::read(xdruple_commerce_application()->dataSource(), $service_parts[2]);
+          $siteResource = SiteResource::read(xdruple_commerce_application()->storage(), $service_parts[2]);
           $site = $siteResource->value();
           $shipping_services[$key]["display_title"] = t("Customer Pickup at @site", [
             "@site" => $site->description() ? $site->description() : $site->code(),
