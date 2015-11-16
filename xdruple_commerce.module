@@ -1,7 +1,7 @@
 <?php
 
 use Xtuple\REST\Resource\Customer\CustomerResource;
-use Xtuple\REST\Resource\Site\SiteResource;
+use Xtuple\REST\Resource\Site\SiteList;
 
 define('LABEL_INLINE', 'inline');
 define('LABEL_ABOVE', 'above');
@@ -35,7 +35,7 @@ function xdruple_commerce_cpanel_alter(&$form, &$form_state) {
     '#default_value' => variable_get('xdruple_commerce_filter_exclusive_items', FALSE),
   ];
 
-  $siteList = SiteResource::readAll(
+  $siteList = SiteList::all(
     xdruple_commerce_application()->storage()
   );
   $sites = [];
