@@ -1,14 +1,1 @@
 <?php
-
-/**
- * Implements hook_install().
- */
-function xdruple_shipping_install() {
-}
-
-/**
- * Implements hook_enable().
- */
-function xdruple_shipping_enable() {
-  variable_set('commerce_ups_use_package_size', 0);
-}
