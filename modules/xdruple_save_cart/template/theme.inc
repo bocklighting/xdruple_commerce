@@ -4,9 +4,8 @@
  * @param $variables
  */
 function template_preprocess_xdruple_saved_carts_block(&$variables) {
-  /** @var stdClass $user */
-  global $user;
-  $variables["uid"] = $user->uid;
+  $user = xdruple_commerce_application()->activeUser();
+  $variables["uid"] = $user->uid();
   $variables["empty"] = [
     "#theme" => "xdruple_empty",
     "#content" => t("You have no saved carts."),

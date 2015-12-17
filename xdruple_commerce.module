@@ -211,8 +211,7 @@ function _xdruple_commerce_convert_uom_price($price, $uom_ratio) {
  * @return float|int|null
  */
 function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only = FALSE) {
-  /** @var stdClass $user */
-  global $user;
+  $user = xdruple_commerce_application()->activeUser();
 
   $product = xdruple_product_entity_load($line_item->commerce_product[LANGUAGE_NONE]['0']['product_id']);
   $price = 0;
@@ -268,11 +267,8 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
  * @return float
  */
 function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only = FALSE) {
-  /** @var \Xtuple\Drupal7\Proxy\User\CommerceUserProxy $user */
-  global $user;
-
+  $user = xdruple_commerce_application()->activeUser();
   $session = $session = xdruple_commerce_application()->sessionHandler();
-
   if ($user->isAnonymous()) {
     // Get anonymous checkout defaults from control panel.
     $customer = variable_get('xdruple_checkout_guest_customer', NULL);
@@ -461,13 +457,11 @@ function xdruple_commerce_checkout_completion_message_pane_settings_form($checko
  * @return array
  */
 function xdruple_commerce_checkout_completion_message_pane_checkout_form($form, &$form_state, $checkout_pane, $order) {
-  /** @var \Xtuple\Drupal7\Proxy\User\CommerceUserProxy $user */
-  global $user;
   $pane_form = [];
   $pane_form["message"] = [
     "#theme" => "xdruple_checkout_completion_message",
     "#order" => $order,
-    "#account" => $user,
+    "#account" => xdruple_commerce_application()->activeUser(),
   ];
   return $pane_form;
 }
@@ -527,8 +521,7 @@ function xdruple_commerce_checkout_purchased_items_pane_checkout_form($form, &$f
  */
 function _xdruple_commerce_get_cart_summary() {
   $summary = [];
-  /** @var \Xtuple\Drupal7\Proxy\User\UserProxyInterface $user */
-  global $user;
+  $user = xdruple_commerce_application()->activeUser();
   if ($order = commerce_cart_order_load($user->uid())) {
     try {
       /** @var \EntityDrupalWrapper $order_wrapper */
