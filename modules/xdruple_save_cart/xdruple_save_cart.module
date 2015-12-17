@@ -142,9 +142,7 @@ function xdruple_save_cart_form_alter(&$form, &$form_state, $form_id) {
  */
 function xdruple_save_cart_form_submit($form, &$form_state) {
   if ($form_state['triggering_element']['#name'] === 'save-cart') {
-    /** @var \stdClass $user */
-    global $user;
-
+    $user = xdruple_commerce_application()->activeUser();
     // Reset the status of the order to cart.
     $order = commerce_order_load($form_state['order']->order_id);
     $form_state['order'] = commerce_order_status_update($order, 'saved_cart', TRUE);
@@ -217,9 +215,7 @@ function xdruple_save_cart_move_order_form_submit($form, &$form_state) {
   $order = $form_state['order'];
 
   if ($order) {
-    /** @var \stdClass $user */
-    global $user;
-
+    $user = xdruple_commerce_application()->activeUser();
     // If there is currently an active cart, move it to Saved Carts.
     $curr_cart_id = commerce_cart_order_id($user->uid);
 
