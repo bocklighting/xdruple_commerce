@@ -233,7 +233,7 @@ function xdruple_commerce_get_customer_line_item_price($line_item, $cache_only =
   }
 
   $session = $session = xdruple_commerce_application()->sessionHandler();
-  if ((!$session->getRescued("customer") || !$session->getRescued("site"))) {
+  if ((!$session->customer() || !$session->site())) {
     // We cannot get a price quote without all of these set.
     return $price;
   }
@@ -280,12 +280,12 @@ function _xdruple_commerce_load_customer_line_item_price($line_item, $cache_only
     $site = variable_get('xdruple_commerce_default_warehouse', NULL);
   }
   else {
-    $customer = $session->getRescued("customer");
+    $customer = $session->customer();
     if ($user->isProspect()) {
       $customer = variable_get('xdruple_checkout_guest_customer', NULL);
     }
-    $shipto = $session->getRescued("ship_to");
-    $site = $session->getRescued("site");
+    $shipto = $session->shipTo();
+    $site = $session->site();
   }
 
   $date = $session->scheduledDate();
